@@ -2609,6 +2609,7 @@ def _archive_tree(entries: list[dict], item_prefix: str = "", *, compact: bool =
 
 def _archive_section(today_slug: str, context: str) -> str:
     entries = _archive_entries(exclude_slug=today_slug)[:ARCHIVE_KEEP]
+
     if context == "home":
         item_prefix = "archive/"
         index_href = "archive/"
@@ -2616,14 +2617,29 @@ def _archive_section(today_slug: str, context: str) -> str:
         item_prefix = ""
         index_href = "./"
 
-    tree = _archive_tree(entries, item_prefix, compact=True)
+    if entries:
+        rows = "".join(
+            f'<a class="archive-row" href="{item_prefix}{entry["slug"]}.html">'
+            f'<span class="archive-date">{entry["label"]}</span>'
+            f'<span class="archive-count">{entry["count"]}개의 큐레이션</span>'
+            '<span class="archive-arrow" aria-hidden="true">→</span>'
+            "</a>"
+            for entry in entries
+        )
+    else:
+        rows = (
+            '<p class="empty-archive">'
+            '지난 브리핑이 쌓이면 이곳에서 다시 볼 수 있어요.'
+            '</p>'
+        )
+
     return f"""
 <section class="archive-section" id="archive">
   <div class="section-head">
     <h2>지난 브리핑</h2>
     <a href="{index_href}">전체 보기 →</a>
   </div>
-  {tree}
+  <div class="archive-list">{rows}</div>
 </section>"""
 
 
