@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-snaac-ui="4">
+<html lang="ko" data-snaac-ui="5">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -652,6 +652,9 @@ footer {
   .save-button:hover,
   .close-button:hover,
   .saved-action-button:hover { border-color: var(--ink); }
+  .archive-summary:hover { background: #fafafa; }
+  .archive-day-row:hover { background: #fafafa; }
+  .about-snaac-card:hover { transform: translateY(-1px); box-shadow: 0 13px 32px rgba(17,17,17,.15); }
 }
 
 @media (max-width: 390px) {
@@ -676,7 +679,7 @@ footer {
 }
 
 
-/* ── v4: 로고, 눈에 띄는 저장함, 상세 카드, 로그인 ── */
+/* ── v5: 로그인 필수 저장, 서랍형 아카이브, ABOUT SNAAC ── */
 .logo-row {
   display: flex;
   align-items: center;
@@ -1104,6 +1107,181 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 .auth-setup-note h3 { margin: 0 0 7px; font-size: 15px; }
 .auth-setup-note p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
 
+
+/* 로그인 목적 안내 */
+.auth-intent {
+  margin: 0 0 13px;
+  padding: 12px 13px;
+  border: 1px solid var(--ink);
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+/* 월 → 주차 → 날짜 순 서랍형 아카이브 */
+.archive-tree {
+  display: grid;
+  gap: 10px;
+}
+.archive-month,
+.archive-week {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+}
+.archive-month[open] {
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 24px rgba(20,20,18,.045);
+}
+.archive-summary {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 15px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.archive-summary::-webkit-details-marker { display: none; }
+.archive-summary::marker { content: ''; }
+.archive-summary-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.archive-summary-title {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -.015em;
+}
+.archive-summary-meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+.archive-chevron {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 14px;
+  transition: transform .16s ease;
+}
+details[open] > .archive-summary .archive-chevron { transform: rotate(180deg); }
+.archive-month-body {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+.archive-week {
+  border-radius: 12px;
+  box-shadow: none;
+}
+.archive-week .archive-summary {
+  min-height: 54px;
+  padding-left: 13px;
+  padding-right: 13px;
+}
+.archive-week .archive-summary-title { font-size: 13.5px; }
+.archive-week .archive-chevron {
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+}
+.archive-day-list {
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.archive-day-row {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+.archive-day-row:last-child { border-bottom: 0; }
+.archive-day-date {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.archive-day-count {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.archive-day-arrow { color: var(--muted); font-size: 14px; }
+.archive-tree-compact .archive-month:not([open]) .archive-month-body { display: none; }
+
+/* 지난 브리핑 아래 ABOUT SNAAC */
+.about-snaac-section { margin-top: 18px; }
+.about-snaac-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 20px 58px 20px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 16px;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 10px 28px rgba(17,17,17,.11);
+}
+.about-snaac-card::after {
+  content: '↗';
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 50%;
+  font-size: 17px;
+  transform: translateY(-50%);
+}
+.about-snaac-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255,255,255,.62);
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+.about-snaac-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -.015em;
+}
+.about-snaac-copy {
+  display: block;
+  margin-top: 5px;
+  color: rgba(255,255,255,.7);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 @media (max-width: 390px) {
   .logo-row { padding-top: 11px; padding-bottom: 15px; }
   .site-logo { width: 164px; }
@@ -1113,6 +1291,9 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
   .saved-thumb { min-height: 72px; }
   .floating-saved { min-width: 164px; min-height: 48px; }
   .preview-card { margin-left: 10px; margin-right: 10px; }
+  .archive-day-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .archive-day-count { display: none; }
+  .about-snaac-card { padding-left: 16px; }
 }
 </style>
 </head>
@@ -1143,135 +1324,135 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 
   <main class="cards">
 <article class="card">
-  <a class="thumb" href="https://byline.network/2026/07/98509284052/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은 원문 열기">
-    <img src="https://cdn.byline.network/wp-content/uploads/2026/07/golerobotics-1.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">인터뷰</span>
-  </a>
-  <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">창업가 인터뷰</span>
-        <span class="source">바이라인네트워크</span>
-      </div>
-      <span class="card-index">01/05</span>
-    </div>
-    <a class="title-link" href="https://byline.network/2026/07/98509284052/" target="_blank" rel="noopener noreferrer"><h2>[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은</h2></a>
-    <p class="summary">건설 현장 자재운반 로봇의 도입 논리와 ‘곰방’ 대체 효과를 다룬 인터뷰다. 노동난·안전·생산성 문제를 로봇이 어떻게 풀 수 있는지 보여준다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>피지컬 AI는 모델보다 현장 공정 설계가 더 중요하다.</p>
-    </div>
-    <div class="card-actions">
-      <a class="read-link" href="https://byline.network/2026/07/98509284052/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://byline.network/2026/07/98509284052/" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
-    </div>
-  </div>
-</article>
-<article class="card">
-  <a class="thumb" href="https://byline.network/2026/07/27_39182773/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="‘AI 인프라’ 사업 겨냥한 네이버, 엔비디아 주주로 맞는다 원문 열기">
-    <img src="https://cdn.byline.network/wp-content/uploads/2026/07/naver_nvidia.jpeg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
-  </a>
-  <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">정책·기회</span>
-        <span class="source">바이라인네트워크</span>
-      </div>
-      <span class="card-index">02/05</span>
-    </div>
-    <a class="title-link" href="https://byline.network/2026/07/27_39182773/" target="_blank" rel="noopener noreferrer"><h2>‘AI 인프라’ 사업 겨냥한 네이버, 엔비디아 주주로 맞는다</h2></a>
-    <p class="summary">네이버의 제3자 유증과 엔비디아 협업을 AI 인프라 관점에서 짚는다. 국내 플랫폼이 GPU·팩토리 경쟁으로 확장하는 흐름을 보여준다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>AI 경쟁축이 서비스에서 인프라와 자본으로 이동 중이다.</p>
-    </div>
-    <div class="card-actions">
-      <a class="read-link" href="https://byline.network/2026/07/27_39182773/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://byline.network/2026/07/27_39182773/" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
-    </div>
-  </div>
-</article>
-<article class="card">
-  <a class="thumb" href="https://en.yna.co.kr/view/AEN20260710002800320" target="_blank" rel="noopener noreferrer" data-initial="Y" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="(Yonhap Interview) Startup RLWRLD seeks to tackle demographic decline with its dexterity robot foundation model 원문 열기">
-    <img src="https://img2.yna.co.kr/etc/inner/EN/2026/07/10/AEN20260710002800320_02_i_P4.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
-  </a>
-  <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">창업가 인터뷰</span>
-        <span class="source">Yonhap News Agency</span>
-      </div>
-      <span class="card-index">03/05</span>
-    </div>
-    <a class="title-link" href="https://en.yna.co.kr/view/AEN20260710002800320" target="_blank" rel="noopener noreferrer"><h2>(Yonhap Interview) Startup RLWRLD seeks to tackle demographic decline with its dexterity robot foundation model</h2></a>
-    <p class="summary">RLWRLD가 숙련 노동 데이터와 기억 모듈로 물리 AI를 훈련하는 전략을 설명한다. 인구감소와 현장 숙련도 문제를 기술로 풀려는 시도가 핵심이다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>한국의 강점은 로봇 하드웨어보다 고품질 작업 데이터다.</p>
-    </div>
-    <div class="card-actions">
-      <a class="read-link" href="https://en.yna.co.kr/view/AEN20260710002800320" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://en.yna.co.kr/view/AEN20260710002800320" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
-    </div>
-  </div>
-</article>
-<article class="card">
-  <a class="thumb" href="https://view.asiae.co.kr/en/article/2026070510404671177" target="_blank" rel="noopener noreferrer" data-initial="T" style="--fallback:#087C67;--fallback-2:#46C7A5" aria-label="[AI Revolution](205) &quot;Shaking Up Daechi-dong in the Second Half&quot;… Masspresso to Launch AI Agent for Teachers 원문 열기">
-    <img src="https://cphoto.asiae.co.kr/listimglink/1/2026062415543022189_1782284070.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">인터뷰</span>
-  </a>
-  <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">제품·성장 인사이트</span>
-        <span class="source">The Asia Business Daily</span>
-      </div>
-      <span class="card-index">04/05</span>
-    </div>
-    <a class="title-link" href="https://view.asiae.co.kr/en/article/2026070510404671177" target="_blank" rel="noopener noreferrer"><h2>[AI Revolution](205) &quot;Shaking Up Daechi-dong in the Second Half&quot;… Masspresso to Launch AI Agent for Teachers</h2></a>
-    <p class="summary">콴다가 교사용 AI 에이전트로 제품 중심축을 학생에서 교사로 옮긴 배경을 다룬다. 교육 품질 표준화와 수익화 전환의 맥락이 선명하다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>기존 고객이 아니라 ‘결정권자’와 ‘생산자’를 다시 보게 한다.</p>
-    </div>
-    <div class="card-actions">
-      <a class="read-link" href="https://view.asiae.co.kr/en/article/2026070510404671177" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://view.asiae.co.kr/en/article/2026070510404671177" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
-    </div>
-  </div>
-</article>
-<article class="card">
-  <a class="thumb" href="https://www.a16z.news/p/the-next-ai-moat-isnt-a-better-model" target="_blank" rel="noopener noreferrer" data-initial="a" style="--fallback:#6A35C9;--fallback-2:#B37AF4" aria-label="The Next AI Moat Isn’t a Better Model 원문 열기">
-    <img src="https://substackcdn.com/image/fetch/$s_!ymPk!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F0186a62b-c9f4-463a-9738-18f3271abb32_2844x1600.png" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+  <a class="thumb" href="https://byline.network/2026/07/0727-3/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="[역직구 기획 4] 내수 한계 부딪힌 패션 플랫폼…O4O 전략으로 글로벌 공략 원문 열기">
+    <img src="https://cdn.byline.network/wp-content/uploads/2026/07/Commerce-1-720x465.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
     <span class="media-label">기사</span>
   </a>
   <div class="card-body">
     <div class="card-meta">
       <div class="meta-left">
         <span class="category">기술·시장 트렌드</span>
-        <span class="source">a16z</span>
+        <span class="source">바이라인네트워크</span>
+      </div>
+      <span class="card-index">01/05</span>
+    </div>
+    <a class="title-link" href="https://byline.network/2026/07/0727-3/" target="_blank" rel="noopener noreferrer"><h2>[역직구 기획 4] 내수 한계 부딪힌 패션 플랫폼…O4O 전략으로 글로벌 공략</h2></a>
+    <p class="summary">패션 플랫폼들이 해외 입점 대신 자체 앱·오프라인 연계로 O4O 전략을 택하는 이유를 짚는다. 내수 한계와 현지 실행력의 차이가 글로벌 확장 성패를 가른다는 맥락이다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>글로벌 진출은 ‘판매 채널’보다 현지 경험 설계가 더 중요하다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://byline.network/2026/07/0727-3/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://byline.network/2026/07/0727-3/" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://startuprecipe.co.kr/archives/5827428" target="_blank" rel="noopener noreferrer" data-initial="스" style="--fallback:#C85B1A;--fallback-2:#F3A64A" aria-label="[AI서머리] 디캠프 노동조합, 조직 정상화 및 책임 경영 촉구‧세컨신드롬-SH, 도시재생 맞손 원문 열기">
+    <img src="https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/260728_2ndsyndrome.com_5020535_slimpic.webp?fit=1000%2C664&amp;ssl=1" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">뉴스레터</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">정책·기회</span>
+        <span class="source">스타트업레시피</span>
+      </div>
+      <span class="card-index">02/05</span>
+    </div>
+    <a class="title-link" href="https://startuprecipe.co.kr/archives/5827428" target="_blank" rel="noopener noreferrer"><h2>[AI서머리] 디캠프 노동조합, 조직 정상화 및 책임 경영 촉구‧세컨신드롬-SH, 도시재생 맞손</h2></a>
+    <p class="summary">디캠프 노조의 책임경영 요구를 통해 공공성 강한 스타트업 지원조직의 거버넌스 이슈를 다룬다. 지원기관의 내부 통제와 인사 시스템이 생태계 신뢰에 직결됨을 보여준다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>생태계의 ‘지원기관’도 결국 운영 품질이 경쟁력이다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://startuprecipe.co.kr/archives/5827428" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://startuprecipe.co.kr/archives/5827428" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://www.venturesquare.net/1101843/" target="_blank" rel="noopener noreferrer" data-initial="벤" style="--fallback:#087C67;--fallback-2:#46C7A5" aria-label="AI가 빌딩 운영까지 판단한다…라이너, 삼성물산과 스마트 빌딩 협력 원문 열기">
+    <img src="https://www.venturesquare.net/wp-content/uploads/2026/07/image-75.gif" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">제품·성장 인사이트</span>
+        <span class="source">벤처스퀘어</span>
+      </div>
+      <span class="card-index">03/05</span>
+    </div>
+    <a class="title-link" href="https://www.venturesquare.net/1101843/" target="_blank" rel="noopener noreferrer"><h2>AI가 빌딩 운영까지 판단한다…라이너, 삼성물산과 스마트 빌딩 협력</h2></a>
+    <p class="summary">라이너와 삼성물산이 검색형 AI를 빌딩 운영·임대 전략에 붙이는 협력을 추진한다. AI가 단순 Q&amp;A를 넘어 현업 의사결정 도구로 진화하는 흐름을 보여준다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>AI의 다음 수익화는 ‘검색’보다 ‘결정 보조’에 있다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://www.venturesquare.net/1101843/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://www.venturesquare.net/1101843/" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://startuprecipe.co.kr/archives/5827442" target="_blank" rel="noopener noreferrer" data-initial="스" style="--fallback:#C85B1A;--fallback-2:#F3A64A" aria-label="[AI서머리] 블리스텍 , 광주창경 시드립스 4호 선정‧카카오, 경량 언어모델 4종 오픈소스 공개 원문 열기">
+    <img src="https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/260728_kocca_00230235.png?fit=552%2C355&amp;ssl=1" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">뉴스레터</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">생태계 업데이트</span>
+        <span class="source">스타트업레시피</span>
+      </div>
+      <span class="card-index">04/05</span>
+    </div>
+    <a class="title-link" href="https://startuprecipe.co.kr/archives/5827442" target="_blank" rel="noopener noreferrer"><h2>[AI서머리] 블리스텍 , 광주창경 시드립스 4호 선정‧카카오, 경량 언어모델 4종 오픈소스 공개</h2></a>
+    <p class="summary">카카오의 경량 언어모델 오픈소스 공개와 지역 창경의 시드 지원 소식을 함께 묶어 보여준다. 대형 플랫폼의 모델 개방과 지역 창업 인프라가 동시에 움직이는 점이 포인트다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>모델 경쟁보다 ‘배포 가능한 AI’가 더 넓은 기회를 만든다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://startuprecipe.co.kr/archives/5827442" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://startuprecipe.co.kr/archives/5827442" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb is-video" href="https://www.youtube.com/watch?v=DtVILWXGLYA" target="_blank" rel="noopener noreferrer" data-initial="E" style="--fallback:#111111;--fallback-2:#5A5A5A" aria-label="대기업 퇴사 후 1인 창업, 법인 설립까지 | 나는 솔로프리너다, 조쉬 | 이오서재 원문 열기">
+    <img src="https://i1.ytimg.com/vi/DtVILWXGLYA/hqdefault.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="play-triangle" aria-hidden="true"></span>
+    <span class="media-label">영상</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">창업가 인터뷰</span>
+        <span class="source">EO Korea</span>
       </div>
       <span class="card-index">05/05</span>
     </div>
-    <a class="title-link" href="https://www.a16z.news/p/the-next-ai-moat-isnt-a-better-model" target="_blank" rel="noopener noreferrer"><h2>The Next AI Moat Isn’t a Better Model</h2></a>
-    <p class="summary">물리 AI에서 경쟁 우위는 모델 크기보다 학습 속도와 데이터 축적에 있다는 관점을 제시한다. 모델 성능보다 현장 학습 구조가 모트가 된다는 주장이다.</p>
+    <a class="title-link" href="https://www.youtube.com/watch?v=DtVILWXGLYA" target="_blank" rel="noopener noreferrer"><h2>대기업 퇴사 후 1인 창업, 법인 설립까지 | 나는 솔로프리너다, 조쉬 | 이오서재</h2></a>
+    <p class="summary">대기업 퇴사 후 1인 창업과 피봇, 채용까지의 과정을 창업자가 직접 풀어낸 인터뷰다. 솔로프리너에서 팀 창업으로 넘어갈 때 필요한 판단과 사업모델 전환이 핵심이다.</p>
     <div class="takeaway">
       <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>모델 경쟁보다 데이터-학습 루프 설계가 핵심이다.</p>
+      <p>1인 창업의 본질은 ‘혼자 버티기’가 아니라 전환 타이밍이다.</p>
     </div>
     <div class="card-actions">
-      <a class="read-link" href="https://www.a16z.news/p/the-next-ai-moat-isnt-a-better-model" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://www.a16z.news/p/the-next-ai-moat-isnt-a-better-model" aria-pressed="false">
+      <a class="read-link" href="https://www.youtube.com/watch?v=DtVILWXGLYA" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://www.youtube.com/watch?v=DtVILWXGLYA" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
       </button>
     </div>
@@ -1283,13 +1464,21 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
     <h2>지난 브리핑</h2>
     <a href="./">전체 보기 →</a>
   </div>
-  <div class="archive-list"><a class="archive-row" href="2026-07-28.html"><span class="archive-date">7월 28일</span><span class="archive-count">5개의 큐레이션</span><span class="archive-arrow" aria-hidden="true">→</span></a></div>
+  <div class="archive-tree archive-tree-compact"><details class="archive-month" open><summary class="archive-summary archive-month-summary"><span class="archive-summary-copy"><span class="archive-summary-title">7월 브리핑</span><span class="archive-summary-meta">2026년 · 1회</span></span><span class="archive-chevron" aria-hidden="true">⌄</span></summary><div class="archive-month-body"><details class="archive-week" open><summary class="archive-summary archive-week-summary"><span class="archive-summary-copy"><span class="archive-summary-title">4주차 브리핑</span><span class="archive-summary-meta">7/28 · 1회</span></span><span class="archive-chevron" aria-hidden="true">⌄</span></summary><div class="archive-day-list"><a class="archive-day-row" href="2026-07-28.html"><span class="archive-day-date">7월 28일 화요일</span><span class="archive-day-count">5개의 큐레이션</span><span class="archive-day-arrow" aria-hidden="true">→</span></a></div></details></div></details></div>
+</section>
+  
+<section class="about-snaac-section" aria-label="SNAAC 소개">
+  <a class="about-snaac-card" href="https://www.snaac.co.kr" target="_blank" rel="noopener noreferrer">
+    <span class="about-snaac-eyebrow">ABOUT SNAAC</span>
+    <span class="about-snaac-title">SNAAC을 더 알아보세요</span>
+    <span class="about-snaac-copy">대학 스타트업 동아리 SNAAC의 활동과 소식을 공식 홈페이지에서 확인할 수 있어요.</span>
+  </a>
 </section>
 
   <footer>
     매일 아침 자동 업데이트 · SNAAC Community Team<br>
     원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<br>
-    비로그인 저장은 현재 브라우저에, 로그인 저장은 개인 계정에 동기화됩니다.
+    저장함은 로그인한 개인 계정에 동기화됩니다.
   </footer>
 </div>
 
@@ -1310,8 +1499,8 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
     </div>
     <div class="sync-strip">
       <div class="sync-copy">
-        <p class="sync-title" id="syncTitle">이 기기에 저장 중</p>
-        <p class="sync-text" id="syncText">로그인하면 다른 기기에서도 이어볼 수 있어요.</p>
+        <p class="sync-title" id="syncTitle">계정 저장함</p>
+        <p class="sync-text" id="syncText">로그인한 계정에서만 기사와 메모를 저장할 수 있어요.</p>
       </div>
       <button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button>
     </div>
@@ -1389,6 +1578,7 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
     </div>
     <div class="auth-content">
       <div id="authGuestView">
+        <p class="auth-intent" id="authIntent" hidden></p>
         <div class="auth-tabs" role="tablist" aria-label="로그인 방식">
           <button class="auth-tab is-active" type="button" role="tab" data-auth-mode="login" aria-selected="true">로그인</button>
           <button class="auth-tab" type="button" role="tab" data-auth-mode="signup" aria-selected="false">회원가입</button>
@@ -1414,7 +1604,7 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
       <div id="authSetupView" hidden>
         <div class="auth-setup-note">
           <h3>로그인 연결 전이에요</h3>
-          <p>운영자가 Supabase 공개 설정을 연결하면 이메일 회원가입과 여러 기기 저장함 동기화가 활성화됩니다. 지금도 저장함은 이 브라우저에서 사용할 수 있어요.</p>
+          <p>기사 저장과 저장함을 사용하려면 Supabase 로그인 연결이 필요합니다. 운영자가 공개 설정을 연결한 뒤 다시 시도해 주세요.</p>
         </div>
       </div>
     </div>
@@ -1423,7 +1613,7 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 
 <p class="sr-only" id="saveStatus" aria-live="polite"></p>
 
-<script id="briefingData" type="application/json">[{"title":"[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은","link":"https://byline.network/2026/07/98509284052/","source":"바이라인네트워크","summary":"건설 현장 자재운반 로봇의 도입 논리와 ‘곰방’ 대체 효과를 다룬 인터뷰다. 노동난·안전·생산성 문제를 로봇이 어떻게 풀 수 있는지 보여준다.","takeaway":"피지컬 AI는 모델보다 현장 공정 설계가 더 중요하다.","category":"창업가 인터뷰","contentType":"인터뷰","briefingDate":"7/29","image":"https://cdn.byline.network/wp-content/uploads/2026/07/golerobotics-1.jpg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"‘AI 인프라’ 사업 겨냥한 네이버, 엔비디아 주주로 맞는다","link":"https://byline.network/2026/07/27_39182773/","source":"바이라인네트워크","summary":"네이버의 제3자 유증과 엔비디아 협업을 AI 인프라 관점에서 짚는다. 국내 플랫폼이 GPU·팩토리 경쟁으로 확장하는 흐름을 보여준다.","takeaway":"AI 경쟁축이 서비스에서 인프라와 자본으로 이동 중이다.","category":"정책·기회","contentType":"기사","briefingDate":"7/29","image":"https://cdn.byline.network/wp-content/uploads/2026/07/naver_nvidia.jpeg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"(Yonhap Interview) Startup RLWRLD seeks to tackle demographic decline with its dexterity robot foundation model","link":"https://en.yna.co.kr/view/AEN20260710002800320","source":"Yonhap News Agency","summary":"RLWRLD가 숙련 노동 데이터와 기억 모듈로 물리 AI를 훈련하는 전략을 설명한다. 인구감소와 현장 숙련도 문제를 기술로 풀려는 시도가 핵심이다.","takeaway":"한국의 강점은 로봇 하드웨어보다 고품질 작업 데이터다.","category":"창업가 인터뷰","contentType":"기사","briefingDate":"7/29","image":"https://img2.yna.co.kr/etc/inner/EN/2026/07/10/AEN20260710002800320_02_i_P4.jpg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"[AI Revolution](205) \"Shaking Up Daechi-dong in the Second Half\"… Masspresso to Launch AI Agent for Teachers","link":"https://view.asiae.co.kr/en/article/2026070510404671177","source":"The Asia Business Daily","summary":"콴다가 교사용 AI 에이전트로 제품 중심축을 학생에서 교사로 옮긴 배경을 다룬다. 교육 품질 표준화와 수익화 전환의 맥락이 선명하다.","takeaway":"기존 고객이 아니라 ‘결정권자’와 ‘생산자’를 다시 보게 한다.","category":"제품·성장 인사이트","contentType":"인터뷰","briefingDate":"7/29","image":"https://cphoto.asiae.co.kr/listimglink/1/2026062415543022189_1782284070.jpg","fallbackA":"#087C67","fallbackB":"#46C7A5"},{"title":"The Next AI Moat Isn’t a Better Model","link":"https://www.a16z.news/p/the-next-ai-moat-isnt-a-better-model","source":"a16z","summary":"물리 AI에서 경쟁 우위는 모델 크기보다 학습 속도와 데이터 축적에 있다는 관점을 제시한다. 모델 성능보다 현장 학습 구조가 모트가 된다는 주장이다.","takeaway":"모델 경쟁보다 데이터-학습 루프 설계가 핵심이다.","category":"기술·시장 트렌드","contentType":"기사","briefingDate":"7/29","image":"https://substackcdn.com/image/fetch/$s_!ymPk!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F0186a62b-c9f4-463a-9738-18f3271abb32_2844x1600.png","fallbackA":"#6A35C9","fallbackB":"#B37AF4"}]</script>
+<script id="briefingData" type="application/json">[{"title":"[역직구 기획 4] 내수 한계 부딪힌 패션 플랫폼…O4O 전략으로 글로벌 공략","link":"https://byline.network/2026/07/0727-3/","source":"바이라인네트워크","summary":"패션 플랫폼들이 해외 입점 대신 자체 앱·오프라인 연계로 O4O 전략을 택하는 이유를 짚는다. 내수 한계와 현지 실행력의 차이가 글로벌 확장 성패를 가른다는 맥락이다.","takeaway":"글로벌 진출은 ‘판매 채널’보다 현지 경험 설계가 더 중요하다.","category":"기술·시장 트렌드","contentType":"기사","briefingDate":"7/29","image":"https://cdn.byline.network/wp-content/uploads/2026/07/Commerce-1-720x465.jpg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"[AI서머리] 디캠프 노동조합, 조직 정상화 및 책임 경영 촉구‧세컨신드롬-SH, 도시재생 맞손","link":"https://startuprecipe.co.kr/archives/5827428","source":"스타트업레시피","summary":"디캠프 노조의 책임경영 요구를 통해 공공성 강한 스타트업 지원조직의 거버넌스 이슈를 다룬다. 지원기관의 내부 통제와 인사 시스템이 생태계 신뢰에 직결됨을 보여준다.","takeaway":"생태계의 ‘지원기관’도 결국 운영 품질이 경쟁력이다.","category":"정책·기회","contentType":"뉴스레터","briefingDate":"7/29","image":"https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/260728_2ndsyndrome.com_5020535_slimpic.webp?fit=1000%2C664\u0026ssl=1","fallbackA":"#C85B1A","fallbackB":"#F3A64A"},{"title":"AI가 빌딩 운영까지 판단한다…라이너, 삼성물산과 스마트 빌딩 협력","link":"https://www.venturesquare.net/1101843/","source":"벤처스퀘어","summary":"라이너와 삼성물산이 검색형 AI를 빌딩 운영·임대 전략에 붙이는 협력을 추진한다. AI가 단순 Q\u0026A를 넘어 현업 의사결정 도구로 진화하는 흐름을 보여준다.","takeaway":"AI의 다음 수익화는 ‘검색’보다 ‘결정 보조’에 있다.","category":"제품·성장 인사이트","contentType":"기사","briefingDate":"7/29","image":"https://www.venturesquare.net/wp-content/uploads/2026/07/image-75.gif","fallbackA":"#087C67","fallbackB":"#46C7A5"},{"title":"[AI서머리] 블리스텍 , 광주창경 시드립스 4호 선정‧카카오, 경량 언어모델 4종 오픈소스 공개","link":"https://startuprecipe.co.kr/archives/5827442","source":"스타트업레시피","summary":"카카오의 경량 언어모델 오픈소스 공개와 지역 창경의 시드 지원 소식을 함께 묶어 보여준다. 대형 플랫폼의 모델 개방과 지역 창업 인프라가 동시에 움직이는 점이 포인트다.","takeaway":"모델 경쟁보다 ‘배포 가능한 AI’가 더 넓은 기회를 만든다.","category":"생태계 업데이트","contentType":"뉴스레터","briefingDate":"7/29","image":"https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/260728_kocca_00230235.png?fit=552%2C355\u0026ssl=1","fallbackA":"#C85B1A","fallbackB":"#F3A64A"},{"title":"대기업 퇴사 후 1인 창업, 법인 설립까지 | 나는 솔로프리너다, 조쉬 | 이오서재","link":"https://www.youtube.com/watch?v=DtVILWXGLYA","source":"EO Korea","summary":"대기업 퇴사 후 1인 창업과 피봇, 채용까지의 과정을 창업자가 직접 풀어낸 인터뷰다. 솔로프리너에서 팀 창업으로 넘어갈 때 필요한 판단과 사업모델 전환이 핵심이다.","takeaway":"1인 창업의 본질은 ‘혼자 버티기’가 아니라 전환 타이밍이다.","category":"창업가 인터뷰","contentType":"영상","briefingDate":"7/29","image":"https://i1.ytimg.com/vi/DtVILWXGLYA/hqdefault.jpg","fallbackA":"#111111","fallbackB":"#5A5A5A"}]</script>
 <script id="authConfig" type="application/json">{"url":"https://mvvmdtrgiesankvlbbnh.supabase.co","publishableKey":"sb_publishable_Rb6eKh6L5gtB7SiFogMoHA_H-3KrkZb","redirectUrl":"","homeHref":"../"}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(() => {
@@ -1474,10 +1664,13 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
   const authPassword = document.getElementById('authPassword');
   const authSubmit = document.getElementById('authSubmit');
   const authMessage = document.getElementById('authMessage');
+  const authIntent = document.getElementById('authIntent');
   const accountEmail = document.getElementById('accountEmail');
 
   let storageAvailable = true;
-  let savedItems = readStorage(GUEST_STORAGE_KEY);
+  // 기존 버전의 비로그인 저장 데이터는 localStorage에 남겨 두었다가 첫 로그인 때 이전합니다.
+  // 새 저장은 로그인 후에만 허용하므로, 로그아웃 화면에서는 저장함을 비워 둡니다.
+  let savedItems = [];
   let drawerTrigger = null;
   let noteTrigger = null;
   let previewTrigger = null;
@@ -1488,6 +1681,8 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
   let currentUser = null;
   let supabaseClient = null;
   let syncBusy = false;
+  let pendingSaveUrl = '';
+  let pendingOpenSaved = false;
 
   const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
 
@@ -1610,7 +1805,7 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
     if (savedDrawerSubtitle) {
       savedDrawerSubtitle.textContent = byUrl.size
         ? `${byUrl.size}개의 아티클을 모아두었어요.`
-        : '좋았던 아티클을 저장하고 메모를 남겨보세요.';
+        : (currentUser ? '좋았던 아티클을 저장하고 메모를 남겨보세요.' : '로그인 후 나만의 저장함을 만들어보세요.');
     }
   }
 
@@ -1626,9 +1821,9 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 
     if (!syncTitle || !syncText || !syncAction) return;
     if (!authEnabled) {
-      syncTitle.textContent = '이 기기에 저장 중';
-      syncText.textContent = '로그인 연동 전에도 기사와 메모는 이 브라우저에 남아요.';
-      syncAction.textContent = '안내';
+      syncTitle.textContent = '로그인 연결이 필요해요';
+      syncText.textContent = 'Supabase 설정을 완료해야 저장함을 사용할 수 있어요.';
+      syncAction.textContent = '설정 안내';
       return;
     }
     if (currentUser) {
@@ -1636,8 +1831,8 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
       syncText.textContent = currentUser.email || '로그인된 계정';
       syncAction.textContent = '내 계정';
     } else {
-      syncTitle.textContent = '다른 기기에서도 이어보기';
-      syncText.textContent = '로그인하면 저장한 기사와 메모가 계정에 동기화돼요.';
+      syncTitle.textContent = '로그인 후 저장 가능';
+      syncText.textContent = '저장한 기사와 메모는 로그인한 계정에 동기화돼요.';
       syncAction.textContent = '로그인';
     }
   }
@@ -1694,7 +1889,9 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
       return;
     }
     if (!savedItems.length) {
-      savedList.append(makeElement('p', 'saved-empty', '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'));
+      savedList.append(makeElement('p', 'saved-empty', currentUser
+        ? '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'
+        : '저장함은 로그인 후 사용할 수 있어요.'));
       return;
     }
 
@@ -1743,7 +1940,26 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
     });
   }
 
+  function setAuthIntent(message = '') {
+    if (!authIntent) return;
+    authIntent.textContent = message;
+    authIntent.hidden = !message;
+  }
+
+  function requestLogin(intent, { saveUrl = '', openSaved = false } = {}) {
+    pendingSaveUrl = saveUrl;
+    pendingOpenSaved = openSaved;
+    setAuthMode('login');
+    openAuthDialog();
+    setAuthIntent(intent);
+    if (!authEnabled) announce('로그인 연결이 완료된 뒤 저장함을 사용할 수 있어요.');
+  }
+
   function openDrawer() {
+    if (!currentUser) {
+      requestLogin('저장함은 로그인 후 사용할 수 있어요. 로그인하면 저장한 기사와 메모를 여러 기기에서 이어볼 수 있습니다.', { openSaved: true });
+      return;
+    }
     if (!drawer) return;
     drawerTrigger = document.activeElement;
     renderSaved();
@@ -1765,6 +1981,10 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
   }
 
   function openNoteDialog(url) {
+    if (!currentUser) {
+      requestLogin('기사를 저장하려면 먼저 로그인해 주세요. 로그인하면 바로 스크랩 메모 화면으로 이어집니다.', { saveUrl: url });
+      return;
+    }
     if (!noteDialog || !noteInput) return;
     const item = itemForUrl(url);
     if (!item) return;
@@ -1927,6 +2147,12 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 
   async function saveWithNote() {
     if (!activeNoteUrl || !noteInput) return;
+    if (!currentUser) {
+      const requestedUrl = activeNoteUrl;
+      closeNoteDialog(false);
+      requestLogin('기사를 저장하려면 먼저 로그인해 주세요. 로그인하면 바로 스크랩 메모 화면으로 이어집니다.', { saveUrl: requestedUrl });
+      return;
+    }
     const existingIndex = savedItems.findIndex(item => item.link === activeNoteUrl);
     const currentItem = currentByUrl.get(activeNoteUrl);
     const existingItem = existingIndex >= 0 ? savedItems[existingIndex] : null;
@@ -1968,8 +2194,6 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
       } else {
         announce('이 기기에는 저장했지만 계정 동기화에 실패했어요.');
       }
-    } else {
-      announce(note ? '메모와 함께 이 기기에 저장했어요.' : '기사를 이 기기에 저장했어요.');
     }
   }
 
@@ -2043,9 +2267,14 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
     }, 40);
   }
 
-  function closeAuthDialog(restoreFocus = true) {
+  function closeAuthDialog(restoreFocus = true, preserveIntent = false) {
     if (!authDialog) return;
     authDialog.hidden = true;
+    if (!preserveIntent && !currentUser) {
+      pendingSaveUrl = '';
+      pendingOpenSaved = false;
+      setAuthIntent('');
+    }
     syncBodyLock();
     if (restoreFocus && authTrigger && typeof authTrigger.focus === 'function') authTrigger.focus();
   }
@@ -2083,7 +2312,7 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
         if (error) throw error;
         if (data && data.session) {
           setAuthMessage('회원가입과 로그인이 완료됐어요.');
-          closeAuthDialog();
+          closeAuthDialog(true, true);
         } else {
           setAuthMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인해 주세요.');
         }
@@ -2091,7 +2320,7 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setAuthMessage('로그인했어요. 저장함을 동기화합니다.');
-        closeAuthDialog();
+        closeAuthDialog(true, true);
       }
     } catch (error) {
       console.error('SNAAC auth error:', error);
@@ -2121,8 +2350,15 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 
     if (nextUser) {
       if (nextId !== previousId || !savedItems.length) await syncSavedFromCloud();
+      const saveUrl = pendingSaveUrl;
+      const shouldOpenSaved = pendingOpenSaved;
+      pendingSaveUrl = '';
+      pendingOpenSaved = false;
+      setAuthIntent('');
+      if (saveUrl) window.setTimeout(() => openNoteDialog(saveUrl), 20);
+      else if (shouldOpenSaved) window.setTimeout(() => openDrawer(), 20);
     } else {
-      savedItems = readStorage(GUEST_STORAGE_KEY);
+      savedItems = [];
       updateSavedIndicators();
       renderSaved();
     }
@@ -2223,6 +2459,9 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 
     const openAuthButton = event.target.closest('[data-open-auth]');
     if (openAuthButton) {
+      pendingSaveUrl = '';
+      pendingOpenSaved = false;
+      setAuthIntent('');
       openAuthDialog();
       return;
     }
