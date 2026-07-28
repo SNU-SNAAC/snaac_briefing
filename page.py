@@ -2872,7 +2872,7 @@ def _page_html(picks: list[dict], now: datetime, context: str) -> str:
   <section class="intro">
     <p>단순 투자 단신보다, 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 관점을 골랐어요. 각 카드에는 핵심 맥락과 읽어볼 이유를 함께 담았습니다.</p>
     <div class="editorial-rule" aria-label="큐레이션 범위">
-      <span class="free-access-note">무료 원문만</span><span>생태계 업데이트</span><span>창업가·VC 관점</span><span>제품·성장</span><span>인터뷰·영상</span>
+      <span>생태계 업데이트</span><span>창업가·VC 관점</span><span>제품·성장</span><span>인터뷰·영상</span>
     </div>
   </section>
 
