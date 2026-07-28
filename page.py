@@ -8,10 +8,11 @@
 
 디자인 원칙
 - 카카오톡 인앱 브라우저를 기준으로 한 모바일 우선 레이아웃
-- 노란색/매체별 원색을 없앤 무채색 팔레트
-- 썸네일까지 흑백 처리해 전체 톤 통일
+- 텍스트와 인터페이스는 무채색으로 정돈
+- 기사 썸네일은 원본 색상을 유지해 콘텐츠의 생동감 보존
 - 카드 전체를 링크로 감싸지 않고, 원문 읽기와 저장 버튼을 분리
-- 저장 기능은 localStorage를 사용하므로 별도 서버·DB·AI 토큰이 필요 없음
+- 저장 시 선택적으로 개인 메모를 남기고 나중에 수정 가능
+- 저장과 메모는 localStorage를 사용하므로 별도 서버·DB·AI 토큰이 필요 없음
 """
 
 from __future__ import annotations
@@ -31,6 +32,33 @@ WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"]
 SHOW_THUMBNAILS = True
 DOCS_DIR = Path("docs")
 ARCHIVE_KEEP = 14
+
+# 썸네일을 불러오지 못했을 때만 사용하는 매체별 폴백 색상입니다.
+# 실제 기사 썸네일은 별도 색상 보정 없이 원본 그대로 표시합니다.
+SOURCE_GRADIENTS = {
+    "플래텀": ("#2752B8", "#6D9CFF"),
+    "벤처스퀘어": ("#087C67", "#46C7A5"),
+    "스타트업레시피": ("#C85B1A", "#F3A64A"),
+    "바이라인네트워크": ("#5B3DB4", "#A06FE8"),
+    "블로터": ("#9A3557", "#E87895"),
+    "지디넷 스타트업": ("#176F9D", "#62BDE0"),
+    "아웃스탠딩": ("#242A79", "#6D78E8"),
+    "EO": ("#111111", "#5A5A5A"),
+    "EO Korea": ("#111111", "#5A5A5A"),
+    "LinkedIn": ("#0A66C2", "#58A8EA"),
+    "링크드인": ("#0A66C2", "#58A8EA"),
+    "YouTube": ("#C91524", "#FF6670"),
+    "유튜브": ("#C91524", "#FF6670"),
+    "a16z": ("#6A35C9", "#B37AF4"),
+}
+FALLBACK_GRADIENTS = [
+    ("#2752B8", "#6D9CFF"),
+    ("#087C67", "#46C7A5"),
+    ("#C85B1A", "#F3A64A"),
+    ("#5B3DB4", "#A06FE8"),
+    ("#9A3557", "#E87895"),
+    ("#176F9D", "#62BDE0"),
+]
 
 CSS = r"""
 @font-face {
@@ -68,7 +96,7 @@ body {
 body.drawer-open { overflow: hidden; }
 a { color: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
-button { font: inherit; }
+button, textarea { font: inherit; }
 [hidden] { display: none !important; }
 
 .wrap {
@@ -183,9 +211,7 @@ button { font: inherit; }
 }
 .stamp strong { display: block; font-size: 15px; letter-spacing: 0; }
 
-.intro {
-  padding: 18px 0 8px;
-}
+.intro { padding: 18px 0 8px; }
 .intro p {
   margin: 0;
   color: var(--ink-2);
@@ -232,7 +258,6 @@ button { font: inherit; }
   height: 100%;
   display: block;
   object-fit: cover;
-  filter: grayscale(100%) contrast(.92) brightness(.98);
   transform: scale(1.002);
 }
 .thumb::after {
@@ -246,15 +271,17 @@ button { font: inherit; }
   display: grid;
   place-items: center;
   background:
-    linear-gradient(135deg, rgba(255,255,255,.52), transparent 55%),
-    repeating-linear-gradient(135deg, #d6d6d6 0, #d6d6d6 12px, #e3e3e3 12px, #e3e3e3 24px);
+    linear-gradient(135deg, rgba(255,255,255,.24), transparent 56%),
+    linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
 }
 .thumb.noimg::before {
   content: attr(data-initial);
-  color: rgba(23, 23, 22, .72);
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, .94);
   font-family: GmarketSans, Pretendard, sans-serif;
   font-size: 44px;
-  z-index: 1;
+  text-shadow: 0 2px 16px rgba(0,0,0,.18);
 }
 .media-label {
   position: absolute;
@@ -451,51 +478,73 @@ footer {
   text-align: center;
 }
 
-.drawer {
+.drawer,
+.note-dialog {
   position: fixed;
   inset: 0;
-  z-index: 50;
   display: flex;
   align-items: flex-end;
   justify-content: center;
 }
-.drawer-backdrop {
+.drawer { z-index: 50; }
+.note-dialog { z-index: 70; }
+.drawer-backdrop,
+.note-backdrop {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(15, 15, 14, .48);
+  background: rgba(15, 15, 14, .5);
   cursor: pointer;
 }
-.drawer-panel {
+.drawer-panel,
+.note-panel {
   position: relative;
   width: min(100%, 600px);
-  max-height: min(78vh, 720px);
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--line);
   border-bottom: 0;
   border-radius: 22px 22px 0 0;
   background: var(--surface);
-  box-shadow: 0 -18px 50px rgba(0,0,0,.16);
-  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -18px 50px rgba(0,0,0,.17);
   animation: drawer-up .18s ease-out both;
 }
-@keyframes drawer-up { from { transform: translateY(18px); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
-.drawer-handle { width: 42px; height: 4px; margin: 9px auto 2px; border-radius: 999px; background: var(--line-strong); }
-.drawer-head {
+.drawer-panel {
+  max-height: min(78vh, 720px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.note-panel {
+  max-height: min(88vh, 720px);
+  overflow-y: auto;
+  padding: 8px 17px calc(18px + env(safe-area-inset-bottom));
+}
+@keyframes drawer-up {
+  from { transform: translateY(18px); opacity: .5; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.drawer-handle {
+  width: 42px;
+  height: 4px;
+  margin: 9px auto 2px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+.drawer-head,
+.note-head {
   min-height: 62px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 17px;
-  border-bottom: 1px solid var(--line);
 }
-.drawer-head h2 { margin: 0; font-size: 17px; }
+.drawer-head { padding: 0 17px; border-bottom: 1px solid var(--line); }
+.drawer-head h2,
+.note-head h2 { margin: 0; font-size: 17px; }
 .close-button {
   width: 40px;
   height: 40px;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
@@ -505,14 +554,58 @@ footer {
   font-size: 20px;
   cursor: pointer;
 }
-.saved-list { overflow-y: auto; overscroll-behavior: contain; padding: 8px 16px 18px; }
-.saved-empty { padding: 44px 18px; color: var(--muted); font-size: 14px; text-align: center; }
+.saved-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 16px 18px;
+}
+.saved-empty {
+  padding: 44px 18px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
 .saved-item { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .saved-item:last-child { border-bottom: 0; }
-.saved-meta { margin-bottom: 4px; color: var(--muted); font-size: 11.5px; font-weight: 700; }
-.saved-title { display: block; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 800; line-height: 1.45; }
-.saved-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
-.remove-saved {
+.saved-meta {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.saved-title {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.saved-note {
+  margin: 10px 0 0;
+  padding: 10px 11px;
+  border-left: 3px solid var(--ink);
+  background: var(--surface-soft);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.saved-note-label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.saved-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 10px;
+}
+.saved-action-button {
   min-height: 36px;
   padding: 0 10px;
   border: 1px solid var(--line);
@@ -523,6 +616,71 @@ footer {
   font-weight: 700;
   cursor: pointer;
 }
+.edit-note { color: var(--ink-2); }
+
+.note-article-title {
+  margin: 1px 0 13px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.note-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.note-optional { color: var(--muted); font-weight: 600; }
+.note-count { color: var(--muted); font-size: 11px; font-weight: 600; }
+.note-input {
+  width: 100%;
+  min-height: 122px;
+  display: block;
+  resize: vertical;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--ink);
+  padding: 12px 13px;
+  font-size: 14px;
+  line-height: 1.55;
+  word-break: break-word;
+  outline: none;
+}
+.note-input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(23,23,23,.08);
+}
+.note-input::placeholder { color: #9a9a9a; }
+.note-help { margin: 8px 1px 0; color: var(--muted); font-size: 11.5px; }
+.note-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 9px;
+  margin-top: 15px;
+}
+.note-button {
+  min-height: 46px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.note-button-primary { border-color: var(--ink); background: var(--ink); color: #fff; }
+.note-button:active { transform: scale(.985); }
+
 .sr-only {
   position: absolute !important;
   width: 1px !important;
@@ -538,9 +696,12 @@ footer {
 @media (hover: hover) {
   .card { transition: transform .16s ease, box-shadow .16s ease; }
   .card:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(20,20,18,.085); }
-  .thumb img { transition: filter .2s ease, transform .25s ease; }
-  .card:hover .thumb img { filter: grayscale(82%) contrast(.96); transform: scale(1.018); }
-  .utility-button:hover, .save-button:hover, .close-button:hover { border-color: var(--ink); }
+  .thumb img { transition: transform .25s ease; }
+  .card:hover .thumb img { transform: scale(1.018); }
+  .utility-button:hover,
+  .save-button:hover,
+  .close-button:hover,
+  .saved-action-button:hover { border-color: var(--ink); }
 }
 
 @media (max-width: 390px) {
@@ -553,11 +714,15 @@ footer {
   .source { max-width: 100px; }
   .archive-count { display: none; }
   .archive-row { grid-template-columns: 1fr auto; }
+  .note-panel { padding-left: 14px; padding-right: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
 }
 """
 
@@ -568,15 +733,25 @@ JS = r"""
   const liveRegion = document.getElementById('saveStatus');
   const drawer = document.getElementById('savedDrawer');
   const savedList = document.getElementById('savedList');
+  const noteDialog = document.getElementById('noteDialog');
+  const noteInput = document.getElementById('noteInput');
+  const noteArticleTitle = document.getElementById('noteArticleTitle');
+  const noteCount = document.getElementById('noteCount');
+  const noteSaveButton = document.getElementById('noteSaveButton');
   const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
   const currentByUrl = new Map(currentItems.map(item => [item.link, item]));
   let storageAvailable = true;
   let drawerTrigger = null;
+  let noteTrigger = null;
+  let activeNoteUrl = '';
 
   function readSaved() {
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter(item => item && typeof item === 'object' && item.link)
+        .map(item => ({ ...item, note: typeof item.note === 'string' ? item.note : '' }));
     } catch (error) {
       storageAvailable = false;
       return [];
@@ -600,48 +775,106 @@ JS = r"""
     window.setTimeout(() => { liveRegion.textContent = message; }, 20);
   }
 
+  function syncBodyLock() {
+    const drawerOpen = drawer && !drawer.hidden;
+    const noteOpen = noteDialog && !noteDialog.hidden;
+    document.body.classList.toggle('drawer-open', Boolean(drawerOpen || noteOpen));
+  }
+
   function updateButtons() {
-    const savedUrls = new Set(readSaved().map(item => item.link));
+    const savedByUrl = new Map(readSaved().map(item => [item.link, item]));
     document.querySelectorAll('.save-button').forEach(button => {
-      const isSaved = savedUrls.has(button.dataset.url);
+      const savedItem = savedByUrl.get(button.dataset.url);
+      const isSaved = Boolean(savedItem);
+      const hasNote = Boolean(savedItem && savedItem.note.trim());
       button.classList.toggle('is-saved', isSaved);
       button.setAttribute('aria-pressed', String(isSaved));
+      button.setAttribute(
+        'aria-label',
+        isSaved ? (hasNote ? '저장한 기사 메모 보기' : '저장한 기사에 메모 추가') : '기사 저장하기'
+      );
       const label = button.querySelector('.save-label');
-      if (label) label.textContent = isSaved ? '저장됨' : '저장';
+      if (label) label.textContent = isSaved ? (hasNote ? '메모 보기' : '메모 추가') : '저장';
     });
     document.querySelectorAll('[data-saved-count]').forEach(node => {
-      node.textContent = String(savedUrls.size);
+      node.textContent = String(savedByUrl.size);
     });
   }
 
-  function toggleSaved(url) {
-    const item = currentByUrl.get(url);
+  function updateNoteCount() {
+    if (noteCount && noteInput) noteCount.textContent = String(noteInput.value.length);
+  }
+
+  function itemForUrl(url) {
+    return readSaved().find(item => item.link === url) || currentByUrl.get(url) || null;
+  }
+
+  function openNoteDialog(url) {
+    if (!noteDialog || !noteInput) return;
+    const item = itemForUrl(url);
     if (!item) return;
 
-    const saved = readSaved();
-    const index = saved.findIndex(entry => entry.link === url);
-    let message = '';
+    const savedItem = readSaved().find(entry => entry.link === url);
+    activeNoteUrl = url;
+    noteTrigger = document.activeElement;
+    noteArticleTitle.textContent = item.title || '제목 없음';
+    noteInput.value = savedItem ? savedItem.note : '';
+    if (noteSaveButton) noteSaveButton.textContent = savedItem ? '메모 저장' : '스크랩 저장';
+    updateNoteCount();
+    noteDialog.hidden = false;
+    syncBodyLock();
+    window.setTimeout(() => noteInput.focus(), 40);
+  }
 
+  function closeNoteDialog(restoreFocus = true) {
+    if (!noteDialog) return;
+    noteDialog.hidden = true;
+    activeNoteUrl = '';
+    syncBodyLock();
+    if (restoreFocus && noteTrigger && typeof noteTrigger.focus === 'function') noteTrigger.focus();
+  }
+
+  function saveWithNote() {
+    if (!activeNoteUrl || !noteInput) return;
+    const saved = readSaved();
+    const index = saved.findIndex(item => item.link === activeNoteUrl);
+    const currentItem = currentByUrl.get(activeNoteUrl);
+    const existingItem = index >= 0 ? saved[index] : null;
+    const item = currentItem || existingItem;
+    if (!item) return;
+
+    const note = noteInput.value.trim();
+    const now = new Date().toISOString();
     if (index >= 0) {
-      saved.splice(index, 1);
-      message = '저장을 취소했어요.';
+      saved[index] = {
+        ...existingItem,
+        ...(currentItem || {}),
+        note,
+        savedAt: existingItem.savedAt || now,
+        updatedAt: now,
+      };
     } else {
-      saved.unshift({ ...item, savedAt: new Date().toISOString() });
-      message = '저장함에 담았어요.';
+      saved.unshift({ ...item, note, savedAt: now, updatedAt: now });
     }
 
     if (!writeSaved(saved)) {
       announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
       return;
     }
+
+    closeNoteDialog();
     updateButtons();
     renderSaved();
-    announce(message);
+    announce(note ? '메모와 함께 저장했어요.' : '기사만 저장했어요.');
   }
 
   function removeSaved(url) {
     const saved = readSaved().filter(item => item.link !== url);
-    writeSaved(saved);
+    if (!writeSaved(saved)) {
+      announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
+      return;
+    }
+    if (activeNoteUrl === url && noteDialog && !noteDialog.hidden) closeNoteDialog(false);
     updateButtons();
     renderSaved();
     announce('저장한 기사에서 삭제했어요.');
@@ -683,16 +916,35 @@ JS = r"""
       link.rel = 'noopener noreferrer';
       link.textContent = item.title || '제목 없음';
 
+      article.append(meta, link);
+
+      if (item.note && item.note.trim()) {
+        const noteBox = document.createElement('p');
+        noteBox.className = 'saved-note';
+        const noteLabel = document.createElement('span');
+        noteLabel.className = 'saved-note-label';
+        noteLabel.textContent = 'MY NOTE';
+        noteBox.append(noteLabel, document.createTextNode(item.note.trim()));
+        article.append(noteBox);
+      }
+
       const actions = document.createElement('div');
       actions.className = 'saved-actions';
+
+      const editButton = document.createElement('button');
+      editButton.type = 'button';
+      editButton.className = 'saved-action-button edit-note';
+      editButton.dataset.editNoteUrl = item.link;
+      editButton.textContent = item.note && item.note.trim() ? '메모 수정' : '메모 추가';
+
       const removeButton = document.createElement('button');
       removeButton.type = 'button';
-      removeButton.className = 'remove-saved';
+      removeButton.className = 'saved-action-button remove-saved';
       removeButton.dataset.removeUrl = item.link;
       removeButton.textContent = '삭제';
-      actions.append(removeButton);
 
-      article.append(meta, link, actions);
+      actions.append(editButton, removeButton);
+      article.append(actions);
       savedList.append(article);
     });
   }
@@ -702,7 +954,7 @@ JS = r"""
     drawerTrigger = document.activeElement;
     renderSaved();
     drawer.hidden = false;
-    document.body.classList.add('drawer-open');
+    syncBodyLock();
     const closeButton = drawer.querySelector('.close-button');
     if (closeButton) closeButton.focus();
   }
@@ -710,14 +962,32 @@ JS = r"""
   function closeDrawer() {
     if (!drawer) return;
     drawer.hidden = true;
-    document.body.classList.remove('drawer-open');
+    syncBodyLock();
     if (drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
   }
 
   document.addEventListener('click', event => {
     const saveButton = event.target.closest('.save-button');
     if (saveButton) {
-      toggleSaved(saveButton.dataset.url);
+      openNoteDialog(saveButton.dataset.url);
+      return;
+    }
+
+    const editNoteButton = event.target.closest('[data-edit-note-url]');
+    if (editNoteButton) {
+      openNoteDialog(editNoteButton.dataset.editNoteUrl);
+      return;
+    }
+
+    const saveNoteButton = event.target.closest('[data-save-note]');
+    if (saveNoteButton) {
+      saveWithNote();
+      return;
+    }
+
+    const closeNoteButton = event.target.closest('[data-close-note]');
+    if (closeNoteButton) {
+      closeNoteDialog();
       return;
     }
 
@@ -737,8 +1007,23 @@ JS = r"""
     if (removeButton) removeSaved(removeButton.dataset.removeUrl);
   });
 
+  if (noteInput) {
+    noteInput.addEventListener('input', updateNoteCount);
+    noteInput.addEventListener('keydown', event => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        event.preventDefault();
+        saveWithNote();
+      }
+    });
+  }
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && drawer && !drawer.hidden) closeDrawer();
+    if (event.key !== 'Escape') return;
+    if (noteDialog && !noteDialog.hidden) {
+      closeNoteDialog();
+    } else if (drawer && !drawer.hidden) {
+      closeDrawer();
+    }
   });
 
   window.addEventListener('storage', () => {
@@ -818,6 +1103,26 @@ def _bookmark_icon() -> str:
     )
 
 
+def _source_gradient(source: str) -> tuple[str, str]:
+    """Return a stable colorful fallback for cards whose original image is unavailable."""
+    source = source.strip()
+    if source in SOURCE_GRADIENTS:
+        return SOURCE_GRADIENTS[source]
+
+    lower = source.lower()
+    if "linkedin" in lower or "링크드인" in source:
+        return SOURCE_GRADIENTS["LinkedIn"]
+    if "youtube" in lower or "유튜브" in source:
+        return SOURCE_GRADIENTS["YouTube"]
+    if lower.startswith("eo"):
+        return SOURCE_GRADIENTS["EO"]
+    if "a16z" in lower:
+        return SOURCE_GRADIENTS["a16z"]
+
+    score = sum((index + 1) * ord(char) for index, char in enumerate(source or "SNAAC"))
+    return FALLBACK_GRADIENTS[score % len(FALLBACK_GRADIENTS)]
+
+
 def _card(index: int, total: int, pick: dict) -> str:
     title = html.escape(pick["title"])
     summary = html.escape(pick["summary"])
@@ -825,7 +1130,9 @@ def _card(index: int, total: int, pick: dict) -> str:
         pick["takeaway"]
         or "원문에서 이번 변화가 스타트업과 창업가에게 주는 의미를 확인해보세요."
     )
-    source = html.escape(pick["source"])
+    source_raw = pick["source"]
+    source = html.escape(source_raw)
+    fallback_a, fallback_b = _source_gradient(source_raw)
     category = html.escape(pick["category"])
     content_type = html.escape(pick["content_type"])
     link = html.escape(pick["link"], quote=True)
@@ -844,7 +1151,7 @@ def _card(index: int, total: int, pick: dict) -> str:
 
     return f"""
 <article class="card">
-  <a class="{thumb_class}" href="{link}" target="_blank" rel="noopener noreferrer" data-initial="{initial}" aria-label="{title} 원문 열기">
+  <a class="{thumb_class}" href="{link}" target="_blank" rel="noopener noreferrer" data-initial="{initial}" style="--fallback:{fallback_a};--fallback-2:{fallback_b}" aria-label="{title} 원문 열기">
     {thumb_inner}
     <span class="media-label">{content_type}</span>
   </a>
@@ -953,6 +1260,29 @@ def _drawer_html() -> str:
     <div class="saved-list" id="savedList"></div>
   </section>
 </div>
+
+<div class="note-dialog" id="noteDialog" hidden>
+  <button class="note-backdrop" type="button" data-close-note aria-label="스크랩 메모 닫기"></button>
+  <section class="note-panel" role="dialog" aria-modal="true" aria-labelledby="noteTitle" aria-describedby="noteHelp">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <div class="note-head">
+      <h2 id="noteTitle">스크랩 메모</h2>
+      <button class="close-button" type="button" data-close-note aria-label="닫기">×</button>
+    </div>
+    <p class="note-article-title" id="noteArticleTitle"></p>
+    <label class="note-label" for="noteInput">
+      <span>이 기사를 저장한 이유 <span class="note-optional">선택</span></span>
+      <span class="note-count"><span id="noteCount">0</span>/500</span>
+    </label>
+    <textarea class="note-input" id="noteInput" maxlength="500" placeholder="예: 다음 기획 회의에서 리텐션 사례로 다시 보기"></textarea>
+    <p class="note-help" id="noteHelp">메모를 비워둔 채 기사만 저장해도 됩니다.</p>
+    <div class="note-actions">
+      <button class="note-button" type="button" data-close-note>취소</button>
+      <button class="note-button note-button-primary" id="noteSaveButton" type="button" data-save-note>스크랩 저장</button>
+    </div>
+  </section>
+</div>
+
 <p class="sr-only" id="saveStatus" aria-live="polite"></p>
 """
 
@@ -1034,7 +1364,7 @@ def _page_html(
   <footer>
     매일 아침 자동 업데이트 · SNAAC Community Team<br>
     원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<br>
-    저장한 기사는 현재 기기의 브라우저에만 보관됩니다.
+    저장한 기사와 메모는 현재 기기의 브라우저에만 보관됩니다.
   </footer>
 </div>
 {_drawer_html()}
