@@ -1,0 +1,53 @@
+name: SNAAC 모닝 브리핑
+
+on:
+  schedule:
+    # UTC 23:30 = 한국시간(KST) 오전 08:30
+    # → 09:00에 오픈채팅봇 반복알림이 나가기 전에 페이지를 갱신해 둡니다.
+    - cron: "30 23 * * *"
+  workflow_dispatch: {} # 수동 실행 버튼 (테스트용)
+
+permissions:
+  contents: write # docs/ 커밋을 위해 필요
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 브리핑 생성
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # 아래 둘은 선택사항 (설정 시 팀장 카톡으로 배포 확인 알림 발송)
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+        run: python main.py
+
+      - name: GitHub Pages에 배포 (docs/ 커밋)
+        run: |
+          git config user.name "snaac-briefing-bot"
+          git config user.email "actions@github.com"
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "변경 사항 없음 - 커밋 생략"
+          else
+            git commit -m "브리핑 업데이트 $(TZ=Asia/Seoul date +%Y-%m-%d)"
+            git push
+          fi
+
+      # (선택) 카카오가 새 리프레시 토큰을 발급하면 GitHub Secret 자동 갱신
+      - name: 리프레시 토큰 자동 갱신
+        if: hashFiles('new_refresh_token.txt') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh secret set KAKAO_REFRESH_TOKEN --body "$(cat new_refresh_token.txt)" --repo ${{ github.repository }}
+          echo "리프레시 토큰 갱신 완료"
