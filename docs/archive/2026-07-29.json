@@ -1,0 +1,77 @@
+{
+  "date": "2026-07-29",
+  "date_label": "2026년 7월 29일 수요일",
+  "generated_at": "2026-07-29T05:14:04.097110+09:00",
+  "picks": [
+    {
+      "title": "[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은",
+      "link": "https://byline.network/2026/07/98509284052/",
+      "source": "바이라인네트워크",
+      "summary": "건설 현장 자재운반 로봇의 도입 논리와 ‘곰방’ 대체 효과를 다룬 인터뷰다. 노동난·안전·생산성 문제를 로봇이 어떻게 풀 수 있는지 보여준다.",
+      "takeaway": "피지컬 AI는 모델보다 현장 공정 설계가 더 중요하다.",
+      "category": "창업가 인터뷰",
+      "content_type": "인터뷰",
+      "published": "2026-07-27T23:36:52+09:00",
+      "briefingDate": "2026년 7월 29일 수요일",
+      "fallback_a": "#5B3DB4",
+      "fallback_b": "#A06FE8",
+      "image": "https://cdn.byline.network/wp-content/uploads/2026/07/golerobotics-1.jpg"
+    },
+    {
+      "title": "‘AI 인프라’ 사업 겨냥한 네이버, 엔비디아 주주로 맞는다",
+      "link": "https://byline.network/2026/07/27_39182773/",
+      "source": "바이라인네트워크",
+      "summary": "네이버의 제3자 유증과 엔비디아 협업을 AI 인프라 관점에서 짚는다. 국내 플랫폼이 GPU·팩토리 경쟁으로 확장하는 흐름을 보여준다.",
+      "takeaway": "AI 경쟁축이 서비스에서 인프라와 자본으로 이동 중이다.",
+      "category": "정책·기회",
+      "content_type": "기사",
+      "published": "2026-07-27T14:40:36+09:00",
+      "briefingDate": "2026년 7월 29일 수요일",
+      "fallback_a": "#5B3DB4",
+      "fallback_b": "#A06FE8",
+      "image": "https://cdn.byline.network/wp-content/uploads/2026/07/naver_nvidia.jpeg"
+    },
+    {
+      "title": "(Yonhap Interview) Startup RLWRLD seeks to tackle demographic decline with its dexterity robot foundation model",
+      "link": "https://en.yna.co.kr/view/AEN20260710002800320",
+      "source": "Yonhap News Agency",
+      "summary": "RLWRLD가 숙련 노동 데이터와 기억 모듈로 물리 AI를 훈련하는 전략을 설명한다. 인구감소와 현장 숙련도 문제를 기술로 풀려는 시도가 핵심이다.",
+      "takeaway": "한국의 강점은 로봇 하드웨어보다 고품질 작업 데이터다.",
+      "category": "창업가 인터뷰",
+      "content_type": "기사",
+      "published": "2026-07-10T00:00:00+09:00",
+      "briefingDate": "2026년 7월 29일 수요일",
+      "fallback_a": "#5B3DB4",
+      "fallback_b": "#A06FE8",
+      "image": "https://img2.yna.co.kr/etc/inner/EN/2026/07/10/AEN20260710002800320_02_i_P4.jpg"
+    },
+    {
+      "title": "[AI Revolution](205) \"Shaking Up Daechi-dong in the Second Half\"… Masspresso to Launch AI Agent for Teachers",
+      "link": "https://view.asiae.co.kr/en/article/2026070510404671177",
+      "source": "The Asia Business Daily",
+      "summary": "콴다가 교사용 AI 에이전트로 제품 중심축을 학생에서 교사로 옮긴 배경을 다룬다. 교육 품질 표준화와 수익화 전환의 맥락이 선명하다.",
+      "takeaway": "기존 고객이 아니라 ‘결정권자’와 ‘생산자’를 다시 보게 한다.",
+      "category": "제품·성장 인사이트",
+      "content_type": "인터뷰",
+      "published": "2026-07-05T10:40:00+09:00",
+      "briefingDate": "2026년 7월 29일 수요일",
+      "fallback_a": "#087C67",
+      "fallback_b": "#46C7A5",
+      "image": "https://cphoto.asiae.co.kr/listimglink/1/2026062415543022189_1782284070.jpg"
+    },
+    {
+      "title": "The Next AI Moat Isn’t a Better Model",
+      "link": "https://www.a16z.news/p/the-next-ai-moat-isnt-a-better-model",
+      "source": "a16z",
+      "summary": "물리 AI에서 경쟁 우위는 모델 크기보다 학습 속도와 데이터 축적에 있다는 관점을 제시한다. 모델 성능보다 현장 학습 구조가 모트가 된다는 주장이다.",
+      "takeaway": "모델 경쟁보다 데이터-학습 루프 설계가 핵심이다.",
+      "category": "기술·시장 트렌드",
+      "content_type": "기사",
+      "published": "2026-07-28T23:02:56+09:00",
+      "briefingDate": "2026년 7월 29일 수요일",
+      "fallback_a": "#6A35C9",
+      "fallback_b": "#B37AF4",
+      "image": "https://substackcdn.com/image/fetch/$s_!ymPk!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F0186a62b-c9f4-463a-9738-18f3271abb32_2844x1600.png"
+    }
+  ]
+}
