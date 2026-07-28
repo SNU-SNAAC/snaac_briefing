@@ -3,12 +3,11 @@ name: SNAAC 모닝 브리핑
 on:
   schedule:
     # UTC 23:30 = 한국시간(KST) 오전 08:30
-    # → 09:00에 오픈채팅봇 반복알림이 나가기 전에 페이지를 갱신해 둡니다.
     - cron: "30 23 * * *"
-  workflow_dispatch: {} # 수동 실행 버튼 (테스트용)
+  workflow_dispatch: {}
 
 permissions:
-  contents: write # docs/ 커밋을 위해 필요
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -26,7 +25,10 @@ jobs:
       - name: 브리핑 생성
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # 아래 둘은 선택사항 (설정 시 팀장 카톡으로 배포 확인 알림 발송)
+          # 로그인 기능용 공개 설정입니다. service_role/secret key는 절대 넣지 마세요.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          # 아래 둘은 선택사항입니다.
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: python main.py
@@ -43,7 +45,6 @@ jobs:
             git push
           fi
 
-      # (선택) 카카오가 새 리프레시 토큰을 발급하면 GitHub Secret 자동 갱신
       - name: 리프레시 토큰 자동 갱신
         if: hashFiles('new_refresh_token.txt') != ''
         env:
