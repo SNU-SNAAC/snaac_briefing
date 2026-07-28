@@ -1,0 +1,62 @@
+{
+  "date": "2026-07-28",
+  "date_label": "2026년 7월 28일 화요일",
+  "generated_at": "2026-07-28T15:46:40.572792+09:00",
+  "picks": [
+    {
+      "title": "[脫오라클 전략]서비스 안 멈추고 DB 옮긴다…엑스로그의 CDC 승부수",
+      "link": "https://www.bloter.net/news/articleView.html?idxno=669107",
+      "source": "블로터",
+      "summary": "엑스로그가 CDC 기반 무중단 DB 이관·실시간 복제로 오라클 전환 시장을 공략합니다. 단순 대체가 아니라 운영 중 마이그레이션과 파트너 확장이 핵심이라는 점이 맥락입니다.",
+      "takeaway": "DB 교체는 기술보다 ‘멈추지 않는 전환’이 승부처입니다.",
+      "category": "제품·성장 인사이트",
+      "content_type": "기사",
+      "published": "2026-07-28T19:04:00+09:00",
+      "briefingDate": "2026년 7월 28일 화요일"
+    },
+    {
+      "title": "“통합돌봄으로 돌봄시장이 성장 궤도에 들어섰습니다”.. 김견원 케어네이션 대표 인터뷰",
+      "link": "https://outstanding.kr/carenatiom20260724/",
+      "source": "아웃스탠딩",
+      "summary": "케어네이션이 선결제·하루 정산 구조로 간병 시장의 결제 관행을 바꾼 과정을 다룹니다. 통합돌봄 제도와 맞물려 왜 이 시장이 커지는지 창업자 관점에서 설명합니다.",
+      "takeaway": "돌봄은 수요보다 정산·운영 설계가 성장을 좌우합니다.",
+      "category": "창업가 인터뷰",
+      "content_type": "인터뷰",
+      "published": "2026-07-24T18:00:13+09:00",
+      "briefingDate": "2026년 7월 28일 화요일"
+    },
+    {
+      "title": "오지큐(OGQ) 연대보증 사태, 판결문과 당사자들의 입장을 확인해봤습니다",
+      "link": "https://outstanding.kr/ogqshin20260727/",
+      "source": "아웃스탠딩",
+      "summary": "연대보증과 창업 책임의 경계를 판결문·당사자 입장으로 짚습니다. 스타트업 자금조달에서 거버넌스와 개인 책임 리스크가 여전히 크다는 점을 보여줍니다.",
+      "takeaway": "창업자는 성장만큼 ‘보증·책임 구조’도 설계해야 합니다.",
+      "category": "정책·기회",
+      "content_type": "기사",
+      "published": "2026-07-27T10:22:45+09:00",
+      "briefingDate": "2026년 7월 28일 화요일"
+    },
+    {
+      "title": "사업계획서 접수 하루 만에 투자 검토 결과 나온다",
+      "link": "https://platum.kr/archives/291460?utm_source=rss&utm_medium=rss&utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4",
+      "source": "플래텀",
+      "summary": "더벤처스가 AI를 활용해 투자 검토 시간을 24시간으로 단축했습니다. 심사의 속도보다 ‘초기 걸러내기’가 빨라질수록 VC의 운영 방식이 어떻게 바뀌는지 보여줍니다.",
+      "takeaway": "AI는 투자 판단을 대체하기보다 심사 공정을 재설계합니다.",
+      "category": "VC·창업가 관점",
+      "content_type": "기사",
+      "published": "2026-07-27T14:14:51+09:00",
+      "briefingDate": "2026년 7월 28일 화요일"
+    },
+    {
+      "title": "Lighthouse or Landgrab? How to Pick Your AI Sales Strategy",
+      "link": "https://www.a16z.news/p/lighthouse-or-landgrab-how-to-pick",
+      "source": "a16z",
+      "summary": "AI 세일즈에서 ‘미래를 증명하는 제품’과 ‘당장 돈을 버는 제품’ 중 무엇을 택할지 다룹니다. 국내 AI 스타트업도 고객 증명과 매출 확장 사이 선택에 바로 적용할 만한 글입니다.",
+      "takeaway": "AI B2B는 기능보다 판매 논리가 먼저입니다.",
+      "category": "기술·시장 트렌드",
+      "content_type": "기사",
+      "published": "2026-07-27T23:01:57+09:00",
+      "briefingDate": "2026년 7월 28일 화요일"
+    }
+  ]
+}

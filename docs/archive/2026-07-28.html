@@ -2,129 +2,922 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f2">
 <title>SNAAC 모닝 브리핑 · 2026년 7월 28일 화요일</title>
-<meta property="og:title" content="SNAAC 모닝 브리핑">
-<meta property="og:description" content="매일 아침 9시, 스타트업 생태계 주요 소식 5가지">
-<meta name="description" content="SNAAC이 고른 오늘의 스타트업 뉴스 5가지">
+<meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트, 인터뷰와 인사이트 5가지">
+<meta property="og:title" content="SNAAC 모닝 브리핑 · 7/28">
+<meta property="og:description" content="스타트업 생태계 업데이트부터 창업가·VC 관점과 실무 인사이트까지">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff" rel="preload" as="font" type="font/woff" crossorigin>
 <style>
-@font-face{font-family:'GmarketSans';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');font-weight:700;font-display:swap}
-:root{
-  --sky:#F2F5FA; --ink:#14213D; --sub:#5A6880;
-  --amber:#F59F00; --line:#DDE4EF; --card:#FFFFFF;
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{background:var(--sky);color:var(--ink);font-family:Pretendard,-apple-system,sans-serif;line-height:1.55}
-.wrap{max-width:560px;margin:0 auto;padding:0 18px 60px}
 
-/* ── 마스트헤드: 날짜가 주인공 ── */
-header{padding:34px 0 10px;border-bottom:2px solid var(--ink);position:relative}
-.club{font-family:GmarketSans,Pretendard,sans-serif;font-size:13px;letter-spacing:.22em;color:var(--sub)}
-.date-big{font-family:GmarketSans,Pretendard,sans-serif;font-size:clamp(56px,17vw,84px);line-height:1;margin:6px 0 2px;letter-spacing:-.02em}
-.date-big em{font-style:normal;color:var(--amber)}
-.date-sub{font-size:14px;color:var(--sub);padding-bottom:16px}
-.stamp{position:absolute;right:0;top:38px;width:74px;height:74px;border:2px solid var(--amber);border-radius:50%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--amber);
-  font-family:GmarketSans,sans-serif;font-size:11px;letter-spacing:.06em;transform:rotate(8deg);background:transparent}
-.stamp b{font-size:16px}
-.intro{font-size:14px;color:var(--sub);padding:14px 0 22px}
+:root {
+  --page: #f2f2f2;
+  --surface: #ffffff;
+  --surface-soft: #e9e9e9;
+  --ink: #171717;
+  --ink-2: #3f3f3f;
+  --muted: #717171;
+  --line: #d5d5d5;
+  --line-strong: #b9b9b9;
+  --shadow: 0 10px 30px rgba(20, 20, 18, .055);
+  --radius: 18px;
+}
 
-/* ── 기사 카드 ── */
-.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;
-  margin-bottom:16px;text-decoration:none;color:inherit;transition:transform .12s ease,box-shadow .12s ease}
-.card:active{transform:scale(.985)}
-.thumb{aspect-ratio:16/8;background:#E8EDF5;overflow:hidden}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb.noimg{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 55%,#fff))}
-.thumb.noimg::after{content:attr(data-initial);font-family:GmarketSans,sans-serif;font-size:44px;color:rgba(255,255,255,.9)}
-.body{padding:16px 18px 18px}
-.meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.tag{font-size:12px;font-weight:700;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,#fff);
-  background:color-mix(in srgb,var(--c) 8%,#fff);padding:3px 9px;border-radius:99px}
-.idx{font-family:GmarketSans,sans-serif;font-size:12px;color:var(--sub)}
-.card h2{font-size:17.5px;font-weight:700;line-height:1.4;letter-spacing:-.01em;margin-bottom:7px;word-break:keep-all}
-.card p{font-size:14px;color:var(--sub);word-break:keep-all}
-.go{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:700;color:var(--amber)}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+body.drawer-open { overflow: hidden; }
+a { color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { font: inherit; }
+[hidden] { display: none !important; }
 
-/* ── 아카이브 & 푸터 ── */
-.archive{margin-top:36px;padding-top:22px;border-top:1px solid var(--line)}
-.archive h3{font-size:13px;color:var(--sub);font-weight:600;margin-bottom:10px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips a{font-size:13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:#fff;
-  padding:5px 12px;border-radius:99px}
-footer{margin-top:40px;font-size:12px;color:var(--sub);text-align:center;line-height:1.8}
-@media (prefers-reduced-motion:reduce){.card{transition:none}}
+.wrap {
+  width: min(100%, 600px);
+  margin: 0 auto;
+  padding: 0 18px calc(72px + env(safe-area-inset-bottom));
+}
+
+.masthead {
+  padding: 18px 0 20px;
+  border-bottom: 1px solid var(--ink);
+}
+.topline {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  white-space: nowrap;
+}
+.brand-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.top-actions { display: flex; align-items: center; gap: 7px; }
+.utility-button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.utility-button:active { transform: scale(.98); }
+.count-badge {
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.date-lockup {
+  position: relative;
+  padding: 28px 0 6px;
+  min-height: 150px;
+}
+.kicker {
+  margin: 0 0 9px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.date-big {
+  margin: 0;
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: clamp(58px, 18vw, 88px);
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+.date-sub {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.stamp {
+  position: absolute;
+  top: 27px;
+  right: 2px;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-content: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--ink-2);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 9px;
+  line-height: 1.25;
+  letter-spacing: .08em;
+  text-align: center;
+  transform: rotate(6deg);
+}
+.stamp strong { display: block; font-size: 15px; letter-spacing: 0; }
+
+.intro {
+  padding: 18px 0 8px;
+}
+.intro p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.editorial-rule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+.editorial-rule span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.cards { padding-top: 14px; }
+.card {
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 8.8;
+  overflow: hidden;
+  background: #dedede;
+  text-decoration: none;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(.92) brightness(.98);
+  transform: scale(1.002);
+}
+.thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, .12), transparent 42%);
+  pointer-events: none;
+}
+.thumb.noimg {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.52), transparent 55%),
+    repeating-linear-gradient(135deg, #d6d6d6 0, #d6d6d6 12px, #e3e3e3 12px, #e3e3e3 24px);
+}
+.thumb.noimg::before {
+  content: attr(data-initial);
+  color: rgba(23, 23, 22, .72);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 44px;
+  z-index: 1;
+}
+.media-label {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  min-height: 27px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 999px;
+  background: rgba(20,20,18,.72);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  backdrop-filter: blur(6px);
+}
+.card-body { padding: 17px 17px 18px; }
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.meta-left { min-width: 0; display: flex; align-items: center; gap: 8px; }
+.category {
+  max-width: 72vw;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.source {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-index {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 11px;
+}
+.title-link { text-decoration: none; }
+.card h2 {
+  margin: 0;
+  font-size: clamp(18px, 4.8vw, 20px);
+  line-height: 1.42;
+  letter-spacing: -.025em;
+}
+.summary {
+  margin: 10px 0 0;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.68;
+}
+.takeaway {
+  margin-top: 15px;
+  padding: 13px 14px;
+  border-left: 3px solid var(--ink);
+  background: var(--surface-soft);
+}
+.takeaway-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .11em;
+}
+.takeaway p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.read-link {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.read-link::after { content: '↗'; font-size: 15px; }
+.save-button {
+  min-width: 84px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.save-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.save-button.is-saved { background: var(--ink); border-color: var(--ink); color: #fff; }
+.save-button.is-saved svg { fill: currentColor; }
+.save-button:active { transform: scale(.97); }
+
+.archive-section {
+  margin-top: 42px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-strong);
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.section-head h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+.section-head a {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.archive-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.archive-row {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 11px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+.archive-row:last-child { border-bottom: 0; }
+.archive-date { font-size: 14px; font-weight: 800; }
+.archive-count { color: var(--muted); font-size: 12px; }
+.archive-arrow { color: var(--muted); font-size: 15px; }
+.empty-archive {
+  padding: 22px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.archive-hero { padding: 32px 0 18px; border-bottom: 1px solid var(--ink); }
+.archive-hero h1 {
+  margin: 8px 0 6px;
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: clamp(35px, 10vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -.045em;
+}
+.archive-hero p { margin: 0; color: var(--muted); font-size: 14px; }
+.archive-page-list { margin-top: 22px; }
+
+footer {
+  margin-top: 44px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 15, 14, .48);
+  cursor: pointer;
+}
+.drawer-panel {
+  position: relative;
+  width: min(100%, 600px);
+  max-height: min(78vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -18px 50px rgba(0,0,0,.16);
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: drawer-up .18s ease-out both;
+}
+@keyframes drawer-up { from { transform: translateY(18px); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
+.drawer-handle { width: 42px; height: 4px; margin: 9px auto 2px; border-radius: 999px; background: var(--line-strong); }
+.drawer-head {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 17px;
+  border-bottom: 1px solid var(--line);
+}
+.drawer-head h2 { margin: 0; font-size: 17px; }
+.close-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font-size: 20px;
+  cursor: pointer;
+}
+.saved-list { overflow-y: auto; overscroll-behavior: contain; padding: 8px 16px 18px; }
+.saved-empty { padding: 44px 18px; color: var(--muted); font-size: 14px; text-align: center; }
+.saved-item { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.saved-item:last-child { border-bottom: 0; }
+.saved-meta { margin-bottom: 4px; color: var(--muted); font-size: 11.5px; font-weight: 700; }
+.saved-title { display: block; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 800; line-height: 1.45; }
+.saved-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+.remove-saved {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (hover: hover) {
+  .card { transition: transform .16s ease, box-shadow .16s ease; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(20,20,18,.085); }
+  .thumb img { transition: filter .2s ease, transform .25s ease; }
+  .card:hover .thumb img { filter: grayscale(82%) contrast(.96); transform: scale(1.018); }
+  .utility-button:hover, .save-button:hover, .close-button:hover { border-color: var(--ink); }
+}
+
+@media (max-width: 390px) {
+  .wrap { padding-left: 14px; padding-right: 14px; }
+  .utility-button { padding: 0 10px; }
+  .utility-label-optional { display: none; }
+  .stamp { width: 68px; height: 68px; top: 31px; }
+  .stamp strong { font-size: 14px; }
+  .card-body { padding-left: 15px; padding-right: 15px; }
+  .source { max-width: 100px; }
+  .archive-count { display: none; }
+  .archive-row { grid-template-columns: 1fr auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="club">SNAAC MORNING BRIEFING</div>
-    <div class="date-big">7.28<em>.</em></div>
-    <div class="date-sub">2026년 7월 28일 화요일</div>
-    <div class="stamp">DAILY<b>AM 9</b>DROP</div>
+  <header class="masthead">
+    <div class="topline">
+      <a class="brand" href="../"><span class="brand-mark"></span>오늘 브리핑</a>
+      <div class="top-actions">
+        <a class="utility-button" href="./" aria-label="지난 브리핑 보기"><span class="utility-label-optional">지난 회차</span><span aria-hidden="true">↺</span></a>
+        <button class="utility-button" type="button" data-open-saved>저장함 <span class="count-badge" data-saved-count>0</span></button>
+      </div>
+    </div>
+    <div class="date-lockup">
+      <p class="kicker">Daily startup journal</p>
+      <h1 class="date-big">7.28.</h1>
+      <div class="date-sub">2026년 7월 28일 화요일</div>
+      <div class="stamp">DAILY<strong>AM 9</strong>DROP</div>
+    </div>
   </header>
-  <p class="intro">어제 스타트업 생태계에서 SNAAC이 고른 소식 5가지. 카드를 누르면 원문으로 이동해요.</p>
+
+  <section class="intro">
+    <p>단순 투자 단신보다, 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 관점을 골랐어요. 각 카드에는 핵심 맥락과 읽어볼 이유를 함께 담았습니다.</p>
+    <div class="editorial-rule" aria-label="큐레이션 범위">
+      <span>생태계 업데이트</span><span>창업가·VC 관점</span><span>제품·성장</span><span>인터뷰·영상</span>
+    </div>
+  </section>
+
+  <main class="cards">
+<article class="card">
+  <a class="thumb" href="https://www.bloter.net/news/articleView.html?idxno=669107" target="_blank" rel="noopener noreferrer" data-initial="블" aria-label="[脫오라클 전략]서비스 안 멈추고 DB 옮긴다…엑스로그의 CDC 승부수 원문 열기">
+    <img src="https://cdn.bloter.net/news/thumbnail/202607/669107_282167_3226_v150.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">제품·성장 인사이트</span>
+        <span class="source">블로터</span>
+      </div>
+      <span class="card-index">01/05</span>
+    </div>
+    <a class="title-link" href="https://www.bloter.net/news/articleView.html?idxno=669107" target="_blank" rel="noopener noreferrer"><h2>[脫오라클 전략]서비스 안 멈추고 DB 옮긴다…엑스로그의 CDC 승부수</h2></a>
+    <p class="summary">엑스로그가 CDC 기반 무중단 DB 이관·실시간 복제로 오라클 전환 시장을 공략합니다. 단순 대체가 아니라 운영 중 마이그레이션과 파트너 확장이 핵심이라는 점이 맥락입니다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>DB 교체는 기술보다 ‘멈추지 않는 전환’이 승부처입니다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://www.bloter.net/news/articleView.html?idxno=669107" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://www.bloter.net/news/articleView.html?idxno=669107" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://outstanding.kr/carenatiom20260724/" target="_blank" rel="noopener noreferrer" data-initial="아" aria-label="“통합돌봄으로 돌봄시장이 성장 궤도에 들어섰습니다”.. 김견원 케어네이션 대표 인터뷰 원문 열기">
+    <img src="https://cdn.outstanding.kr/wp-content/uploads/2027/07/ssum-1.png" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">인터뷰</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">창업가 인터뷰</span>
+        <span class="source">아웃스탠딩</span>
+      </div>
+      <span class="card-index">02/05</span>
+    </div>
+    <a class="title-link" href="https://outstanding.kr/carenatiom20260724/" target="_blank" rel="noopener noreferrer"><h2>“통합돌봄으로 돌봄시장이 성장 궤도에 들어섰습니다”.. 김견원 케어네이션 대표 인터뷰</h2></a>
+    <p class="summary">케어네이션이 선결제·하루 정산 구조로 간병 시장의 결제 관행을 바꾼 과정을 다룹니다. 통합돌봄 제도와 맞물려 왜 이 시장이 커지는지 창업자 관점에서 설명합니다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>돌봄은 수요보다 정산·운영 설계가 성장을 좌우합니다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://outstanding.kr/carenatiom20260724/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://outstanding.kr/carenatiom20260724/" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://outstanding.kr/ogqshin20260727/" target="_blank" rel="noopener noreferrer" data-initial="아" aria-label="오지큐(OGQ) 연대보증 사태, 판결문과 당사자들의 입장을 확인해봤습니다 원문 열기">
+    <img src="https://cdn.outstanding.kr/wp-content/uploads/2026/07/22.png" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">정책·기회</span>
+        <span class="source">아웃스탠딩</span>
+      </div>
+      <span class="card-index">03/05</span>
+    </div>
+    <a class="title-link" href="https://outstanding.kr/ogqshin20260727/" target="_blank" rel="noopener noreferrer"><h2>오지큐(OGQ) 연대보증 사태, 판결문과 당사자들의 입장을 확인해봤습니다</h2></a>
+    <p class="summary">연대보증과 창업 책임의 경계를 판결문·당사자 입장으로 짚습니다. 스타트업 자금조달에서 거버넌스와 개인 책임 리스크가 여전히 크다는 점을 보여줍니다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>창업자는 성장만큼 ‘보증·책임 구조’도 설계해야 합니다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://outstanding.kr/ogqshin20260727/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://outstanding.kr/ogqshin20260727/" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" target="_blank" rel="noopener noreferrer" data-initial="플" aria-label="사업계획서 접수 하루 만에 투자 검토 결과 나온다 원문 열기">
+    <img src="https://cdn.platum.kr/wp-content/uploads/2026/07/theV.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">VC·창업가 관점</span>
+        <span class="source">플래텀</span>
+      </div>
+      <span class="card-index">04/05</span>
+    </div>
+    <a class="title-link" href="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" target="_blank" rel="noopener noreferrer"><h2>사업계획서 접수 하루 만에 투자 검토 결과 나온다</h2></a>
+    <p class="summary">더벤처스가 AI를 활용해 투자 검토 시간을 24시간으로 단축했습니다. 심사의 속도보다 ‘초기 걸러내기’가 빨라질수록 VC의 운영 방식이 어떻게 바뀌는지 보여줍니다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>AI는 투자 판단을 대체하기보다 심사 공정을 재설계합니다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://www.a16z.news/p/lighthouse-or-landgrab-how-to-pick" target="_blank" rel="noopener noreferrer" data-initial="a" aria-label="Lighthouse or Landgrab? How to Pick Your AI Sales Strategy 원문 열기">
+    <img src="https://substackcdn.com/image/fetch/$s_!TSIW!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcfe489d5-fa10-41b6-a980-a437e669b773_2844x1600.png" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <div class="meta-left">
+        <span class="category">기술·시장 트렌드</span>
+        <span class="source">a16z</span>
+      </div>
+      <span class="card-index">05/05</span>
+    </div>
+    <a class="title-link" href="https://www.a16z.news/p/lighthouse-or-landgrab-how-to-pick" target="_blank" rel="noopener noreferrer"><h2>Lighthouse or Landgrab? How to Pick Your AI Sales Strategy</h2></a>
+    <p class="summary">AI 세일즈에서 ‘미래를 증명하는 제품’과 ‘당장 돈을 버는 제품’ 중 무엇을 택할지 다룹니다. 국내 AI 스타트업도 고객 증명과 매출 확장 사이 선택에 바로 적용할 만한 글입니다.</p>
+    <div class="takeaway">
+      <span class="takeaway-label">WHY IT MATTERS</span>
+      <p>AI B2B는 기능보다 판매 논리가 먼저입니다.</p>
+    </div>
+    <div class="card-actions">
+      <a class="read-link" href="https://www.a16z.news/p/lighthouse-or-landgrab-how-to-pick" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://www.a16z.news/p/lighthouse-or-landgrab-how-to-pick" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
+      </button>
+    </div>
+  </div>
+</article></main>
   
-    <a class="card" href="https://www.venturesquare.net/1101653/" target="_blank" rel="noopener">
-      <div class="thumb"><img src="https://www.venturesquare.net/wp-content/uploads/2026/07/1785149655658.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.parentElement.style.setProperty('--c','#0E7A5F');this.parentElement.dataset.initial='벤';this.remove()"></div>
-      <div class="body">
-        <div class="meta"><span class="tag" style="--c:#0E7A5F">벤처스퀘어</span><span class="idx">1/5</span></div>
-        <h2>AI 에이전트 운영체제 노리는 알페아… 500만 달러 투자 유치</h2>
-        <p>AI 에이전트용 분산 클라우드 구축에 500만 달러를 유치했다.
-개발자 네트워크와 글로벌 노드 생태계 확장에 자금을 투입한다.</p>
-        <span class="go">원문 읽기 →</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.venturesquare.net/1101656/" target="_blank" rel="noopener">
-      <div class="thumb"><img src="https://www.venturesquare.net/wp-content/uploads/2026/07/8percent.png" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.parentElement.style.setProperty('--c','#0E7A5F');this.parentElement.dataset.initial='벤';this.remove()"></div>
-      <div class="body">
-        <div class="meta"><span class="tag" style="--c:#0E7A5F">벤처스퀘어</span><span class="idx">2/5</span></div>
-        <h2>720만 건이 만든 새 신용평가…에잇퍼센트, AI 모델로 금융 사각지대 겨냥</h2>
-        <p>720만 건 심사 데이터를 바탕으로 신용평가모형을 고도화했다.
-중저신용자 변별력은 높이고 심사 변수는 대폭 줄였다.</p>
-        <span class="go">원문 읽기 →</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.venturesquare.net/1101685/" target="_blank" rel="noopener">
-      <div class="thumb"><img src="https://www.venturesquare.net/wp-content/uploads/2026/07/grep-2-789x237.png" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.parentElement.style.setProperty('--c','#0E7A5F');this.parentElement.dataset.initial='벤';this.remove()"></div>
-      <div class="body">
-        <div class="meta"><span class="tag" style="--c:#0E7A5F">벤처스퀘어</span><span class="idx">3/5</span></div>
-        <h2>AI 면접부터 시험 감독까지…그렙, 국가 혁신기업 명단에 이름 올렸다</h2>
-        <p>그렙이 정부 혁신기업에 선정돼 정책금융 지원을 받는다.
-AI 평가·원격감독 기술이 채용과 시험 시장에서 인정받았다.</p>
-        <span class="go">원문 읽기 →</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.venturesquare.net/1101677/" target="_blank" rel="noopener">
-      <div class="thumb"><img src="https://www.venturesquare.net/wp-content/uploads/2026/07/0723.png" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.parentElement.style.setProperty('--c','#0E7A5F');this.parentElement.dataset.initial='벤';this.remove()"></div>
-      <div class="body">
-        <div class="meta"><span class="tag" style="--c:#0E7A5F">벤처스퀘어</span><span class="idx">4/5</span></div>
-        <h2>고객 데이터가 바로 마케팅으로…스티비, 아임웹 실시간 연동</h2>
-        <p>아임웹 회원 정보가 스티비와 실시간 연동된다.
-이메일 마케팅과 CRM 운영이 더 자동화돼 자사몰 활용도가 높아진다.</p>
-        <span class="go">원문 읽기 →</span>
-      </div>
-    </a>
-    <a class="card" href="https://www.bloter.net/news/articleView.html?idxno=669103" target="_blank" rel="noopener">
-      <div class="thumb"><img src="https://cdn.bloter.net/news/thumbnail/202607/669103_282164_1926_v150.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('noimg');this.parentElement.style.setProperty('--c','#8F2D46');this.parentElement.dataset.initial='블';this.remove()"></div>
-      <div class="body">
-        <div class="meta"><span class="tag" style="--c:#8F2D46">블로터</span><span class="idx">5/5</span></div>
-        <h2>과기정통부, AMD와 개방형 &#x27;AI 인프라&#x27; 구축…엔비디아 독점 막는다</h2>
-        <p>정부가 AMD와 손잡고 AI 인프라 공급망 다변화에 나선다.
-엔비디아 의존도를 낮추고 국산 NPU까지 묶는 개방형 생태계를 추진한다.</p>
-        <span class="go">원문 읽기 →</span>
-      </div>
-    </a>
-  
+<section class="archive-section" id="archive">
+  <div class="section-head">
+    <h2>지난 브리핑</h2>
+    <a href="./">전체 보기 →</a>
+  </div>
+  <div class="archive-list"><p class="empty-archive">지난 브리핑이 쌓이면 이곳에서 다시 볼 수 있어요.</p></div>
+</section>
+
   <footer>
-    매일 아침 자동으로 업데이트됩니다 · SNAAC Community Team<br>
-    본 페이지는 기사 원문 링크만 제공하며, 모든 기사의 저작권은 각 매체에 있습니다.
+    매일 아침 자동 업데이트 · SNAAC Community Team<br>
+    원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<br>
+    저장한 기사는 현재 기기의 브라우저에만 보관됩니다.
   </footer>
 </div>
+
+<div class="drawer" id="savedDrawer" hidden>
+  <button class="drawer-backdrop" type="button" data-close-saved aria-label="저장함 닫기"></button>
+  <section class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <div class="drawer-head">
+      <h2 id="savedTitle">저장한 기사</h2>
+      <button class="close-button" type="button" data-close-saved aria-label="닫기">×</button>
+    </div>
+    <div class="saved-list" id="savedList"></div>
+  </section>
+</div>
+<p class="sr-only" id="saveStatus" aria-live="polite"></p>
+
+<script id="briefingData" type="application/json">[{"title":"[脫오라클 전략]서비스 안 멈추고 DB 옮긴다…엑스로그의 CDC 승부수","link":"https://www.bloter.net/news/articleView.html?idxno=669107","source":"블로터","summary":"엑스로그가 CDC 기반 무중단 DB 이관·실시간 복제로 오라클 전환 시장을 공략합니다. 단순 대체가 아니라 운영 중 마이그레이션과 파트너 확장이 핵심이라는 점이 맥락입니다.","takeaway":"DB 교체는 기술보다 ‘멈추지 않는 전환’이 승부처입니다.","category":"제품·성장 인사이트","contentType":"기사","briefingDate":"7/28"},{"title":"“통합돌봄으로 돌봄시장이 성장 궤도에 들어섰습니다”.. 김견원 케어네이션 대표 인터뷰","link":"https://outstanding.kr/carenatiom20260724/","source":"아웃스탠딩","summary":"케어네이션이 선결제·하루 정산 구조로 간병 시장의 결제 관행을 바꾼 과정을 다룹니다. 통합돌봄 제도와 맞물려 왜 이 시장이 커지는지 창업자 관점에서 설명합니다.","takeaway":"돌봄은 수요보다 정산·운영 설계가 성장을 좌우합니다.","category":"창업가 인터뷰","contentType":"인터뷰","briefingDate":"7/28"},{"title":"오지큐(OGQ) 연대보증 사태, 판결문과 당사자들의 입장을 확인해봤습니다","link":"https://outstanding.kr/ogqshin20260727/","source":"아웃스탠딩","summary":"연대보증과 창업 책임의 경계를 판결문·당사자 입장으로 짚습니다. 스타트업 자금조달에서 거버넌스와 개인 책임 리스크가 여전히 크다는 점을 보여줍니다.","takeaway":"창업자는 성장만큼 ‘보증·책임 구조’도 설계해야 합니다.","category":"정책·기회","contentType":"기사","briefingDate":"7/28"},{"title":"사업계획서 접수 하루 만에 투자 검토 결과 나온다","link":"https://platum.kr/archives/291460?utm_source=rss\u0026utm_medium=rss\u0026utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4","source":"플래텀","summary":"더벤처스가 AI를 활용해 투자 검토 시간을 24시간으로 단축했습니다. 심사의 속도보다 ‘초기 걸러내기’가 빨라질수록 VC의 운영 방식이 어떻게 바뀌는지 보여줍니다.","takeaway":"AI는 투자 판단을 대체하기보다 심사 공정을 재설계합니다.","category":"VC·창업가 관점","contentType":"기사","briefingDate":"7/28"},{"title":"Lighthouse or Landgrab? How to Pick Your AI Sales Strategy","link":"https://www.a16z.news/p/lighthouse-or-landgrab-how-to-pick","source":"a16z","summary":"AI 세일즈에서 ‘미래를 증명하는 제품’과 ‘당장 돈을 버는 제품’ 중 무엇을 택할지 다룹니다. 국내 AI 스타트업도 고객 증명과 매출 확장 사이 선택에 바로 적용할 만한 글입니다.","takeaway":"AI B2B는 기능보다 판매 논리가 먼저입니다.","category":"기술·시장 트렌드","contentType":"기사","briefingDate":"7/28"}]</script>
+<script>
+(() => {
+  const STORAGE_KEY = 'snaac-saved-articles-v1';
+  const dataElement = document.getElementById('briefingData');
+  const liveRegion = document.getElementById('saveStatus');
+  const drawer = document.getElementById('savedDrawer');
+  const savedList = document.getElementById('savedList');
+  const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
+  const currentByUrl = new Map(currentItems.map(item => [item.link, item]));
+  let storageAvailable = true;
+  let drawerTrigger = null;
+
+  function readSaved() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      storageAvailable = false;
+      return [];
+    }
+  }
+
+  function writeSaved(items) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      storageAvailable = true;
+      return true;
+    } catch (error) {
+      storageAvailable = false;
+      return false;
+    }
+  }
+
+  function announce(message) {
+    if (!liveRegion) return;
+    liveRegion.textContent = '';
+    window.setTimeout(() => { liveRegion.textContent = message; }, 20);
+  }
+
+  function updateButtons() {
+    const savedUrls = new Set(readSaved().map(item => item.link));
+    document.querySelectorAll('.save-button').forEach(button => {
+      const isSaved = savedUrls.has(button.dataset.url);
+      button.classList.toggle('is-saved', isSaved);
+      button.setAttribute('aria-pressed', String(isSaved));
+      const label = button.querySelector('.save-label');
+      if (label) label.textContent = isSaved ? '저장됨' : '저장';
+    });
+    document.querySelectorAll('[data-saved-count]').forEach(node => {
+      node.textContent = String(savedUrls.size);
+    });
+  }
+
+  function toggleSaved(url) {
+    const item = currentByUrl.get(url);
+    if (!item) return;
+
+    const saved = readSaved();
+    const index = saved.findIndex(entry => entry.link === url);
+    let message = '';
+
+    if (index >= 0) {
+      saved.splice(index, 1);
+      message = '저장을 취소했어요.';
+    } else {
+      saved.unshift({ ...item, savedAt: new Date().toISOString() });
+      message = '저장함에 담았어요.';
+    }
+
+    if (!writeSaved(saved)) {
+      announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
+      return;
+    }
+    updateButtons();
+    renderSaved();
+    announce(message);
+  }
+
+  function removeSaved(url) {
+    const saved = readSaved().filter(item => item.link !== url);
+    writeSaved(saved);
+    updateButtons();
+    renderSaved();
+    announce('저장한 기사에서 삭제했어요.');
+  }
+
+  function renderSaved() {
+    if (!savedList) return;
+    const saved = readSaved();
+    savedList.replaceChildren();
+
+    if (!storageAvailable) {
+      const note = document.createElement('p');
+      note.className = 'saved-empty';
+      note.textContent = '현재 브라우저의 저장 공간을 사용할 수 없어요.';
+      savedList.append(note);
+      return;
+    }
+
+    if (!saved.length) {
+      const note = document.createElement('p');
+      note.className = 'saved-empty';
+      note.textContent = '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.';
+      savedList.append(note);
+      return;
+    }
+
+    saved.forEach(item => {
+      const article = document.createElement('article');
+      article.className = 'saved-item';
+
+      const meta = document.createElement('div');
+      meta.className = 'saved-meta';
+      meta.textContent = [item.briefingDate, item.source].filter(Boolean).join(' · ');
+
+      const link = document.createElement('a');
+      link.className = 'saved-title';
+      link.href = item.link;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = item.title || '제목 없음';
+
+      const actions = document.createElement('div');
+      actions.className = 'saved-actions';
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'remove-saved';
+      removeButton.dataset.removeUrl = item.link;
+      removeButton.textContent = '삭제';
+      actions.append(removeButton);
+
+      article.append(meta, link, actions);
+      savedList.append(article);
+    });
+  }
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawerTrigger = document.activeElement;
+    renderSaved();
+    drawer.hidden = false;
+    document.body.classList.add('drawer-open');
+    const closeButton = drawer.querySelector('.close-button');
+    if (closeButton) closeButton.focus();
+  }
+
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.hidden = true;
+    document.body.classList.remove('drawer-open');
+    if (drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
+  }
+
+  document.addEventListener('click', event => {
+    const saveButton = event.target.closest('.save-button');
+    if (saveButton) {
+      toggleSaved(saveButton.dataset.url);
+      return;
+    }
+
+    const openButton = event.target.closest('[data-open-saved]');
+    if (openButton) {
+      openDrawer();
+      return;
+    }
+
+    const closeButton = event.target.closest('[data-close-saved]');
+    if (closeButton) {
+      closeDrawer();
+      return;
+    }
+
+    const removeButton = event.target.closest('[data-remove-url]');
+    if (removeButton) removeSaved(removeButton.dataset.removeUrl);
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && drawer && !drawer.hidden) closeDrawer();
+  });
+
+  window.addEventListener('storage', () => {
+    updateButtons();
+    renderSaved();
+  });
+
+  updateButtons();
+  renderSaved();
+})();
+</script>
 </body>
 </html>
