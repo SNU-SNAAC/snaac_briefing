@@ -6,6 +6,7 @@
 - RSS 후보에 더해 OpenAI Responses API 웹 검색으로 공개 LinkedIn/YouTube/
   인터뷰/칼럼 후보를 보완
 - Structured Outputs로 응답 형식을 고정
+- 유료 구독·멤버십 전용 원문은 도메인/페이지 검사로 제외
 """
 
 from __future__ import annotations
@@ -34,6 +35,70 @@ ENABLE_WEB_DISCOVERY = os.environ.get("ENABLE_WEB_DISCOVERY", "1").lower() not i
 }
 MAX_CANDIDATES = 60
 MAX_PER_SOURCE_IN_FINAL = 2
+
+# 유료 구독을 요구하는 대표 도메인은 후보/웹 검색 단계부터 제외합니다.
+# 유료 잠금 비중이 높은 플랫폼은 도메인 단계에서 막고, 그 밖의 신규 도메인은 페이지 문구를 검사합니다.
+PAYWALL_BLOCKED_DOMAINS = {
+    "outstanding.kr",
+    "publy.co",
+    "longblack.co",
+    "folin.co",
+    "contents.premium.naver.com",
+    "theinformation.com",
+    "wsj.com",
+    "ft.com",
+    "bloomberg.com",
+    "economist.com",
+    "hbr.org",
+    "businessinsider.com",
+    "techinasia.com",
+    "dealstreetasia.com",
+    "pitchbook.com",
+    "fortune.com",
+    "medium.com",
+    "seekingalpha.com",
+}
+
+# 현재 수집 소스이거나 공개 콘텐츠 플랫폼인 도메인은 네트워크 재검사를 생략합니다.
+KNOWN_FREE_DOMAINS = {
+    "platum.kr",
+    "venturesquare.net",
+    "startuprecipe.co.kr",
+    "byline.network",
+    "bloter.net",
+    "zdnet.co.kr",
+    "a16z.com",
+    "a16z.news",
+    "youtube.com",
+    "youtu.be",
+    "eopla.net",
+}
+
+PAYWALL_PATTERNS = [
+    r'"isAccessibleForFree"\s*:\s*false',
+    r"구독자\s*전용",
+    r"유료\s*(회원|구독|콘텐츠)",
+    r"멤버십\s*(전용|회원만)",
+    r"프리미엄\s*콘텐츠",
+    r"전체\s*(기사|내용).{0,30}(구독|결제)",
+    r"남은\s*내용.{0,30}(구독|결제)",
+    r"구독\s*후\s*(이용|열람|확인)",
+    r"subscribe\s+to\s+(continue|read|unlock)",
+    r"subscriber[- ]only",
+    r"members?[-\s]+only",
+    r"this\s+(article|content)\s+is\s+for\s+subscribers",
+    r"unlock\s+(this|the)\s+(article|story)",
+    r"continue\s+reading\s+with\s+a\s+subscription",
+    # 무료 회원가입·로그인을 해야만 본문을 볼 수 있는 경우도 공개 원문으로 보지 않습니다.
+    r"로그인\s*(후|해야).{0,40}(전체|본문|콘텐츠|기사)",
+    r"(전체|본문|콘텐츠|기사).{0,40}로그인\s*(후|해야)",
+    r"계속.{0,25}(로그인|회원가입)",
+    r"sign\s+in\s+to\s+(continue|read|view)",
+    r"log\s+in\s+to\s+(continue|read|view)",
+    r"create\s+an\s+account\s+to\s+(continue|read|view)",
+    r"join\s+linkedin\s+to\s+(see|view|continue)",
+    r"sign\s+up\s+to\s+(continue|read|unlock)",
+]
 
 CATEGORY_VALUES = [
     "생태계 업데이트",
@@ -118,6 +183,8 @@ SNAAC 커뮤니티의 편집장입니다. 목표는 '투자 소식 5개'가 아�
 - 단순 보도자료 재전송, 제품 홍보, 수상/협약/행사 개최 사실만 있는 글은 제외.
 - 링크드인 글은 유명세만 보지 말고, 구체적 주장·경험·데이터가 있을 때만 선택.
 - 영상은 제목만 자극적인 콘텐츠보다 인터뷰·강연·토론처럼 밀도가 높은 것을 선호.
+- 최종 원문은 유료 구독, 멤버십, 결제, 무료 체험 등록 없이 핵심 내용을 읽거나 볼 수 있어야 함.
+- 일부 문단만 공개하고 나머지를 구독으로 잠근 기사, 프리미엄 콘텐츠, 유료 뉴스레터는 제외.
 - 공개 웹 검색 결과는 최근 7일 이내를 우선하되, 실행 가치가 매우 높은 심층 글은
   최근 14일까지 허용.
 
@@ -238,6 +305,10 @@ def _prepare_candidates(articles: list[dict]) -> list[dict]:
 
     for article in ranked:
         source = article.get("source", "기타")
+        link = article.get("link", "")
+        if _is_blocked_paywall_domain(link):
+            print(f"[무료 원문 제외] 구독형 도메인: {link}")
+            continue
         # 한 피드가 후보 전체를 독점하지 않도록 사전 단계에서 최대 12개만 허용합니다.
         if source_counts.get(source, 0) >= 12:
             continue
@@ -251,6 +322,7 @@ def _prepare_candidates(articles: list[dict]) -> list[dict]:
                 "author": article.get("author", "")[:100],
                 "source_group": article.get("source_group", "news"),
                 "content_type": article.get("content_type", "news"),
+                "thumbnail": article.get("thumbnail", ""),
             }
         )
         source_counts[source] = source_counts.get(source, 0) + 1
@@ -305,6 +377,77 @@ def _is_safe_http_url(url: str) -> bool:
         return False
 
 
+def _host_matches(host: str, domains: set[str]) -> bool:
+    host = host.lower().split(":", 1)[0]
+    if host.startswith("www."):
+        host = host[4:]
+    return any(host == domain or host.endswith(f".{domain}") for domain in domains)
+
+
+def _is_blocked_paywall_domain(url: str) -> bool:
+    try:
+        return _host_matches(urlsplit(url).netloc, PAYWALL_BLOCKED_DOMAINS)
+    except Exception:
+        return True
+
+
+def _looks_paywalled(page_html: str) -> bool:
+    sample = page_html[:500_000]
+    return any(re.search(pattern, sample, flags=re.I | re.S) for pattern in PAYWALL_PATTERNS)
+
+
+_FREE_ACCESS_CACHE: dict[str, bool] = {}
+
+
+def _is_free_to_read(url: str) -> bool:
+    """유료 구독 없이 핵심 원문을 볼 수 있는 링크인지 보수적으로 확인합니다."""
+    normalized = normalize_link(url)
+    if normalized in _FREE_ACCESS_CACHE:
+        return _FREE_ACCESS_CACHE[normalized]
+    if not _is_safe_http_url(url) or _is_blocked_paywall_domain(url):
+        _FREE_ACCESS_CACHE[normalized] = False
+        return False
+
+    try:
+        host = urlsplit(url).netloc
+        if _host_matches(host, KNOWN_FREE_DOMAINS):
+            _FREE_ACCESS_CACHE[normalized] = True
+            return True
+
+        response = requests.get(
+            url,
+            timeout=12,
+            allow_redirects=True,
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) "
+                    "AppleWebKit/605.1.15 Version/17.5 Mobile/15E148 Safari/604.1"
+                ),
+                "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
+            },
+        )
+        if _is_blocked_paywall_domain(response.url):
+            _FREE_ACCESS_CACHE[normalized] = False
+            return False
+        if response.status_code in {401, 402, 451}:
+            _FREE_ACCESS_CACHE[normalized] = False
+            return False
+        if response.status_code >= 400:
+            # 무료 여부를 확인할 수 없는 신규 도메인은 보수적으로 제외합니다.
+            _FREE_ACCESS_CACHE[normalized] = False
+            return False
+
+        content_type = response.headers.get("Content-Type", "").lower()
+        result = "html" not in content_type or not _looks_paywalled(response.text)
+        _FREE_ACCESS_CACHE[normalized] = result
+        return result
+    except requests.RequestException as exc:
+        # 신규 도메인은 원문 공개 여부를 직접 확인하지 못하면 최종 5개에서 제외합니다.
+        print(f"[무료 원문 확인 실패 → 제외] {url}: {exc}")
+        _FREE_ACCESS_CACHE[normalized] = False
+        return False
+
+
 def _clean_pick(pick: dict) -> dict:
     return {
         "title": strip_html(str(pick.get("title", "")))[:240],
@@ -315,6 +458,7 @@ def _clean_pick(pick: dict) -> dict:
         "content_type": str(pick.get("content_type", "기사")),
         "summary": strip_html(str(pick.get("summary", "")))[:180],
         "takeaway": strip_html(str(pick.get("takeaway", "")))[:120],
+        "thumbnail": str(pick.get("thumbnail", "")).strip(),
     }
 
 
@@ -403,6 +547,9 @@ def _validate_picks(
         if link_key in excluded_links:
             print(f"[제외] 최근 브리핑에서 이미 소개한 URL: {link}")
             continue
+        if not _is_free_to_read(link):
+            print(f"[무료 원문 제외] 구독·결제 필요 가능성: {link}")
+            continue
 
         original = candidate_map.get(link_key)
         if original:
@@ -410,6 +557,7 @@ def _validate_picks(
             pick["title"] = original["title"]
             pick["source"] = original["source"]
             pick["published"] = original.get("published", "unknown")
+            pick["thumbnail"] = original.get("thumbnail", "")
         elif not web_enabled:
             continue
         elif web_enabled:
@@ -473,6 +621,7 @@ def _fallback_fill(
             ),
             "summary": summary[:160],
             "takeaway": "핵심 맥락과 창업가에게 주는 의미를 원문에서 확인해보세요.",
+            "thumbnail": candidate.get("thumbnail", ""),
         }
 
     # 1차: 아직 없는 카테고리를 우선하며 모든 편집 제한을 지킵니다.
@@ -486,6 +635,8 @@ def _fallback_fill(
         for candidate in candidates:
             link_key = normalize_link(candidate["link"])
             if link_key in seen or link_key in excluded_links:
+                continue
+            if not _is_free_to_read(candidate["link"]):
                 continue
 
             fallback_pick = as_pick(candidate)
@@ -527,6 +678,7 @@ def _request_openai(
 아래 RSS/Atom 후보를 우선 검토하세요. 웹 검색이 활성화되어 있다면 최근 7일의 공개 웹에서
 다음 후보도 보완 탐색하세요: 한국 스타트업 대표·VC 심사역의 공개 LinkedIn 글,
 창업가 인터뷰, 유튜브 인터뷰/강연, 제품·성장·조직·시장에 관한 깊이 있는 아티클.
+단, 유료 구독이나 멤버십 결제 없이 핵심 원문 전체를 확인할 수 있는 공개 콘텐츠만 고르세요.
 
 검색 시 특정 유명인만 반복하지 말고, 실제 내용의 밀도와 커뮤니티 유용성을 평가하세요.
 최종적으로 편집 규칙에 맞는 5개를 고르세요. 후보가 정말 부족한 경우에만 5개 미만을 허용합니다.
@@ -569,12 +721,10 @@ RSS/Atom 후보 JSON:
                             "region": "Seoul",
                         },
                         "filters": {
-                            "blocked_domains": [
-                                "wikipedia.org",
-                                "namu.wiki",
-                                "reddit.com",
-                                "quora.com",
-                            ]
+                            "blocked_domains": sorted(
+                                PAYWALL_BLOCKED_DOMAINS
+                                | {"wikipedia.org", "namu.wiki", "reddit.com", "quora.com"}
+                            )
                         },
                     }
                 ],

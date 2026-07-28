@@ -15,7 +15,7 @@ import calendar
 import html as html_lib
 import re
 from datetime import datetime, timedelta, timezone
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlsplit, urlunsplit
 
 import feedparser
 
@@ -65,14 +65,8 @@ FEEDS = [
         "source_group": "news",
         "lookback_hours": 48,
     },
-    # 국내 심층 기사/인터뷰. 일부 글은 유료일 수 있으므로 최종 선별 단계에서
-    # 제목과 피드 요약만으로도 가치가 분명한 경우에만 선택하도록 지시합니다.
-    {
-        "source": "아웃스탠딩",
-        "url": "https://wp.outstanding.kr/feed",
-        "source_group": "insight",
-        "lookback_hours": 168,
-    },
+    # 유료 구독이 필요한 매체는 후보군에 넣지 않습니다.
+    # 심층 콘텐츠는 무료 공개 웹 검색과 a16z·EO Korea 등 공개 소스로 보완합니다.
     # 해외 VC/창업 실무 인사이트. 하루 5개 중 해외 콘텐츠는 최대 2개만 뽑습니다.
     {
         "source": "a16z",
@@ -118,7 +112,6 @@ PROFESSIONAL_SOURCES = {
     "플래텀",
     "벤처스퀘어",
     "스타트업레시피",
-    "아웃스탠딩",
     "a16z",
     "EO Korea",
 }
@@ -225,6 +218,57 @@ def _entry_summary(entry: dict) -> str:
     return ""
 
 
+def _youtube_video_id(url: str) -> str | None:
+    """YouTube URL에서 영상 ID를 추출합니다."""
+    try:
+        parts = urlsplit(url)
+        host = parts.netloc.lower().split(":")[0]
+        path_parts = [part for part in parts.path.split("/") if part]
+
+        if host in {"youtu.be", "www.youtu.be"} and path_parts:
+            return path_parts[0]
+        if host.endswith("youtube.com"):
+            if parts.path == "/watch":
+                return (parse_qs(parts.query).get("v") or [None])[0]
+            if path_parts and path_parts[0] in {"shorts", "embed", "live"}:
+                return path_parts[1] if len(path_parts) > 1 else None
+    except Exception:
+        return None
+    return None
+
+
+def _entry_thumbnail(entry: dict, link: str) -> str:
+    """Atom/RSS의 media:thumbnail 등을 우선 사용하고 YouTube는 공식 썸네일 URL로 보완합니다."""
+    for key in ("media_thumbnail", "media_content"):
+        values = entry.get(key) or []
+        if isinstance(values, dict):
+            values = [values]
+        if isinstance(values, list):
+            for value in values:
+                if not isinstance(value, dict):
+                    continue
+                url = str(value.get("url", "")).strip()
+                medium = str(value.get("medium", "")).lower()
+                content_type = str(value.get("type", "")).lower()
+                if url.startswith(("http://", "https://")) and (
+                    key == "media_thumbnail"
+                    or medium == "image"
+                    or content_type.startswith("image/")
+                ):
+                    return url
+
+    image = entry.get("image")
+    if isinstance(image, dict):
+        url = str(image.get("href") or image.get("url") or "").strip()
+        if url.startswith(("http://", "https://")):
+            return url
+
+    video_id = _youtube_video_id(link)
+    if video_id and re.fullmatch(r"[A-Za-z0-9_-]{6,20}", video_id):
+        return f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+    return ""
+
+
 def collect_articles(hours: int = 36) -> list[dict]:
     """여러 RSS/Atom 피드에서 뉴스·인터뷰·인사이트·영상을 수집합니다.
 
@@ -272,6 +316,7 @@ def collect_articles(hours: int = 36) -> list[dict]:
             raw_summary = _entry_summary(entry)
             summary = strip_html(raw_summary)[:700]
             author = strip_html(entry.get("author", ""))[:100]
+            thumbnail = _entry_thumbnail(entry, link)
 
             if not title or not link:
                 continue
@@ -300,6 +345,7 @@ def collect_articles(hours: int = 36) -> list[dict]:
                     "author": author,
                     "source_group": source_group,
                     "content_type": content_type,
+                    "thumbnail": thumbnail,
                     "lookback_hours": lookback_hours,
                 }
             )
