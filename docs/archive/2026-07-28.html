@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-snaac-ui="4">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f2f2f2">
 <title>SNAAC 모닝 브리핑 · 2026년 7월 28일 화요일</title>
-<meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트, 인터뷰와 인사이트 5가지">
+<meta name="description" content="SNAAC이 고른 오늘의 무료 스타트업 업데이트, 인터뷰와 인사이트 5가지">
 <meta property="og:title" content="SNAAC 모닝 브리핑 · 7/28">
-<meta property="og:description" content="스타트업 생태계 업데이트부터 창업가·VC 관점과 실무 인사이트까지">
+<meta property="og:description" content="무료로 확인할 수 있는 스타트업 업데이트와 창업가·VC 인사이트">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
@@ -674,18 +674,458 @@ footer {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* ── v4: 로고, 눈에 띄는 저장함, 상세 카드, 로그인 ── */
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0 18px;
+}
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.site-logo {
+  width: clamp(158px, 47vw, 208px);
+  height: auto;
+  display: block;
+}
+.topline {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+}
+.topline .utility-button {
+  width: 100%;
+  min-width: 0;
+  padding: 0 9px;
+  white-space: nowrap;
+}
+.utility-button.saved-vault {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(17,17,17,.14);
+}
+.utility-button.saved-vault .count-badge {
+  background: #fff;
+  color: var(--ink);
+}
+.utility-button.saved-vault svg { width: 15px; height: 15px; fill: currentColor; }
+.note-dialog { z-index: 90; }
+.utility-button.auth-control {
+  overflow: hidden;
+}
+.utility-button.auth-control span[data-auth-label] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.masthead { padding-top: 0; }
+.date-lockup { padding-top: 24px; }
+
+.free-access-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.free-access-note::before {
+  content: '✓';
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.thumb.is-video::before,
+.preview-thumb.is-video::after,
+.saved-thumb.is-video::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(17,17,17,.82);
+  box-shadow: 0 7px 22px rgba(0,0,0,.2);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.thumb.is-video .play-triangle,
+.preview-thumb.is-video .play-triangle,
+.saved-thumb.is-video .play-triangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 13px solid #fff;
+  transform: translate(-36%, -50%);
+  pointer-events: none;
+}
+
+.floating-saved {
+  position: fixed;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 32;
+  min-width: 176px;
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 18px;
+  border: 1px solid #111;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 12px 34px rgba(0,0,0,.24);
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition: opacity .16s ease, transform .16s ease;
+}
+.floating-saved svg { width: 17px; height: 17px; fill: currentColor; }
+.floating-saved .count-badge { background: #fff; color: #111; }
+.floating-saved:active { transform: translateX(-50%) scale(.98); }
+body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(12px); }
+
+.drawer-panel { max-height: min(92dvh, 820px); }
+.drawer-head {
+  min-height: 70px;
+  padding: 0 16px;
+}
+.drawer-title-wrap { min-width: 0; }
+.drawer-head h2 { display: flex; align-items: center; gap: 8px; }
+.drawer-head h2 svg { width: 18px; height: 18px; fill: currentColor; }
+.drawer-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 11.5px; }
+
+.sync-strip {
+  margin: 12px 16px 4px;
+  padding: 12px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.sync-copy { min-width: 0; }
+.sync-title { margin: 0; color: var(--ink); font-size: 12.5px; font-weight: 800; }
+.sync-text { margin: 2px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.sync-action {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.saved-list { padding: 10px 14px 24px; }
+.saved-item {
+  margin-bottom: 11px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+.saved-item:last-child { margin-bottom: 0; border-bottom: 1px solid var(--line); }
+.saved-preview-trigger {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 94px minmax(0, 1fr);
+  gap: 12px;
+  padding: 11px;
+  border: 0;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.saved-thumb {
+  position: relative;
+  min-height: 78px;
+  overflow: hidden;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
+}
+.saved-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.saved-thumb.noimg::before {
+  content: attr(data-initial);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.94);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+.saved-thumb.is-video::after { width: 34px; height: 34px; }
+.saved-thumb.is-video .play-triangle {
+  border-top-width: 6px;
+  border-bottom-width: 6px;
+  border-left-width: 10px;
+}
+.saved-copy { min-width: 0; align-self: center; }
+.saved-meta { margin: 0 0 5px; }
+.saved-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 14.5px;
+  line-height: 1.43;
+}
+.saved-note-preview {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.saved-note-preview strong { color: var(--ink-2); font-size: 10px; letter-spacing: .06em; }
+.saved-open-hint { margin-top: 7px; color: var(--ink-2); font-size: 11px; font-weight: 800; }
+.saved-actions {
+  margin: 0;
+  padding: 9px 11px 10px;
+  border-top: 1px solid var(--line);
+}
+.saved-action-button { background: #fff; }
+.saved-action-button.preview-action { margin-right: auto; color: var(--ink); border-color: var(--line-strong); }
+
+.preview-dialog,
+.auth-dialog {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.preview-dialog { z-index: 80; }
+.auth-dialog { z-index: 100; }
+.preview-backdrop,
+.auth-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15,15,14,.56);
+  cursor: pointer;
+}
+.preview-panel,
+.auth-panel {
+  position: relative;
+  width: min(100%, 600px);
+  max-height: min(92dvh, 820px);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -18px 50px rgba(0,0,0,.2);
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: drawer-up .18s ease-out both;
+}
+.preview-head,
+.auth-head {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(12px);
+}
+.preview-head h2,
+.auth-head h2 { margin: 0; font-size: 17px; }
+.preview-card { margin: 14px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+.preview-thumb {
+  position: relative;
+  aspect-ratio: 16 / 8.8;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
+}
+.preview-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.preview-thumb.noimg::before {
+  content: attr(data-initial);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.94);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 42px;
+}
+.preview-body { padding: 17px; }
+.preview-body h3 { margin: 0; font-size: 20px; line-height: 1.42; letter-spacing: -.025em; }
+.preview-summary { margin: 11px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.65; }
+.preview-note {
+  margin-top: 14px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.preview-note strong { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10.5px; letter-spacing: .09em; }
+.preview-actions {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 9px;
+  margin-top: 15px;
+}
+.preview-read,
+.preview-secondary {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.preview-read { border: 1px solid var(--ink); background: var(--ink); color: #fff; }
+.preview-secondary { border: 1px solid var(--line-strong); background: #fff; color: var(--ink-2); }
+.preview-delete {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-content { padding: 18px 16px calc(22px + env(safe-area-inset-bottom)); }
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.auth-tab {
+  min-height: 40px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.auth-tab.is-active { background: #fff; color: var(--ink); box-shadow: 0 2px 9px rgba(0,0,0,.06); }
+.auth-form { margin-top: 16px; }
+.auth-label { display: block; margin-top: 12px; color: var(--ink-2); font-size: 12px; font-weight: 800; }
+.auth-input {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 6px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 15px;
+  outline: none;
+}
+.auth-input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(23,23,23,.08); }
+.auth-submit {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 17px;
+  border: 1px solid var(--ink);
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.auth-submit:disabled { opacity: .55; cursor: wait; }
+.auth-message { min-height: 20px; margin: 11px 2px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.auth-message.is-error { color: #4a2020; }
+.auth-help { margin: 12px 2px 0; color: var(--muted); font-size: 11.5px; line-height: 1.55; }
+.account-card {
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-soft);
+}
+.account-eyebrow { margin: 0 0 5px; color: var(--muted); font-size: 10.5px; font-weight: 800; letter-spacing: .1em; }
+.account-email { margin: 0; color: var(--ink); font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.account-copy { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.account-logout {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.auth-setup-note { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-soft); }
+.auth-setup-note h3 { margin: 0 0 7px; font-size: 15px; }
+.auth-setup-note p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
+
+@media (max-width: 390px) {
+  .logo-row { padding-top: 11px; padding-bottom: 15px; }
+  .site-logo { width: 164px; }
+  .topline { gap: 5px; }
+  .topline .utility-button { min-height: 39px; padding: 0 6px; font-size: 11.5px; }
+  .saved-preview-trigger { grid-template-columns: 82px minmax(0, 1fr); gap: 10px; }
+  .saved-thumb { min-height: 72px; }
+  .floating-saved { min-width: 164px; min-height: 48px; }
+  .preview-card { margin-left: 10px; margin-right: 10px; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="masthead">
-    <div class="topline">
-      <a class="brand" href="../"><span class="brand-mark"></span>오늘 브리핑</a>
-      <div class="top-actions">
-        <a class="utility-button" href="./" aria-label="지난 브리핑 보기"><span class="utility-label-optional">지난 회차</span><span aria-hidden="true">↺</span></a>
-        <button class="utility-button" type="button" data-open-saved>저장함 <span class="count-badge" data-saved-count>0</span></button>
-      </div>
-    </div>
+    
+<div class="logo-row"><a class="logo-link" href="../" aria-label="SNAAC 오늘 브리핑"><img class="site-logo" src="../assets/snaac-logo.png" alt="SNAAC" width="932" height="232"></a></div>
+<div class="topline">
+  <a class="utility-button" href="../" aria-label="오늘 보기"><span>오늘</span><span aria-hidden="true">←</span></a>
+  <button class="utility-button saved-vault" type="button" data-open-saved><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span>저장함</span><span class="count-badge" data-saved-count>0</span></button>
+  <button class="utility-button auth-control" type="button" data-open-auth aria-label="로그인 또는 내 계정"><span aria-hidden="true">◎</span><span data-auth-label>로그인</span></button>
+</div>
     <div class="date-lockup">
       <p class="kicker">Daily startup journal</p>
       <h1 class="date-big">7.28.</h1>
@@ -697,122 +1137,122 @@ footer {
   <section class="intro">
     <p>단순 투자 단신보다, 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 관점을 골랐어요. 각 카드에는 핵심 맥락과 읽어볼 이유를 함께 담았습니다.</p>
     <div class="editorial-rule" aria-label="큐레이션 범위">
-      <span>생태계 업데이트</span><span>창업가·VC 관점</span><span>제품·성장</span><span>인터뷰·영상</span>
+      <span class="free-access-note">무료 원문만</span><span>생태계 업데이트</span><span>창업가·VC 관점</span><span>제품·성장</span><span>인터뷰·영상</span>
     </div>
   </section>
 
   <main class="cards">
 <article class="card">
-  <a class="thumb" href="https://outstanding.kr/mcdonaldsjapan20260728/" target="_blank" rel="noopener noreferrer" data-initial="아" style="--fallback:#242A79;--fallback-2:#6D78E8" aria-label="가격을 꾸준히 인상해도 고객이 줄지 않는 맥도날드재팬, 왜일까? 원문 열기">
-    <img src="https://cdn.outstanding.kr/wp-content/uploads/2020/07/600-36.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+  <a class="thumb" href="https://byline.network/2026/07/26_1928734-2/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="네이버 100억달러 투자유치, AI 팩토리 확장 속도 낸다 원문 열기">
+    <img src="https://cdn.byline.network/wp-content/uploads/2024/11/naver1784.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
     <span class="media-label">기사</span>
   </a>
   <div class="card-body">
     <div class="card-meta">
       <div class="meta-left">
-        <span class="category">제품·성장 인사이트</span>
-        <span class="source">아웃스탠딩</span>
+        <span class="category">VC·창업가 관점</span>
+        <span class="source">바이라인네트워크</span>
       </div>
       <span class="card-index">01/05</span>
     </div>
-    <a class="title-link" href="https://outstanding.kr/mcdonaldsjapan20260728/" target="_blank" rel="noopener noreferrer"><h2>가격을 꾸준히 인상해도 고객이 줄지 않는 맥도날드재팬, 왜일까?</h2></a>
-    <p class="summary">맥도날드재팬의 가격 인상에도 수요가 유지되는 배경을 일본 햄버거 시장 구조와 함께 설명한다. 단순 가격 전략이 아니라 브랜드·가치 인식·시장 성숙도가 매출을 지키는 맥락을 짚는다.</p>
+    <a class="title-link" href="https://byline.network/2026/07/26_1928734-2/" target="_blank" rel="noopener noreferrer"><h2>네이버 100억달러 투자유치, AI 팩토리 확장 속도 낸다</h2></a>
+    <p class="summary">네이버가 브룩필드·엔비디아와 AI 팩토리 확장용 100억달러 자금 조달에 나섰다. 데이터센터 증설을 넘어 AI 인프라를 자산화하는 전략 변화가 핵심이다.</p>
     <div class="takeaway">
       <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>가격 인상은 ‘손실’이 아니라 포지셔닝일 수 있다.</p>
+      <p>AI 인프라는 ‘모델’보다 ‘전력·부지·자본’ 게임이 됐다.</p>
     </div>
     <div class="card-actions">
-      <a class="read-link" href="https://outstanding.kr/mcdonaldsjapan20260728/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://outstanding.kr/mcdonaldsjapan20260728/" aria-pressed="false">
+      <a class="read-link" href="https://byline.network/2026/07/26_1928734-2/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://byline.network/2026/07/26_1928734-2/" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
       </button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb" href="https://www.bloter.net/news/articleView.html?idxno=669016" target="_blank" rel="noopener noreferrer" data-initial="블" style="--fallback:#9A3557;--fallback-2:#E87895" aria-label="[脫오라클 전략] 유엔넷, 레이크하우스로 비용 90% 아낀다 원문 열기">
-    <img src="https://cdn.bloter.net/news/thumbnail/202607/669016_282030_2618_v150.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+  <a class="thumb" href="https://byline.network/2026/07/28-635/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="오케스트로, AX 인프라 전략 ‘OKESTRO 4.0’ 발표 원문 열기">
+    <img src="https://cdn.byline.network/wp-content/uploads/2026/07/okestro4-ceo.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
     <span class="media-label">기사</span>
   </a>
   <div class="card-body">
     <div class="card-meta">
       <div class="meta-left">
         <span class="category">기술·시장 트렌드</span>
-        <span class="source">블로터</span>
+        <span class="source">바이라인네트워크</span>
       </div>
       <span class="card-index">02/05</span>
     </div>
-    <a class="title-link" href="https://www.bloter.net/news/articleView.html?idxno=669016" target="_blank" rel="noopener noreferrer"><h2>[脫오라클 전략] 유엔넷, 레이크하우스로 비용 90% 아낀다</h2></a>
-    <p class="summary">유엔넷이 오라클 대안으로 레이크하우스를 도입해 비용을 크게 줄이는 과정을 다뤘다. 금융권 고객과 해외 진출 맥락까지 함께 보여줘, 데이터 인프라 전환이 왜 지금 시장 기회가 되는지 설명한다.</p>
+    <a class="title-link" href="https://byline.network/2026/07/28-635/" target="_blank" rel="noopener noreferrer"><h2>오케스트로, AX 인프라 전략 ‘OKESTRO 4.0’ 발표</h2></a>
+    <p class="summary">오케스트로가 컴퓨팅·클라우드·데이터·DevOps를 AI로 재설계하는 ‘OKESTRO 4.0’ 전략을 공개했다. 고객 운영데이터를 제품 기획·검증·지원 전 과정에 연결하는 AX 전환이 포인트다.</p>
     <div class="takeaway">
       <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>DB 대체는 기능 경쟁이 아니라 비용·이식성 게임이다.</p>
+      <p>AI 도입의 승부처는 기능 추가보다 운영 재설계다.</p>
     </div>
     <div class="card-actions">
-      <a class="read-link" href="https://www.bloter.net/news/articleView.html?idxno=669016" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://www.bloter.net/news/articleView.html?idxno=669016" aria-pressed="false">
+      <a class="read-link" href="https://byline.network/2026/07/28-635/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://byline.network/2026/07/28-635/" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
       </button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb noimg" href="https://www.youtube.com/watch?v=NcUmG5kUu-k" target="_blank" rel="noopener noreferrer" data-initial="E" style="--fallback:#111111;--fallback-2:#5A5A5A" aria-label="조달청이 스타트업의 &#x27;첫 번째 고객&#x27;이 되어주는 이유 | 조달청 강성민 차장 원문 열기">
-    
-    <span class="media-label">영상</span>
+  <a class="thumb" href="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" target="_blank" rel="noopener noreferrer" data-initial="플" style="--fallback:#2752B8;--fallback-2:#6D9CFF" aria-label="사업계획서 접수 하루 만에 투자 검토 결과 나온다 원문 열기">
+    <img src="https://cdn.platum.kr/wp-content/uploads/2026/07/theV.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
   </a>
   <div class="card-body">
     <div class="card-meta">
       <div class="meta-left">
-        <span class="category">정책·기회</span>
-        <span class="source">EO Korea</span>
+        <span class="category">VC·창업가 관점</span>
+        <span class="source">플래텀</span>
       </div>
       <span class="card-index">03/05</span>
     </div>
-    <a class="title-link" href="https://www.youtube.com/watch?v=NcUmG5kUu-k" target="_blank" rel="noopener noreferrer"><h2>조달청이 스타트업의 &#x27;첫 번째 고객&#x27;이 되어주는 이유 | 조달청 강성민 차장</h2></a>
-    <p class="summary">공공조달이 스타트업의 초기 매출과 레퍼런스를 만드는 ‘첫 고객’이 될 수 있다는 점을 조달청 실무자 인터뷰로 풀어낸다. 혁신조달 제도와 시장 규모, 스타트업이 접근할 때의 관점을 구체적으로 설명한다.</p>
+    <a class="title-link" href="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" target="_blank" rel="noopener noreferrer"><h2>사업계획서 접수 하루 만에 투자 검토 결과 나온다</h2></a>
+    <p class="summary">더벤처스가 AI로 서류검토·데이터 대조를 자동화해 투자 검토 결과를 24시간 내 전달하는 체계를 시작했다. 심사 속도 경쟁이 VC 운영 방식 자체를 바꾸고 있다.</p>
     <div class="takeaway">
       <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>B2G는 판매 채널이 아니라 초기 신뢰를 만드는 레버리지다.</p>
+      <p>투자심사도 ‘빠르게 보는 능력’이 경쟁력이 됐다.</p>
     </div>
     <div class="card-actions">
-      <a class="read-link" href="https://www.youtube.com/watch?v=NcUmG5kUu-k" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://www.youtube.com/watch?v=NcUmG5kUu-k" aria-pressed="false">
+      <a class="read-link" href="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://platum.kr/archives/291460?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
       </button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb" href="https://byline.network/2026/07/98509284052/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은 원문 열기">
-    <img src="https://cdn.byline.network/wp-content/uploads/2026/07/golerobotics-1.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">인터뷰</span>
+  <a class="thumb" href="https://platum.kr/archives/291453?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ea%25b5%25ad%25eb%2582%25b4-%25ec%25b7%25a8%25ec%2597%2585-%25eb%2585%25b8%25eb%25a6%25ac%25eb%258a%2594-%25ec%2599%25b8%25ea%25b5%25ad%25ec%259d%25b8%25ea%25b3%25bc-%25ed%2595%25b4%25ec%2599%25b8-%eb%82%98%ea%b0%80%eb%8a%94-%ea%b8%b0%ec%97%85-%ed%95%9c%ec%9e%90%eb%a6%ac" target="_blank" rel="noopener noreferrer" data-initial="플" style="--fallback:#2752B8;--fallback-2:#6D9CFF" aria-label="국내 취업 노리는 외국인과 해외 나가는 기업들이 만났다 원문 열기">
+    <img src="https://cdn.platum.kr/wp-content/uploads/2026/07/wanted.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
+    <span class="media-label">기사</span>
   </a>
   <div class="card-body">
     <div class="card-meta">
       <div class="meta-left">
-        <span class="category">창업가 인터뷰</span>
-        <span class="source">바이라인네트워크</span>
+        <span class="category">생태계 업데이트</span>
+        <span class="source">플래텀</span>
       </div>
       <span class="card-index">04/05</span>
     </div>
-    <a class="title-link" href="https://byline.network/2026/07/98509284052/" target="_blank" rel="noopener noreferrer"><h2>[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은</h2></a>
-    <p class="summary">건설 현장의 자재 운반 문제를 로봇으로 줄이려는 고레로보틱스의 접근을 인터뷰로 담았다. 현장 노동·안전·비용 구조를 함께 설명해 로봇 스타트업이 어떤 실제 문제를 풀어야 하는지 보여준다.</p>
+    <a class="title-link" href="https://platum.kr/archives/291453?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ea%25b5%25ad%25eb%2582%25b4-%25ec%25b7%25a8%25ec%2597%2585-%25eb%2585%25b8%25eb%25a6%25ac%25eb%258a%2594-%25ec%2599%25b8%25ea%25b5%25ad%25ec%259d%25b8%25ea%25b3%25bc-%25ed%2595%25b4%25ec%2599%25b8-%eb%82%98%ea%b0%80%eb%8a%94-%ea%b8%b0%ec%97%85-%ed%95%9c%ec%9e%90%eb%a6%ac" target="_blank" rel="noopener noreferrer"><h2>국내 취업 노리는 외국인과 해외 나가는 기업들이 만났다</h2></a>
+    <p class="summary">원티드랩이 바이링구얼 인재 채용 행사를 열어 한국어·영어가 가능한 인재와 해외 진출 기업을 연결했다. 채용이 인력 확보를 넘어 글로벌 확장 전략의 일부가 되고 있다.</p>
     <div class="takeaway">
       <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>로봇은 기술보다 ‘현장 단가’가 성패를 가른다.</p>
+      <p>채용은 이제 ‘인재 모집’이 아니라 ‘시장 진입 전략’이다.</p>
     </div>
     <div class="card-actions">
-      <a class="read-link" href="https://byline.network/2026/07/98509284052/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://byline.network/2026/07/98509284052/" aria-pressed="false">
+      <a class="read-link" href="https://platum.kr/archives/291453?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ea%25b5%25ad%25eb%2582%25b4-%25ec%25b7%25a8%25ec%2597%2585-%25eb%2585%25b8%25eb%25a6%25ac%25eb%258a%2594-%25ec%2599%25b8%25ea%25b5%25ad%25ec%259d%25b8%25ea%25b3%25bc-%25ed%2595%25b4%25ec%2599%25b8-%eb%82%98%ea%b0%80%eb%8a%94-%ea%b8%b0%ec%97%85-%ed%95%9c%ec%9e%90%eb%a6%ac" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://platum.kr/archives/291453?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ea%25b5%25ad%25eb%2582%25b4-%25ec%25b7%25a8%25ec%2597%2585-%25eb%2585%25b8%25eb%25a6%25ac%25eb%258a%2594-%25ec%2599%25b8%25ea%25b5%25ad%25ec%259d%25b8%25ea%25b3%25bc-%25ed%2595%25b4%25ec%2599%25b8-%eb%82%98%ea%b0%80%eb%8a%94-%ea%b8%b0%ec%97%85-%ed%95%9c%ec%9e%90%eb%a6%ac" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
       </button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb noimg" href="https://www.youtube.com/watch?v=DtVILWXGLYA" target="_blank" rel="noopener noreferrer" data-initial="E" style="--fallback:#111111;--fallback-2:#5A5A5A" aria-label="대기업 퇴사 후 1인 창업, 법인 설립까지 | 나는 솔로프리너다, 조쉬 | 이오서재 원문 열기">
-    
+  <a class="thumb is-video" href="https://www.youtube.com/watch?v=epcN1orZZpU" target="_blank" rel="noopener noreferrer" data-initial="E" style="--fallback:#111111;--fallback-2:#5A5A5A" aria-label="스탠퍼드 로봇 공학자가 바라본 로봇의 시대 | Stanford, Catie Cuan 원문 열기">
+    <img src="https://i2.ytimg.com/vi/epcN1orZZpU/hqdefault.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="play-triangle" aria-hidden="true"></span>
     <span class="media-label">영상</span>
   </a>
   <div class="card-body">
@@ -823,15 +1263,15 @@ footer {
       </div>
       <span class="card-index">05/05</span>
     </div>
-    <a class="title-link" href="https://www.youtube.com/watch?v=DtVILWXGLYA" target="_blank" rel="noopener noreferrer"><h2>대기업 퇴사 후 1인 창업, 법인 설립까지 | 나는 솔로프리너다, 조쉬 | 이오서재</h2></a>
-    <p class="summary">대기업 퇴사 후 1인 창업에서 팀 창업으로 확장한 조쉬의 경험을 다룬 대담이다. 솔로프리너의 장점과 한계, 피봇 과정, 채용과 사업모델 전환의 현실이 담겨 있다.</p>
+    <a class="title-link" href="https://www.youtube.com/watch?v=epcN1orZZpU" target="_blank" rel="noopener noreferrer"><h2>스탠퍼드 로봇 공학자가 바라본 로봇의 시대 | Stanford, Catie Cuan</h2></a>
+    <p class="summary">로봇의 미래는 정말 &#x27;더 똑똑한 AI&#x27;일까요? 스탠퍼드대학교 로봇공학자이자 로봇 안무가인 케이티 쿠안은 조금 다른 이야기를 합니다. 지금 휴머노이드 경쟁은 사람의 일을 대신하는 기능과 성능에 집중하고 있습니다. 하지만 앞으로 수십억 대의 로봇이 우리 일상에 들어온다면, 더 중요한 것은</p>
     <div class="takeaway">
       <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>1인 창업의 핵심은 ‘혼자 버티기’보다 전환 타이밍이다.</p>
+      <p>핵심 맥락과 창업가에게 주는 의미를 원문에서 확인해보세요.</p>
     </div>
     <div class="card-actions">
-      <a class="read-link" href="https://www.youtube.com/watch?v=DtVILWXGLYA" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://www.youtube.com/watch?v=DtVILWXGLYA" aria-pressed="false">
+      <a class="read-link" href="https://www.youtube.com/watch?v=epcN1orZZpU" target="_blank" rel="noopener noreferrer">원문 읽기</a>
+      <button class="save-button" type="button" data-url="https://www.youtube.com/watch?v=epcN1orZZpU" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
       </button>
     </div>
@@ -849,17 +1289,31 @@ footer {
   <footer>
     매일 아침 자동 업데이트 · SNAAC Community Team<br>
     원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<br>
-    저장한 기사와 메모는 현재 기기의 브라우저에만 보관됩니다.
+    비로그인 저장은 현재 브라우저에, 로그인 저장은 개인 계정에 동기화됩니다.
   </footer>
 </div>
+
+<button class="floating-saved" type="button" data-open-saved aria-label="저장함 열기">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span>내 저장함</span><span class="count-badge" data-saved-count>0</span>
+</button>
 
 <div class="drawer" id="savedDrawer" hidden>
   <button class="drawer-backdrop" type="button" data-close-saved aria-label="저장함 닫기"></button>
   <section class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle">
     <div class="drawer-handle" aria-hidden="true"></div>
     <div class="drawer-head">
-      <h2 id="savedTitle">저장한 기사</h2>
+      <div class="drawer-title-wrap">
+        <h2 id="savedTitle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg> 내 저장함</h2>
+        <p class="drawer-subtitle" id="savedDrawerSubtitle">좋았던 아티클을 저장하고 메모를 남겨보세요.</p>
+      </div>
       <button class="close-button" type="button" data-close-saved aria-label="닫기">×</button>
+    </div>
+    <div class="sync-strip">
+      <div class="sync-copy">
+        <p class="sync-title" id="syncTitle">이 기기에 저장 중</p>
+        <p class="sync-text" id="syncText">로그인하면 다른 기기에서도 이어볼 수 있어요.</p>
+      </div>
+      <button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button>
     </div>
     <div class="saved-list" id="savedList"></div>
   </section>
@@ -887,44 +1341,207 @@ footer {
   </section>
 </div>
 
+<div class="preview-dialog" id="previewDialog" hidden>
+  <button class="preview-backdrop" type="button" data-close-preview aria-label="저장한 기사 상세 닫기"></button>
+  <section class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="previewDialogTitle">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <div class="preview-head">
+      <h2 id="previewDialogTitle">저장한 아티클</h2>
+      <button class="close-button" type="button" data-close-preview aria-label="닫기">×</button>
+    </div>
+    <article class="preview-card">
+      <div class="preview-thumb noimg" id="previewThumb" data-initial="S">
+        <span class="media-label" id="previewMediaLabel">기사</span>
+      </div>
+      <div class="preview-body">
+        <div class="card-meta">
+          <div class="meta-left">
+            <span class="category" id="previewCategory">생태계 업데이트</span>
+            <span class="source" id="previewSource">SNAAC</span>
+          </div>
+        </div>
+        <h3 id="previewTitle">저장한 기사</h3>
+        <p class="preview-summary" id="previewSummary"></p>
+        <div class="takeaway">
+          <span class="takeaway-label">WHY IT MATTERS</span>
+          <p id="previewTakeaway"></p>
+        </div>
+        <div class="preview-note" id="previewNoteWrap" hidden>
+          <strong>MY NOTE</strong><span id="previewNote"></span>
+        </div>
+        <div class="preview-actions">
+          <a class="preview-read" id="previewReadLink" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a>
+          <button class="preview-secondary" id="previewEditButton" type="button">메모 수정</button>
+        </div>
+        <button class="preview-delete" id="previewDeleteButton" type="button">저장함에서 삭제</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<div class="auth-dialog" id="authDialog" hidden>
+  <button class="auth-backdrop" type="button" data-close-auth aria-label="로그인 창 닫기"></button>
+  <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <div class="auth-head">
+      <h2 id="authTitle">SNAAC 계정</h2>
+      <button class="close-button" type="button" data-close-auth aria-label="닫기">×</button>
+    </div>
+    <div class="auth-content">
+      <div id="authGuestView">
+        <div class="auth-tabs" role="tablist" aria-label="로그인 방식">
+          <button class="auth-tab is-active" type="button" role="tab" data-auth-mode="login" aria-selected="true">로그인</button>
+          <button class="auth-tab" type="button" role="tab" data-auth-mode="signup" aria-selected="false">회원가입</button>
+        </div>
+        <form class="auth-form" id="authForm">
+          <label class="auth-label" for="authEmail">이메일</label>
+          <input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" required placeholder="name@example.com">
+          <label class="auth-label" for="authPassword">비밀번호</label>
+          <input class="auth-input" id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상">
+          <button class="auth-submit" id="authSubmit" type="submit">로그인</button>
+          <p class="auth-message" id="authMessage" aria-live="polite"></p>
+          <p class="auth-help">로그인하면 저장한 기사와 메모가 계정에 동기화되어 다른 기기에서도 이어볼 수 있어요.</p>
+        </form>
+      </div>
+      <div id="authUserView" hidden>
+        <div class="account-card">
+          <p class="account-eyebrow">SIGNED IN AS</p>
+          <p class="account-email" id="accountEmail"></p>
+          <p class="account-copy">저장한 기사와 메모를 이 계정으로 동기화하고 있어요.</p>
+        </div>
+        <button class="account-logout" type="button" data-logout>로그아웃</button>
+      </div>
+      <div id="authSetupView" hidden>
+        <div class="auth-setup-note">
+          <h3>로그인 연결 전이에요</h3>
+          <p>운영자가 Supabase 공개 설정을 연결하면 이메일 회원가입과 여러 기기 저장함 동기화가 활성화됩니다. 지금도 저장함은 이 브라우저에서 사용할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
 <p class="sr-only" id="saveStatus" aria-live="polite"></p>
 
-<script id="briefingData" type="application/json">[{"title":"가격을 꾸준히 인상해도 고객이 줄지 않는 맥도날드재팬, 왜일까?","link":"https://outstanding.kr/mcdonaldsjapan20260728/","source":"아웃스탠딩","summary":"맥도날드재팬의 가격 인상에도 수요가 유지되는 배경을 일본 햄버거 시장 구조와 함께 설명한다. 단순 가격 전략이 아니라 브랜드·가치 인식·시장 성숙도가 매출을 지키는 맥락을 짚는다.","takeaway":"가격 인상은 ‘손실’이 아니라 포지셔닝일 수 있다.","category":"제품·성장 인사이트","contentType":"기사","briefingDate":"7/28"},{"title":"[脫오라클 전략] 유엔넷, 레이크하우스로 비용 90% 아낀다","link":"https://www.bloter.net/news/articleView.html?idxno=669016","source":"블로터","summary":"유엔넷이 오라클 대안으로 레이크하우스를 도입해 비용을 크게 줄이는 과정을 다뤘다. 금융권 고객과 해외 진출 맥락까지 함께 보여줘, 데이터 인프라 전환이 왜 지금 시장 기회가 되는지 설명한다.","takeaway":"DB 대체는 기능 경쟁이 아니라 비용·이식성 게임이다.","category":"기술·시장 트렌드","contentType":"기사","briefingDate":"7/28"},{"title":"조달청이 스타트업의 '첫 번째 고객'이 되어주는 이유 | 조달청 강성민 차장","link":"https://www.youtube.com/watch?v=NcUmG5kUu-k","source":"EO Korea","summary":"공공조달이 스타트업의 초기 매출과 레퍼런스를 만드는 ‘첫 고객’이 될 수 있다는 점을 조달청 실무자 인터뷰로 풀어낸다. 혁신조달 제도와 시장 규모, 스타트업이 접근할 때의 관점을 구체적으로 설명한다.","takeaway":"B2G는 판매 채널이 아니라 초기 신뢰를 만드는 레버리지다.","category":"정책·기회","contentType":"영상","briefingDate":"7/28"},{"title":"[인터뷰] 고레로보틱스, 로봇으로 건설 기간을 단축하는 방법은","link":"https://byline.network/2026/07/98509284052/","source":"바이라인네트워크","summary":"건설 현장의 자재 운반 문제를 로봇으로 줄이려는 고레로보틱스의 접근을 인터뷰로 담았다. 현장 노동·안전·비용 구조를 함께 설명해 로봇 스타트업이 어떤 실제 문제를 풀어야 하는지 보여준다.","takeaway":"로봇은 기술보다 ‘현장 단가’가 성패를 가른다.","category":"창업가 인터뷰","contentType":"인터뷰","briefingDate":"7/28"},{"title":"대기업 퇴사 후 1인 창업, 법인 설립까지 | 나는 솔로프리너다, 조쉬 | 이오서재","link":"https://www.youtube.com/watch?v=DtVILWXGLYA","source":"EO Korea","summary":"대기업 퇴사 후 1인 창업에서 팀 창업으로 확장한 조쉬의 경험을 다룬 대담이다. 솔로프리너의 장점과 한계, 피봇 과정, 채용과 사업모델 전환의 현실이 담겨 있다.","takeaway":"1인 창업의 핵심은 ‘혼자 버티기’보다 전환 타이밍이다.","category":"창업가 인터뷰","contentType":"영상","briefingDate":"7/28"}]</script>
-<script>
-(() => {
-  const STORAGE_KEY = 'snaac-saved-articles-v1';
+<script id="briefingData" type="application/json">[{"title":"네이버 100억달러 투자유치, AI 팩토리 확장 속도 낸다","link":"https://byline.network/2026/07/26_1928734-2/","source":"바이라인네트워크","summary":"네이버가 브룩필드·엔비디아와 AI 팩토리 확장용 100억달러 자금 조달에 나섰다. 데이터센터 증설을 넘어 AI 인프라를 자산화하는 전략 변화가 핵심이다.","takeaway":"AI 인프라는 ‘모델’보다 ‘전력·부지·자본’ 게임이 됐다.","category":"VC·창업가 관점","contentType":"기사","briefingDate":"7/28","image":"https://cdn.byline.network/wp-content/uploads/2024/11/naver1784.jpg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"오케스트로, AX 인프라 전략 ‘OKESTRO 4.0’ 발표","link":"https://byline.network/2026/07/28-635/","source":"바이라인네트워크","summary":"오케스트로가 컴퓨팅·클라우드·데이터·DevOps를 AI로 재설계하는 ‘OKESTRO 4.0’ 전략을 공개했다. 고객 운영데이터를 제품 기획·검증·지원 전 과정에 연결하는 AX 전환이 포인트다.","takeaway":"AI 도입의 승부처는 기능 추가보다 운영 재설계다.","category":"기술·시장 트렌드","contentType":"기사","briefingDate":"7/28","image":"https://cdn.byline.network/wp-content/uploads/2026/07/okestro4-ceo.jpg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"사업계획서 접수 하루 만에 투자 검토 결과 나온다","link":"https://platum.kr/archives/291460?utm_source=rss\u0026utm_medium=rss\u0026utm_campaign=%25ec%2582%25ac%25ec%2597%2585%25ea%25b3%2584%25ed%259a%258d%25ec%2584%259c-%25ec%25a0%2591%25ec%2588%2598-%25ed%2595%2598%25eb%25a3%25a8-%25eb%25a7%258c%25ec%2597%2590-%25ed%2588%25ac%25ec%259e%2590-%25ea%25b2%2580%25ed%2586%25a0-%25ea%25b2%25b0%25ea%25b3%25bc-%25eb%2582%2598%25ec%2598%25a8%25eb%258b%25a4","source":"플래텀","summary":"더벤처스가 AI로 서류검토·데이터 대조를 자동화해 투자 검토 결과를 24시간 내 전달하는 체계를 시작했다. 심사 속도 경쟁이 VC 운영 방식 자체를 바꾸고 있다.","takeaway":"투자심사도 ‘빠르게 보는 능력’이 경쟁력이 됐다.","category":"VC·창업가 관점","contentType":"기사","briefingDate":"7/28","image":"https://cdn.platum.kr/wp-content/uploads/2026/07/theV.jpg","fallbackA":"#2752B8","fallbackB":"#6D9CFF"},{"title":"국내 취업 노리는 외국인과 해외 나가는 기업들이 만났다","link":"https://platum.kr/archives/291453?utm_source=rss\u0026utm_medium=rss\u0026utm_campaign=%25ea%25b5%25ad%25eb%2582%25b4-%25ec%25b7%25a8%25ec%2597%2585-%25eb%2585%25b8%25eb%25a6%25ac%25eb%258a%2594-%25ec%2599%25b8%25ea%25b5%25ad%25ec%259d%25b8%25ea%25b3%25bc-%25ed%2595%25b4%25ec%2599%25b8-%eb%82%98%ea%b0%80%eb%8a%94-%ea%b8%b0%ec%97%85-%ed%95%9c%ec%9e%90%eb%a6%ac","source":"플래텀","summary":"원티드랩이 바이링구얼 인재 채용 행사를 열어 한국어·영어가 가능한 인재와 해외 진출 기업을 연결했다. 채용이 인력 확보를 넘어 글로벌 확장 전략의 일부가 되고 있다.","takeaway":"채용은 이제 ‘인재 모집’이 아니라 ‘시장 진입 전략’이다.","category":"생태계 업데이트","contentType":"기사","briefingDate":"7/28","image":"https://cdn.platum.kr/wp-content/uploads/2026/07/wanted.jpg","fallbackA":"#2752B8","fallbackB":"#6D9CFF"},{"title":"스탠퍼드 로봇 공학자가 바라본 로봇의 시대 | Stanford, Catie Cuan","link":"https://www.youtube.com/watch?v=epcN1orZZpU","source":"EO Korea","summary":"로봇의 미래는 정말 '더 똑똑한 AI'일까요? 스탠퍼드대학교 로봇공학자이자 로봇 안무가인 케이티 쿠안은 조금 다른 이야기를 합니다. 지금 휴머노이드 경쟁은 사람의 일을 대신하는 기능과 성능에 집중하고 있습니다. 하지만 앞으로 수십억 대의 로봇이 우리 일상에 들어온다면, 더 중요한 것은","takeaway":"핵심 맥락과 창업가에게 주는 의미를 원문에서 확인해보세요.","category":"창업가 인터뷰","contentType":"영상","briefingDate":"7/28","image":"https://i2.ytimg.com/vi/epcN1orZZpU/hqdefault.jpg","fallbackA":"#111111","fallbackB":"#5A5A5A"}]</script>
+<script id="authConfig" type="application/json">{"url":"https://mvvmdtrgiesankvlbbnh.supabase.co","publishableKey":"sb_publishable_Rb6eKh6L5gtB7SiFogMoHA_H-3KrkZb","redirectUrl":"","homeHref":"../"}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>(() => {
+  'use strict';
+
+  const GUEST_STORAGE_KEY = 'snaac-saved-articles-v1';
+  const USER_STORAGE_PREFIX = 'snaac-saved-articles-user-v1:';
   const dataElement = document.getElementById('briefingData');
+  const authConfigElement = document.getElementById('authConfig');
+  const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
+  const authConfig = authConfigElement ? JSON.parse(authConfigElement.textContent || '{}') : {};
+  const currentByUrl = new Map(currentItems.map(item => [item.link, normalizeItem(item)]));
+
   const liveRegion = document.getElementById('saveStatus');
   const drawer = document.getElementById('savedDrawer');
   const savedList = document.getElementById('savedList');
+  const savedDrawerSubtitle = document.getElementById('savedDrawerSubtitle');
+  const syncTitle = document.getElementById('syncTitle');
+  const syncText = document.getElementById('syncText');
+  const syncAction = document.getElementById('syncAction');
+
   const noteDialog = document.getElementById('noteDialog');
   const noteInput = document.getElementById('noteInput');
   const noteArticleTitle = document.getElementById('noteArticleTitle');
   const noteCount = document.getElementById('noteCount');
   const noteSaveButton = document.getElementById('noteSaveButton');
-  const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
-  const currentByUrl = new Map(currentItems.map(item => [item.link, item]));
+
+  const previewDialog = document.getElementById('previewDialog');
+  const previewThumb = document.getElementById('previewThumb');
+  const previewMediaLabel = document.getElementById('previewMediaLabel');
+  const previewCategory = document.getElementById('previewCategory');
+  const previewSource = document.getElementById('previewSource');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewSummary = document.getElementById('previewSummary');
+  const previewTakeaway = document.getElementById('previewTakeaway');
+  const previewNoteWrap = document.getElementById('previewNoteWrap');
+  const previewNote = document.getElementById('previewNote');
+  const previewReadLink = document.getElementById('previewReadLink');
+  const previewEditButton = document.getElementById('previewEditButton');
+  const previewDeleteButton = document.getElementById('previewDeleteButton');
+
+  const authDialog = document.getElementById('authDialog');
+  const authGuestView = document.getElementById('authGuestView');
+  const authUserView = document.getElementById('authUserView');
+  const authSetupView = document.getElementById('authSetupView');
+  const authForm = document.getElementById('authForm');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const authSubmit = document.getElementById('authSubmit');
+  const authMessage = document.getElementById('authMessage');
+  const accountEmail = document.getElementById('accountEmail');
+
   let storageAvailable = true;
+  let savedItems = readStorage(GUEST_STORAGE_KEY);
   let drawerTrigger = null;
   let noteTrigger = null;
+  let previewTrigger = null;
+  let authTrigger = null;
   let activeNoteUrl = '';
+  let activePreviewUrl = '';
+  let authMode = 'login';
+  let currentUser = null;
+  let supabaseClient = null;
+  let syncBusy = false;
 
-  function readSaved() {
+  const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
+
+  function normalizeItem(item) {
+    const now = new Date().toISOString();
+    return {
+      title: String(item && item.title || '').trim(),
+      link: String(item && (item.link || item.article_url) || '').trim(),
+      source: String(item && item.source || '기타').trim() || '기타',
+      summary: String(item && item.summary || '').trim(),
+      takeaway: String(item && item.takeaway || '').trim(),
+      category: String(item && item.category || '생태계 업데이트').trim(),
+      contentType: String(item && (item.contentType || item.content_type) || '기사').trim(),
+      briefingDate: String(item && (item.briefingDate || item.briefing_date) || '').trim(),
+      image: String(item && (item.image || item.thumbnail_url) || '').trim(),
+      fallbackA: String(item && (item.fallbackA || item.fallback_a) || '#2752B8').trim(),
+      fallbackB: String(item && (item.fallbackB || item.fallback_b) || '#6D9CFF').trim(),
+      note: String(item && item.note || ''),
+      savedAt: String(item && (item.savedAt || item.saved_at) || now),
+      updatedAt: String(item && (item.updatedAt || item.updated_at) || now),
+      pendingSync: Boolean(item && item.pendingSync),
+    };
+  }
+
+  function timestamp(item) {
+    const value = Date.parse(item.updatedAt || item.savedAt || '');
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function dedupeItems(groups) {
+    const map = new Map();
+    groups.flat().forEach(raw => {
+      const item = normalizeItem(raw);
+      if (!item.link) return;
+      const previous = map.get(item.link);
+      if (!previous || timestamp(item) >= timestamp(previous)) map.set(item.link, item);
+    });
+    return Array.from(map.values()).sort((a, b) => timestamp(b) - timestamp(a));
+  }
+
+  function readStorage(key) {
     try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      if (!Array.isArray(parsed)) return [];
-      return parsed
-        .filter(item => item && typeof item === 'object' && item.link)
-        .map(item => ({ ...item, note: typeof item.note === 'string' ? item.note : '' }));
+      const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+      storageAvailable = true;
+      return Array.isArray(parsed) ? dedupeItems([parsed]) : [];
     } catch (error) {
       storageAvailable = false;
       return [];
     }
   }
 
-  function writeSaved(items) {
+  function writeStorage(key, items) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(key, JSON.stringify(items));
       storageAvailable = true;
       return true;
     } catch (error) {
@@ -933,22 +1550,49 @@ footer {
     }
   }
 
+  function clearStorage(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      storageAvailable = false;
+    }
+  }
+
+  function activeStorageKey() {
+    return currentUser ? `${USER_STORAGE_PREFIX}${currentUser.id}` : GUEST_STORAGE_KEY;
+  }
+
+  function persistActive() {
+    return writeStorage(activeStorageKey(), savedItems);
+  }
+
   function announce(message) {
     if (!liveRegion) return;
     liveRegion.textContent = '';
     window.setTimeout(() => { liveRegion.textContent = message; }, 20);
   }
 
-  function syncBodyLock() {
-    const drawerOpen = drawer && !drawer.hidden;
-    const noteOpen = noteDialog && !noteDialog.hidden;
-    document.body.classList.toggle('drawer-open', Boolean(drawerOpen || noteOpen));
+  function isOpen(element) {
+    return Boolean(element && !element.hidden);
   }
 
-  function updateButtons() {
-    const savedByUrl = new Map(readSaved().map(item => [item.link, item]));
+  function syncBodyLock() {
+    const locked = [drawer, noteDialog, previewDialog, authDialog].some(isOpen);
+    document.body.classList.toggle('drawer-open', locked);
+  }
+
+  function itemForUrl(url) {
+    return savedItems.find(item => item.link === url) || currentByUrl.get(url) || null;
+  }
+
+  function savedMap() {
+    return new Map(savedItems.map(item => [item.link, item]));
+  }
+
+  function updateSavedIndicators() {
+    const byUrl = savedMap();
     document.querySelectorAll('.save-button').forEach(button => {
-      const savedItem = savedByUrl.get(button.dataset.url);
+      const savedItem = byUrl.get(button.dataset.url);
       const isSaved = Boolean(savedItem);
       const hasNote = Boolean(savedItem && savedItem.note.trim());
       button.classList.toggle('is-saved', isSaved);
@@ -961,27 +1605,173 @@ footer {
       if (label) label.textContent = isSaved ? (hasNote ? '메모 보기' : '메모 추가') : '저장';
     });
     document.querySelectorAll('[data-saved-count]').forEach(node => {
-      node.textContent = String(savedByUrl.size);
+      node.textContent = String(byUrl.size);
     });
+    if (savedDrawerSubtitle) {
+      savedDrawerSubtitle.textContent = byUrl.size
+        ? `${byUrl.size}개의 아티클을 모아두었어요.`
+        : '좋았던 아티클을 저장하고 메모를 남겨보세요.';
+    }
+  }
+
+  function shortAccountLabel(email) {
+    if (!email) return '내 계정';
+    const local = email.split('@')[0] || '내 계정';
+    return local.length > 7 ? `${local.slice(0, 7)}…` : local;
+  }
+
+  function updateAuthIndicators() {
+    const label = currentUser ? shortAccountLabel(currentUser.email) : '로그인';
+    document.querySelectorAll('[data-auth-label]').forEach(node => { node.textContent = label; });
+
+    if (!syncTitle || !syncText || !syncAction) return;
+    if (!authEnabled) {
+      syncTitle.textContent = '이 기기에 저장 중';
+      syncText.textContent = '로그인 연동 전에도 기사와 메모는 이 브라우저에 남아요.';
+      syncAction.textContent = '안내';
+      return;
+    }
+    if (currentUser) {
+      syncTitle.textContent = syncBusy ? '계정과 동기화 중…' : '계정에 안전하게 동기화';
+      syncText.textContent = currentUser.email || '로그인된 계정';
+      syncAction.textContent = '내 계정';
+    } else {
+      syncTitle.textContent = '다른 기기에서도 이어보기';
+      syncText.textContent = '로그인하면 저장한 기사와 메모가 계정에 동기화돼요.';
+      syncAction.textContent = '로그인';
+    }
+  }
+
+  function makeElement(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
+
+  function isVideo(item) {
+    const type = String(item.contentType || '').toLowerCase();
+    const link = String(item.link || '').toLowerCase();
+    return type.includes('영상') || type.includes('video') || link.includes('youtube.com') || link.includes('youtu.be');
+  }
+
+  function fillThumbnail(container, item) {
+    if (!container) return;
+    container.replaceChildren();
+    container.classList.add('noimg');
+    container.classList.toggle('is-video', isVideo(item));
+    container.dataset.initial = (item.source || 'S').slice(0, 1);
+    container.style.setProperty('--fallback', item.fallbackA || '#2752B8');
+    container.style.setProperty('--fallback-2', item.fallbackB || '#6D9CFF');
+
+    if (item.image) {
+      const image = document.createElement('img');
+      image.alt = '';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.addEventListener('load', () => container.classList.remove('noimg'), { once: true });
+      image.addEventListener('error', () => image.remove(), { once: true });
+      image.src = item.image;
+      container.append(image);
+    }
+
+    if (isVideo(item)) {
+      const triangle = makeElement('span', 'play-triangle');
+      triangle.setAttribute('aria-hidden', 'true');
+      container.append(triangle);
+    }
+    if (container === previewThumb && previewMediaLabel) container.append(previewMediaLabel);
+  }
+
+  function renderSaved() {
+    if (!savedList) return;
+    savedList.replaceChildren();
+    updateSavedIndicators();
+    updateAuthIndicators();
+
+    if (!storageAvailable) {
+      savedList.append(makeElement('p', 'saved-empty', '현재 브라우저의 저장 공간을 사용할 수 없어요.'));
+      return;
+    }
+    if (!savedItems.length) {
+      savedList.append(makeElement('p', 'saved-empty', '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'));
+      return;
+    }
+
+    savedItems.forEach(item => {
+      const article = makeElement('article', 'saved-item');
+      const previewButton = makeElement('button', 'saved-preview-trigger');
+      previewButton.type = 'button';
+      previewButton.dataset.previewUrl = item.link;
+      previewButton.setAttribute('aria-label', `${item.title || '저장한 기사'} 상세 보기`);
+
+      const thumb = makeElement('span', 'saved-thumb');
+      fillThumbnail(thumb, item);
+
+      const copy = makeElement('span', 'saved-copy');
+      const meta = makeElement('span', 'saved-meta', [item.briefingDate, item.source].filter(Boolean).join(' · '));
+      const title = makeElement('span', 'saved-title', item.title || '제목 없음');
+      copy.append(meta, title);
+
+      if (item.note && item.note.trim()) {
+        const notePreview = makeElement('span', 'saved-note-preview');
+        const noteLabel = makeElement('strong', '', 'MY NOTE · ');
+        notePreview.append(noteLabel, document.createTextNode(item.note.trim()));
+        copy.append(notePreview);
+      }
+      copy.append(makeElement('span', 'saved-open-hint', '카드로 다시 보기 →'));
+      previewButton.append(thumb, copy);
+
+      const actions = makeElement('div', 'saved-actions');
+      const previewAction = makeElement('button', 'saved-action-button preview-action', '상세 보기');
+      previewAction.type = 'button';
+      previewAction.dataset.previewUrl = item.link;
+      const editButton = makeElement(
+        'button',
+        'saved-action-button edit-note',
+        item.note && item.note.trim() ? '메모 수정' : '메모 추가'
+      );
+      editButton.type = 'button';
+      editButton.dataset.editNoteUrl = item.link;
+      const removeButton = makeElement('button', 'saved-action-button remove-saved', '삭제');
+      removeButton.type = 'button';
+      removeButton.dataset.removeUrl = item.link;
+      actions.append(previewAction, editButton, removeButton);
+
+      article.append(previewButton, actions);
+      savedList.append(article);
+    });
+  }
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawerTrigger = document.activeElement;
+    renderSaved();
+    drawer.hidden = false;
+    syncBodyLock();
+    const closeButton = drawer.querySelector('.close-button');
+    if (closeButton) closeButton.focus();
+  }
+
+  function closeDrawer(restoreFocus = true) {
+    if (!drawer) return;
+    drawer.hidden = true;
+    syncBodyLock();
+    if (restoreFocus && drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
   }
 
   function updateNoteCount() {
     if (noteCount && noteInput) noteCount.textContent = String(noteInput.value.length);
   }
 
-  function itemForUrl(url) {
-    return readSaved().find(item => item.link === url) || currentByUrl.get(url) || null;
-  }
-
   function openNoteDialog(url) {
     if (!noteDialog || !noteInput) return;
     const item = itemForUrl(url);
     if (!item) return;
-
-    const savedItem = readSaved().find(entry => entry.link === url);
+    const savedItem = savedItems.find(entry => entry.link === url);
     activeNoteUrl = url;
     noteTrigger = document.activeElement;
-    noteArticleTitle.textContent = item.title || '제목 없음';
+    if (noteArticleTitle) noteArticleTitle.textContent = item.title || '제목 없음';
     noteInput.value = savedItem ? savedItem.note : '';
     if (noteSaveButton) noteSaveButton.textContent = savedItem ? '메모 저장' : '스크랩 저장';
     updateNoteCount();
@@ -998,142 +1788,382 @@ footer {
     if (restoreFocus && noteTrigger && typeof noteTrigger.focus === 'function') noteTrigger.focus();
   }
 
-  function saveWithNote() {
+  function renderPreview(item) {
+    if (!item) return;
+    fillThumbnail(previewThumb, item);
+    if (previewMediaLabel) previewMediaLabel.textContent = item.contentType || '기사';
+    if (previewCategory) previewCategory.textContent = item.category || '생태계 업데이트';
+    if (previewSource) previewSource.textContent = item.source || '기타';
+    if (previewTitle) previewTitle.textContent = item.title || '제목 없음';
+    if (previewSummary) previewSummary.textContent = item.summary || '';
+    if (previewTakeaway) {
+      previewTakeaway.textContent = item.takeaway || '원문에서 이번 변화가 창업가와 팀에 주는 의미를 확인해보세요.';
+    }
+    if (previewNoteWrap && previewNote) {
+      const hasNote = Boolean(item.note && item.note.trim());
+      previewNoteWrap.hidden = !hasNote;
+      previewNote.textContent = hasNote ? item.note.trim() : '';
+    }
+    if (previewReadLink) previewReadLink.href = item.link;
+    if (previewEditButton) previewEditButton.dataset.previewEditUrl = item.link;
+    if (previewDeleteButton) previewDeleteButton.dataset.previewDeleteUrl = item.link;
+  }
+
+  function openPreview(url) {
+    if (!previewDialog) return;
+    const item = itemForUrl(url);
+    if (!item) return;
+    activePreviewUrl = url;
+    previewTrigger = document.activeElement;
+    renderPreview(item);
+    previewDialog.hidden = false;
+    syncBodyLock();
+    const closeButton = previewDialog.querySelector('.close-button');
+    if (closeButton) closeButton.focus();
+  }
+
+  function closePreview(restoreFocus = true) {
+    if (!previewDialog) return;
+    previewDialog.hidden = true;
+    activePreviewUrl = '';
+    syncBodyLock();
+    if (restoreFocus && previewTrigger && typeof previewTrigger.focus === 'function') previewTrigger.focus();
+  }
+
+  function remoteRowToItem(row) {
+    return normalizeItem({
+      title: row.title,
+      link: row.article_url,
+      source: row.source,
+      summary: row.summary,
+      takeaway: row.takeaway,
+      category: row.category,
+      contentType: row.content_type,
+      briefingDate: row.briefing_date,
+      image: row.thumbnail_url,
+      fallbackA: row.fallback_a,
+      fallbackB: row.fallback_b,
+      note: row.note,
+      savedAt: row.saved_at,
+      updatedAt: row.updated_at,
+      pendingSync: false,
+    });
+  }
+
+  function itemToRemote(item) {
+    return {
+      user_id: currentUser.id,
+      article_url: item.link,
+      title: item.title || '제목 없음',
+      source: item.source || '기타',
+      summary: item.summary || '',
+      takeaway: item.takeaway || '',
+      category: item.category || '생태계 업데이트',
+      content_type: item.contentType || '기사',
+      briefing_date: item.briefingDate || '',
+      thumbnail_url: item.image || '',
+      fallback_a: item.fallbackA || '#2752B8',
+      fallback_b: item.fallbackB || '#6D9CFF',
+      note: item.note || '',
+      saved_at: item.savedAt || new Date().toISOString(),
+      updated_at: item.updatedAt || new Date().toISOString(),
+    };
+  }
+
+  async function upsertItemsToCloud(items) {
+    if (!supabaseClient || !currentUser || !items.length) return true;
+    const { error } = await supabaseClient
+      .from('saved_articles')
+      .upsert(items.map(itemToRemote), { onConflict: 'user_id,article_url' });
+    if (error) {
+      console.error('SNAAC saved article upsert failed:', error);
+      return false;
+    }
+    return true;
+  }
+
+  async function syncSavedFromCloud() {
+    if (!supabaseClient || !currentUser || syncBusy) return;
+    syncBusy = true;
+    updateAuthIndicators();
+
+    const userKey = activeStorageKey();
+    const userLocal = readStorage(userKey);
+    const pendingLocal = userLocal.filter(item => item.pendingSync);
+    const guestItems = readStorage(GUEST_STORAGE_KEY);
+
+    const { data, error } = await supabaseClient
+      .from('saved_articles')
+      .select('*')
+      .order('saved_at', { ascending: false });
+
+    if (error) {
+      console.error('SNAAC saved article fetch failed:', error);
+      savedItems = dedupeItems([userLocal, guestItems]);
+      writeStorage(userKey, savedItems);
+      syncBusy = false;
+      updateSavedIndicators();
+      renderSaved();
+      announce('계정 동기화에 실패했지만 이 기기에는 저장되어 있어요.');
+      return;
+    }
+
+    const remoteItems = (data || []).map(remoteRowToItem);
+    savedItems = dedupeItems([remoteItems, pendingLocal, guestItems]).map(item => ({ ...item, pendingSync: true }));
+    writeStorage(userKey, savedItems);
+
+    const uploaded = await upsertItemsToCloud(savedItems);
+    if (uploaded) {
+      savedItems = savedItems.map(item => ({ ...item, pendingSync: false }));
+      writeStorage(userKey, savedItems);
+      clearStorage(GUEST_STORAGE_KEY);
+    }
+
+    syncBusy = false;
+    updateSavedIndicators();
+    renderSaved();
+    if (!uploaded) announce('기기 저장은 완료됐지만 계정 동기화를 다시 시도해 주세요.');
+  }
+
+  async function saveWithNote() {
     if (!activeNoteUrl || !noteInput) return;
-    const saved = readSaved();
-    const index = saved.findIndex(item => item.link === activeNoteUrl);
+    const existingIndex = savedItems.findIndex(item => item.link === activeNoteUrl);
     const currentItem = currentByUrl.get(activeNoteUrl);
-    const existingItem = index >= 0 ? saved[index] : null;
+    const existingItem = existingIndex >= 0 ? savedItems[existingIndex] : null;
     const item = currentItem || existingItem;
     if (!item) return;
 
     const note = noteInput.value.trim();
     const now = new Date().toISOString();
-    if (index >= 0) {
-      saved[index] = {
-        ...existingItem,
-        ...(currentItem || {}),
-        note,
-        savedAt: existingItem.savedAt || now,
-        updatedAt: now,
-      };
-    } else {
-      saved.unshift({ ...item, note, savedAt: now, updatedAt: now });
-    }
+    const nextItem = normalizeItem({
+      ...(existingItem || {}),
+      ...(currentItem || {}),
+      note,
+      savedAt: existingItem && existingItem.savedAt || now,
+      updatedAt: now,
+      pendingSync: Boolean(currentUser),
+    });
 
-    if (!writeSaved(saved)) {
+    if (existingIndex >= 0) savedItems.splice(existingIndex, 1);
+    savedItems.unshift(nextItem);
+    savedItems = dedupeItems([savedItems]);
+
+    if (!persistActive()) {
       announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
       return;
     }
 
     closeNoteDialog();
-    updateButtons();
+    updateSavedIndicators();
     renderSaved();
-    announce(note ? '메모와 함께 저장했어요.' : '기사만 저장했어요.');
+    if (activePreviewUrl === nextItem.link) renderPreview(nextItem);
+
+    if (currentUser) {
+      const uploaded = await upsertItemsToCloud([nextItem]);
+      if (uploaded) {
+        const saved = savedItems.find(savedItem => savedItem.link === nextItem.link);
+        if (saved) saved.pendingSync = false;
+        persistActive();
+        announce(note ? '메모와 함께 계정에 저장했어요.' : '기사를 계정에 저장했어요.');
+      } else {
+        announce('이 기기에는 저장했지만 계정 동기화에 실패했어요.');
+      }
+    } else {
+      announce(note ? '메모와 함께 이 기기에 저장했어요.' : '기사를 이 기기에 저장했어요.');
+    }
   }
 
-  function removeSaved(url) {
-    const saved = readSaved().filter(item => item.link !== url);
-    if (!writeSaved(saved)) {
+  async function removeSaved(url) {
+    savedItems = savedItems.filter(item => item.link !== url);
+    if (!persistActive()) {
       announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
       return;
     }
-    if (activeNoteUrl === url && noteDialog && !noteDialog.hidden) closeNoteDialog(false);
-    updateButtons();
+
+    if (activeNoteUrl === url && isOpen(noteDialog)) closeNoteDialog(false);
+    if (activePreviewUrl === url && isOpen(previewDialog)) closePreview(false);
+    updateSavedIndicators();
     renderSaved();
-    announce('저장한 기사에서 삭제했어요.');
-  }
 
-  function renderSaved() {
-    if (!savedList) return;
-    const saved = readSaved();
-    savedList.replaceChildren();
-
-    if (!storageAvailable) {
-      const note = document.createElement('p');
-      note.className = 'saved-empty';
-      note.textContent = '현재 브라우저의 저장 공간을 사용할 수 없어요.';
-      savedList.append(note);
-      return;
-    }
-
-    if (!saved.length) {
-      const note = document.createElement('p');
-      note.className = 'saved-empty';
-      note.textContent = '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.';
-      savedList.append(note);
-      return;
-    }
-
-    saved.forEach(item => {
-      const article = document.createElement('article');
-      article.className = 'saved-item';
-
-      const meta = document.createElement('div');
-      meta.className = 'saved-meta';
-      meta.textContent = [item.briefingDate, item.source].filter(Boolean).join(' · ');
-
-      const link = document.createElement('a');
-      link.className = 'saved-title';
-      link.href = item.link;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = item.title || '제목 없음';
-
-      article.append(meta, link);
-
-      if (item.note && item.note.trim()) {
-        const noteBox = document.createElement('p');
-        noteBox.className = 'saved-note';
-        const noteLabel = document.createElement('span');
-        noteLabel.className = 'saved-note-label';
-        noteLabel.textContent = 'MY NOTE';
-        noteBox.append(noteLabel, document.createTextNode(item.note.trim()));
-        article.append(noteBox);
+    if (currentUser && supabaseClient) {
+      const { error } = await supabaseClient
+        .from('saved_articles')
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('article_url', url);
+      if (error) {
+        console.error('SNAAC saved article delete failed:', error);
+        announce('기기에서는 삭제했지만 계정 동기화에 실패했어요.');
+        return;
       }
+    }
+    announce('저장함에서 삭제했어요.');
+  }
 
-      const actions = document.createElement('div');
-      actions.className = 'saved-actions';
-
-      const editButton = document.createElement('button');
-      editButton.type = 'button';
-      editButton.className = 'saved-action-button edit-note';
-      editButton.dataset.editNoteUrl = item.link;
-      editButton.textContent = item.note && item.note.trim() ? '메모 수정' : '메모 추가';
-
-      const removeButton = document.createElement('button');
-      removeButton.type = 'button';
-      removeButton.className = 'saved-action-button remove-saved';
-      removeButton.dataset.removeUrl = item.link;
-      removeButton.textContent = '삭제';
-
-      actions.append(editButton, removeButton);
-      article.append(actions);
-      savedList.append(article);
+  function setAuthMode(mode) {
+    authMode = mode === 'signup' ? 'signup' : 'login';
+    document.querySelectorAll('[data-auth-mode]').forEach(button => {
+      const active = button.dataset.authMode === authMode;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-selected', String(active));
     });
+    if (authSubmit) authSubmit.textContent = authMode === 'signup' ? '회원가입' : '로그인';
+    if (authPassword) authPassword.autocomplete = authMode === 'signup' ? 'new-password' : 'current-password';
+    if (authMessage) {
+      authMessage.textContent = '';
+      authMessage.classList.remove('is-error');
+    }
   }
 
-  function openDrawer() {
-    if (!drawer) return;
-    drawerTrigger = document.activeElement;
-    renderSaved();
-    drawer.hidden = false;
-    syncBodyLock();
-    const closeButton = drawer.querySelector('.close-button');
-    if (closeButton) closeButton.focus();
+  function updateAuthDialogView() {
+    if (!authGuestView || !authUserView || !authSetupView) return;
+    authSetupView.hidden = authEnabled;
+    authGuestView.hidden = !authEnabled || Boolean(currentUser);
+    authUserView.hidden = !authEnabled || !currentUser;
+    if (accountEmail) accountEmail.textContent = currentUser && currentUser.email || '';
   }
 
-  function closeDrawer() {
-    if (!drawer) return;
-    drawer.hidden = true;
+  function openAuthDialog() {
+    if (!authDialog) return;
+    authTrigger = document.activeElement;
+    updateAuthDialogView();
+    setAuthMode(authMode);
+    authDialog.hidden = false;
     syncBodyLock();
-    if (drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
+    window.setTimeout(() => {
+      if (currentUser) {
+        const logout = authDialog.querySelector('[data-logout]');
+        if (logout) logout.focus();
+      } else if (authEnabled && authEmail) {
+        authEmail.focus();
+      } else {
+        const closeButton = authDialog.querySelector('.close-button');
+        if (closeButton) closeButton.focus();
+      }
+    }, 40);
+  }
+
+  function closeAuthDialog(restoreFocus = true) {
+    if (!authDialog) return;
+    authDialog.hidden = true;
+    syncBodyLock();
+    if (restoreFocus && authTrigger && typeof authTrigger.focus === 'function') authTrigger.focus();
+  }
+
+  function setAuthMessage(message, isError = false) {
+    if (!authMessage) return;
+    authMessage.textContent = message;
+    authMessage.classList.toggle('is-error', isError);
+  }
+
+  async function handleAuthSubmit(event) {
+    event.preventDefault();
+    if (!supabaseClient || !authEmail || !authPassword || !authSubmit) return;
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    if (!email || !password) {
+      setAuthMessage('이메일과 비밀번호를 모두 입력해 주세요.', true);
+      return;
+    }
+    if (password.length < 8) {
+      setAuthMessage('비밀번호는 8자 이상으로 입력해 주세요.', true);
+      return;
+    }
+
+    authSubmit.disabled = true;
+    setAuthMessage(authMode === 'signup' ? '계정을 만들고 있어요…' : '로그인하고 있어요…');
+    try {
+      if (authMode === 'signup') {
+        const redirectTo = authConfig.redirectUrl || new URL(authConfig.homeHref || './', window.location.href).href;
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: redirectTo },
+        });
+        if (error) throw error;
+        if (data && data.session) {
+          setAuthMessage('회원가입과 로그인이 완료됐어요.');
+          closeAuthDialog();
+        } else {
+          setAuthMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인해 주세요.');
+        }
+      } else {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setAuthMessage('로그인했어요. 저장함을 동기화합니다.');
+        closeAuthDialog();
+      }
+    } catch (error) {
+      console.error('SNAAC auth error:', error);
+      setAuthMessage(error && error.message ? error.message : '로그인 처리 중 오류가 발생했어요.', true);
+    } finally {
+      authSubmit.disabled = false;
+    }
+  }
+
+  async function handleSignOut() {
+    if (!supabaseClient) return;
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      announce('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    closeAuthDialog();
+  }
+
+  async function applySession(session) {
+    const nextUser = session && session.user || null;
+    const previousId = currentUser && currentUser.id || '';
+    const nextId = nextUser && nextUser.id || '';
+    currentUser = nextUser;
+    updateAuthDialogView();
+    updateAuthIndicators();
+
+    if (nextUser) {
+      if (nextId !== previousId || !savedItems.length) await syncSavedFromCloud();
+    } else {
+      savedItems = readStorage(GUEST_STORAGE_KEY);
+      updateSavedIndicators();
+      renderSaved();
+    }
+  }
+
+  async function initSupabase() {
+    updateAuthDialogView();
+    updateAuthIndicators();
+    if (!authEnabled) return;
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      console.error('Supabase library did not load.');
+      return;
+    }
+
+    supabaseClient = window.supabase.createClient(authConfig.url, authConfig.publishableKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) console.error('Supabase session error:', error);
+    await applySession(data && data.session || null);
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      window.setTimeout(() => { void applySession(session); }, 0);
+    });
   }
 
   document.addEventListener('click', event => {
     const saveButton = event.target.closest('.save-button');
     if (saveButton) {
       openNoteDialog(saveButton.dataset.url);
+      return;
+    }
+
+    const previewButton = event.target.closest('[data-preview-url]');
+    if (previewButton) {
+      openPreview(previewButton.dataset.previewUrl);
       return;
     }
 
@@ -1145,7 +2175,7 @@ footer {
 
     const saveNoteButton = event.target.closest('[data-save-note]');
     if (saveNoteButton) {
-      saveWithNote();
+      void saveWithNote();
       return;
     }
 
@@ -1155,20 +2185,62 @@ footer {
       return;
     }
 
-    const openButton = event.target.closest('[data-open-saved]');
-    if (openButton) {
+    const openSavedButton = event.target.closest('[data-open-saved]');
+    if (openSavedButton) {
       openDrawer();
       return;
     }
 
-    const closeButton = event.target.closest('[data-close-saved]');
-    if (closeButton) {
+    const closeSavedButton = event.target.closest('[data-close-saved]');
+    if (closeSavedButton) {
       closeDrawer();
       return;
     }
 
     const removeButton = event.target.closest('[data-remove-url]');
-    if (removeButton) removeSaved(removeButton.dataset.removeUrl);
+    if (removeButton) {
+      void removeSaved(removeButton.dataset.removeUrl);
+      return;
+    }
+
+    const closePreviewButton = event.target.closest('[data-close-preview]');
+    if (closePreviewButton) {
+      closePreview();
+      return;
+    }
+
+    const previewEditButtonTarget = event.target.closest('[data-preview-edit-url]');
+    if (previewEditButtonTarget) {
+      openNoteDialog(previewEditButtonTarget.dataset.previewEditUrl);
+      return;
+    }
+
+    const previewDeleteButtonTarget = event.target.closest('[data-preview-delete-url]');
+    if (previewDeleteButtonTarget) {
+      void removeSaved(previewDeleteButtonTarget.dataset.previewDeleteUrl);
+      return;
+    }
+
+    const openAuthButton = event.target.closest('[data-open-auth]');
+    if (openAuthButton) {
+      openAuthDialog();
+      return;
+    }
+
+    const closeAuthButton = event.target.closest('[data-close-auth]');
+    if (closeAuthButton) {
+      closeAuthDialog();
+      return;
+    }
+
+    const authTab = event.target.closest('[data-auth-mode]');
+    if (authTab) {
+      setAuthMode(authTab.dataset.authMode);
+      return;
+    }
+
+    const logoutButton = event.target.closest('[data-logout]');
+    if (logoutButton) void handleSignOut();
   });
 
   if (noteInput) {
@@ -1176,28 +2248,36 @@ footer {
     noteInput.addEventListener('keydown', event => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
-        saveWithNote();
+        void saveWithNote();
       }
     });
   }
 
+  if (authForm) authForm.addEventListener('submit', event => { void handleAuthSubmit(event); });
+
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
-    if (noteDialog && !noteDialog.hidden) {
-      closeNoteDialog();
-    } else if (drawer && !drawer.hidden) {
-      closeDrawer();
-    }
+    if (isOpen(authDialog)) closeAuthDialog();
+    else if (isOpen(noteDialog)) closeNoteDialog();
+    else if (isOpen(previewDialog)) closePreview();
+    else if (isOpen(drawer)) closeDrawer();
   });
 
   window.addEventListener('storage', () => {
-    updateButtons();
+    savedItems = readStorage(activeStorageKey());
+    updateSavedIndicators();
     renderSaved();
+    if (activePreviewUrl) {
+      const item = itemForUrl(activePreviewUrl);
+      if (item) renderPreview(item);
+      else closePreview(false);
+    }
   });
 
-  updateButtons();
+  setAuthMode('login');
+  updateSavedIndicators();
   renderSaved();
-})();
-</script>
+  void initSupabase();
+})();</script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-snaac-ui="4">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -672,18 +672,463 @@ footer {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* ── v4: 로고, 눈에 띄는 저장함, 상세 카드, 로그인 ── */
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0 18px;
+}
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.site-logo {
+  width: clamp(158px, 47vw, 208px);
+  height: auto;
+  display: block;
+}
+.topline {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+}
+.topline .utility-button {
+  width: 100%;
+  min-width: 0;
+  padding: 0 9px;
+  white-space: nowrap;
+}
+.utility-button.saved-vault {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(17,17,17,.14);
+}
+.utility-button.saved-vault .count-badge {
+  background: #fff;
+  color: var(--ink);
+}
+.utility-button.saved-vault svg { width: 15px; height: 15px; fill: currentColor; }
+.note-dialog { z-index: 90; }
+.utility-button.auth-control {
+  overflow: hidden;
+}
+.utility-button.auth-control span[data-auth-label] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.masthead { padding-top: 0; }
+.date-lockup { padding-top: 24px; }
+
+.free-access-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.free-access-note::before {
+  content: '✓';
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.thumb.is-video::before,
+.preview-thumb.is-video::after,
+.saved-thumb.is-video::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(17,17,17,.82);
+  box-shadow: 0 7px 22px rgba(0,0,0,.2);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.thumb.is-video .play-triangle,
+.preview-thumb.is-video .play-triangle,
+.saved-thumb.is-video .play-triangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 13px solid #fff;
+  transform: translate(-36%, -50%);
+  pointer-events: none;
+}
+
+.floating-saved {
+  position: fixed;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 32;
+  min-width: 176px;
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 18px;
+  border: 1px solid #111;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 12px 34px rgba(0,0,0,.24);
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition: opacity .16s ease, transform .16s ease;
+}
+.floating-saved svg { width: 17px; height: 17px; fill: currentColor; }
+.floating-saved .count-badge { background: #fff; color: #111; }
+.floating-saved:active { transform: translateX(-50%) scale(.98); }
+body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(12px); }
+
+.drawer-panel { max-height: min(92dvh, 820px); }
+.drawer-head {
+  min-height: 70px;
+  padding: 0 16px;
+}
+.drawer-title-wrap { min-width: 0; }
+.drawer-head h2 { display: flex; align-items: center; gap: 8px; }
+.drawer-head h2 svg { width: 18px; height: 18px; fill: currentColor; }
+.drawer-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 11.5px; }
+
+.sync-strip {
+  margin: 12px 16px 4px;
+  padding: 12px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.sync-copy { min-width: 0; }
+.sync-title { margin: 0; color: var(--ink); font-size: 12.5px; font-weight: 800; }
+.sync-text { margin: 2px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.sync-action {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.saved-list { padding: 10px 14px 24px; }
+.saved-item {
+  margin-bottom: 11px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+.saved-item:last-child { margin-bottom: 0; border-bottom: 1px solid var(--line); }
+.saved-preview-trigger {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 94px minmax(0, 1fr);
+  gap: 12px;
+  padding: 11px;
+  border: 0;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.saved-thumb {
+  position: relative;
+  min-height: 78px;
+  overflow: hidden;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
+}
+.saved-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.saved-thumb.noimg::before {
+  content: attr(data-initial);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.94);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+.saved-thumb.is-video::after { width: 34px; height: 34px; }
+.saved-thumb.is-video .play-triangle {
+  border-top-width: 6px;
+  border-bottom-width: 6px;
+  border-left-width: 10px;
+}
+.saved-copy { min-width: 0; align-self: center; }
+.saved-meta { margin: 0 0 5px; }
+.saved-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 14.5px;
+  line-height: 1.43;
+}
+.saved-note-preview {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.saved-note-preview strong { color: var(--ink-2); font-size: 10px; letter-spacing: .06em; }
+.saved-open-hint { margin-top: 7px; color: var(--ink-2); font-size: 11px; font-weight: 800; }
+.saved-actions {
+  margin: 0;
+  padding: 9px 11px 10px;
+  border-top: 1px solid var(--line);
+}
+.saved-action-button { background: #fff; }
+.saved-action-button.preview-action { margin-right: auto; color: var(--ink); border-color: var(--line-strong); }
+
+.preview-dialog,
+.auth-dialog {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.preview-dialog { z-index: 80; }
+.auth-dialog { z-index: 100; }
+.preview-backdrop,
+.auth-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15,15,14,.56);
+  cursor: pointer;
+}
+.preview-panel,
+.auth-panel {
+  position: relative;
+  width: min(100%, 600px);
+  max-height: min(92dvh, 820px);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -18px 50px rgba(0,0,0,.2);
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: drawer-up .18s ease-out both;
+}
+.preview-head,
+.auth-head {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(12px);
+}
+.preview-head h2,
+.auth-head h2 { margin: 0; font-size: 17px; }
+.preview-card { margin: 14px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+.preview-thumb {
+  position: relative;
+  aspect-ratio: 16 / 8.8;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
+}
+.preview-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.preview-thumb.noimg::before {
+  content: attr(data-initial);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.94);
+  font-family: GmarketSans, Pretendard, sans-serif;
+  font-size: 42px;
+}
+.preview-body { padding: 17px; }
+.preview-body h3 { margin: 0; font-size: 20px; line-height: 1.42; letter-spacing: -.025em; }
+.preview-summary { margin: 11px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.65; }
+.preview-note {
+  margin-top: 14px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.preview-note strong { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10.5px; letter-spacing: .09em; }
+.preview-actions {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 9px;
+  margin-top: 15px;
+}
+.preview-read,
+.preview-secondary {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.preview-read { border: 1px solid var(--ink); background: var(--ink); color: #fff; }
+.preview-secondary { border: 1px solid var(--line-strong); background: #fff; color: var(--ink-2); }
+.preview-delete {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-content { padding: 18px 16px calc(22px + env(safe-area-inset-bottom)); }
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.auth-tab {
+  min-height: 40px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.auth-tab.is-active { background: #fff; color: var(--ink); box-shadow: 0 2px 9px rgba(0,0,0,.06); }
+.auth-form { margin-top: 16px; }
+.auth-label { display: block; margin-top: 12px; color: var(--ink-2); font-size: 12px; font-weight: 800; }
+.auth-input {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 6px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 15px;
+  outline: none;
+}
+.auth-input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(23,23,23,.08); }
+.auth-submit {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 17px;
+  border: 1px solid var(--ink);
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.auth-submit:disabled { opacity: .55; cursor: wait; }
+.auth-message { min-height: 20px; margin: 11px 2px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.auth-message.is-error { color: #4a2020; }
+.auth-help { margin: 12px 2px 0; color: var(--muted); font-size: 11.5px; line-height: 1.55; }
+.account-card {
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-soft);
+}
+.account-eyebrow { margin: 0 0 5px; color: var(--muted); font-size: 10.5px; font-weight: 800; letter-spacing: .1em; }
+.account-email { margin: 0; color: var(--ink); font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.account-copy { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.account-logout {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.auth-setup-note { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-soft); }
+.auth-setup-note h3 { margin: 0 0 7px; font-size: 15px; }
+.auth-setup-note p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
+
+@media (max-width: 390px) {
+  .logo-row { padding-top: 11px; padding-bottom: 15px; }
+  .site-logo { width: 164px; }
+  .topline { gap: 5px; }
+  .topline .utility-button { min-height: 39px; padding: 0 6px; font-size: 11.5px; }
+  .saved-preview-trigger { grid-template-columns: 82px minmax(0, 1fr); gap: 10px; }
+  .saved-thumb { min-height: 72px; }
+  .floating-saved { min-width: 164px; min-height: 48px; }
+  .preview-card { margin-left: 10px; margin-right: 10px; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="topline" style="padding-top:18px">
-    <a class="brand" href="../"><span class="brand-mark"></span>오늘 브리핑</a>
-    <button class="utility-button" type="button" data-open-saved>저장함 <span class="count-badge" data-saved-count>0</span></button>
-  </div>
+  <header class="masthead">
+    
+<div class="logo-row"><a class="logo-link" href="../" aria-label="SNAAC 오늘 브리핑"><img class="site-logo" src="../assets/snaac-logo.png" alt="SNAAC" width="932" height="232"></a></div>
+<div class="topline">
+  <a class="utility-button" href="../" aria-label="오늘 보기"><span>오늘</span><span aria-hidden="true">←</span></a>
+  <button class="utility-button saved-vault" type="button" data-open-saved><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span>저장함</span><span class="count-badge" data-saved-count>0</span></button>
+  <button class="utility-button auth-control" type="button" data-open-auth aria-label="로그인 또는 내 계정"><span aria-hidden="true">◎</span><span data-auth-label>로그인</span></button>
+</div>
+  </header>
   <header class="archive-hero">
     <p class="kicker">SNAAC morning archive</p>
     <h1>지난 브리핑</h1>
-    <p>날짜를 눌러 그날 소개한 기사 5개를 다시 확인하세요.</p>
+    <p>날짜를 눌러 그날 소개한 아티클을 다시 확인하세요.</p>
   </header>
   <main class="archive-page-list">
     <div class="archive-list"><a class="archive-row" href="2026-07-28.html"><span class="archive-date">2026년 7월 28일</span><span class="archive-count">5개의 큐레이션</span><span class="archive-arrow" aria-hidden="true">→</span></a></div>
@@ -694,13 +1139,27 @@ footer {
   </footer>
 </div>
 
+<button class="floating-saved" type="button" data-open-saved aria-label="저장함 열기">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span>내 저장함</span><span class="count-badge" data-saved-count>0</span>
+</button>
+
 <div class="drawer" id="savedDrawer" hidden>
   <button class="drawer-backdrop" type="button" data-close-saved aria-label="저장함 닫기"></button>
   <section class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle">
     <div class="drawer-handle" aria-hidden="true"></div>
     <div class="drawer-head">
-      <h2 id="savedTitle">저장한 기사</h2>
+      <div class="drawer-title-wrap">
+        <h2 id="savedTitle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg> 내 저장함</h2>
+        <p class="drawer-subtitle" id="savedDrawerSubtitle">좋았던 아티클을 저장하고 메모를 남겨보세요.</p>
+      </div>
       <button class="close-button" type="button" data-close-saved aria-label="닫기">×</button>
+    </div>
+    <div class="sync-strip">
+      <div class="sync-copy">
+        <p class="sync-title" id="syncTitle">이 기기에 저장 중</p>
+        <p class="sync-text" id="syncText">로그인하면 다른 기기에서도 이어볼 수 있어요.</p>
+      </div>
+      <button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button>
     </div>
     <div class="saved-list" id="savedList"></div>
   </section>
@@ -728,44 +1187,207 @@ footer {
   </section>
 </div>
 
+<div class="preview-dialog" id="previewDialog" hidden>
+  <button class="preview-backdrop" type="button" data-close-preview aria-label="저장한 기사 상세 닫기"></button>
+  <section class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="previewDialogTitle">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <div class="preview-head">
+      <h2 id="previewDialogTitle">저장한 아티클</h2>
+      <button class="close-button" type="button" data-close-preview aria-label="닫기">×</button>
+    </div>
+    <article class="preview-card">
+      <div class="preview-thumb noimg" id="previewThumb" data-initial="S">
+        <span class="media-label" id="previewMediaLabel">기사</span>
+      </div>
+      <div class="preview-body">
+        <div class="card-meta">
+          <div class="meta-left">
+            <span class="category" id="previewCategory">생태계 업데이트</span>
+            <span class="source" id="previewSource">SNAAC</span>
+          </div>
+        </div>
+        <h3 id="previewTitle">저장한 기사</h3>
+        <p class="preview-summary" id="previewSummary"></p>
+        <div class="takeaway">
+          <span class="takeaway-label">WHY IT MATTERS</span>
+          <p id="previewTakeaway"></p>
+        </div>
+        <div class="preview-note" id="previewNoteWrap" hidden>
+          <strong>MY NOTE</strong><span id="previewNote"></span>
+        </div>
+        <div class="preview-actions">
+          <a class="preview-read" id="previewReadLink" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a>
+          <button class="preview-secondary" id="previewEditButton" type="button">메모 수정</button>
+        </div>
+        <button class="preview-delete" id="previewDeleteButton" type="button">저장함에서 삭제</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<div class="auth-dialog" id="authDialog" hidden>
+  <button class="auth-backdrop" type="button" data-close-auth aria-label="로그인 창 닫기"></button>
+  <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <div class="auth-head">
+      <h2 id="authTitle">SNAAC 계정</h2>
+      <button class="close-button" type="button" data-close-auth aria-label="닫기">×</button>
+    </div>
+    <div class="auth-content">
+      <div id="authGuestView">
+        <div class="auth-tabs" role="tablist" aria-label="로그인 방식">
+          <button class="auth-tab is-active" type="button" role="tab" data-auth-mode="login" aria-selected="true">로그인</button>
+          <button class="auth-tab" type="button" role="tab" data-auth-mode="signup" aria-selected="false">회원가입</button>
+        </div>
+        <form class="auth-form" id="authForm">
+          <label class="auth-label" for="authEmail">이메일</label>
+          <input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" required placeholder="name@example.com">
+          <label class="auth-label" for="authPassword">비밀번호</label>
+          <input class="auth-input" id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상">
+          <button class="auth-submit" id="authSubmit" type="submit">로그인</button>
+          <p class="auth-message" id="authMessage" aria-live="polite"></p>
+          <p class="auth-help">로그인하면 저장한 기사와 메모가 계정에 동기화되어 다른 기기에서도 이어볼 수 있어요.</p>
+        </form>
+      </div>
+      <div id="authUserView" hidden>
+        <div class="account-card">
+          <p class="account-eyebrow">SIGNED IN AS</p>
+          <p class="account-email" id="accountEmail"></p>
+          <p class="account-copy">저장한 기사와 메모를 이 계정으로 동기화하고 있어요.</p>
+        </div>
+        <button class="account-logout" type="button" data-logout>로그아웃</button>
+      </div>
+      <div id="authSetupView" hidden>
+        <div class="auth-setup-note">
+          <h3>로그인 연결 전이에요</h3>
+          <p>운영자가 Supabase 공개 설정을 연결하면 이메일 회원가입과 여러 기기 저장함 동기화가 활성화됩니다. 지금도 저장함은 이 브라우저에서 사용할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
 <p class="sr-only" id="saveStatus" aria-live="polite"></p>
 
 <script id="briefingData" type="application/json">[]</script>
-<script>
-(() => {
-  const STORAGE_KEY = 'snaac-saved-articles-v1';
+<script id="authConfig" type="application/json">{"url":"https://mvvmdtrgiesankvlbbnh.supabase.co","publishableKey":"sb_publishable_Rb6eKh6L5gtB7SiFogMoHA_H-3KrkZb","redirectUrl":"","homeHref":"../"}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>(() => {
+  'use strict';
+
+  const GUEST_STORAGE_KEY = 'snaac-saved-articles-v1';
+  const USER_STORAGE_PREFIX = 'snaac-saved-articles-user-v1:';
   const dataElement = document.getElementById('briefingData');
+  const authConfigElement = document.getElementById('authConfig');
+  const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
+  const authConfig = authConfigElement ? JSON.parse(authConfigElement.textContent || '{}') : {};
+  const currentByUrl = new Map(currentItems.map(item => [item.link, normalizeItem(item)]));
+
   const liveRegion = document.getElementById('saveStatus');
   const drawer = document.getElementById('savedDrawer');
   const savedList = document.getElementById('savedList');
+  const savedDrawerSubtitle = document.getElementById('savedDrawerSubtitle');
+  const syncTitle = document.getElementById('syncTitle');
+  const syncText = document.getElementById('syncText');
+  const syncAction = document.getElementById('syncAction');
+
   const noteDialog = document.getElementById('noteDialog');
   const noteInput = document.getElementById('noteInput');
   const noteArticleTitle = document.getElementById('noteArticleTitle');
   const noteCount = document.getElementById('noteCount');
   const noteSaveButton = document.getElementById('noteSaveButton');
-  const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
-  const currentByUrl = new Map(currentItems.map(item => [item.link, item]));
+
+  const previewDialog = document.getElementById('previewDialog');
+  const previewThumb = document.getElementById('previewThumb');
+  const previewMediaLabel = document.getElementById('previewMediaLabel');
+  const previewCategory = document.getElementById('previewCategory');
+  const previewSource = document.getElementById('previewSource');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewSummary = document.getElementById('previewSummary');
+  const previewTakeaway = document.getElementById('previewTakeaway');
+  const previewNoteWrap = document.getElementById('previewNoteWrap');
+  const previewNote = document.getElementById('previewNote');
+  const previewReadLink = document.getElementById('previewReadLink');
+  const previewEditButton = document.getElementById('previewEditButton');
+  const previewDeleteButton = document.getElementById('previewDeleteButton');
+
+  const authDialog = document.getElementById('authDialog');
+  const authGuestView = document.getElementById('authGuestView');
+  const authUserView = document.getElementById('authUserView');
+  const authSetupView = document.getElementById('authSetupView');
+  const authForm = document.getElementById('authForm');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const authSubmit = document.getElementById('authSubmit');
+  const authMessage = document.getElementById('authMessage');
+  const accountEmail = document.getElementById('accountEmail');
+
   let storageAvailable = true;
+  let savedItems = readStorage(GUEST_STORAGE_KEY);
   let drawerTrigger = null;
   let noteTrigger = null;
+  let previewTrigger = null;
+  let authTrigger = null;
   let activeNoteUrl = '';
+  let activePreviewUrl = '';
+  let authMode = 'login';
+  let currentUser = null;
+  let supabaseClient = null;
+  let syncBusy = false;
 
-  function readSaved() {
+  const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
+
+  function normalizeItem(item) {
+    const now = new Date().toISOString();
+    return {
+      title: String(item && item.title || '').trim(),
+      link: String(item && (item.link || item.article_url) || '').trim(),
+      source: String(item && item.source || '기타').trim() || '기타',
+      summary: String(item && item.summary || '').trim(),
+      takeaway: String(item && item.takeaway || '').trim(),
+      category: String(item && item.category || '생태계 업데이트').trim(),
+      contentType: String(item && (item.contentType || item.content_type) || '기사').trim(),
+      briefingDate: String(item && (item.briefingDate || item.briefing_date) || '').trim(),
+      image: String(item && (item.image || item.thumbnail_url) || '').trim(),
+      fallbackA: String(item && (item.fallbackA || item.fallback_a) || '#2752B8').trim(),
+      fallbackB: String(item && (item.fallbackB || item.fallback_b) || '#6D9CFF').trim(),
+      note: String(item && item.note || ''),
+      savedAt: String(item && (item.savedAt || item.saved_at) || now),
+      updatedAt: String(item && (item.updatedAt || item.updated_at) || now),
+      pendingSync: Boolean(item && item.pendingSync),
+    };
+  }
+
+  function timestamp(item) {
+    const value = Date.parse(item.updatedAt || item.savedAt || '');
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function dedupeItems(groups) {
+    const map = new Map();
+    groups.flat().forEach(raw => {
+      const item = normalizeItem(raw);
+      if (!item.link) return;
+      const previous = map.get(item.link);
+      if (!previous || timestamp(item) >= timestamp(previous)) map.set(item.link, item);
+    });
+    return Array.from(map.values()).sort((a, b) => timestamp(b) - timestamp(a));
+  }
+
+  function readStorage(key) {
     try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      if (!Array.isArray(parsed)) return [];
-      return parsed
-        .filter(item => item && typeof item === 'object' && item.link)
-        .map(item => ({ ...item, note: typeof item.note === 'string' ? item.note : '' }));
+      const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+      storageAvailable = true;
+      return Array.isArray(parsed) ? dedupeItems([parsed]) : [];
     } catch (error) {
       storageAvailable = false;
       return [];
     }
   }
 
-  function writeSaved(items) {
+  function writeStorage(key, items) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(key, JSON.stringify(items));
       storageAvailable = true;
       return true;
     } catch (error) {
@@ -774,22 +1396,49 @@ footer {
     }
   }
 
+  function clearStorage(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      storageAvailable = false;
+    }
+  }
+
+  function activeStorageKey() {
+    return currentUser ? `${USER_STORAGE_PREFIX}${currentUser.id}` : GUEST_STORAGE_KEY;
+  }
+
+  function persistActive() {
+    return writeStorage(activeStorageKey(), savedItems);
+  }
+
   function announce(message) {
     if (!liveRegion) return;
     liveRegion.textContent = '';
     window.setTimeout(() => { liveRegion.textContent = message; }, 20);
   }
 
-  function syncBodyLock() {
-    const drawerOpen = drawer && !drawer.hidden;
-    const noteOpen = noteDialog && !noteDialog.hidden;
-    document.body.classList.toggle('drawer-open', Boolean(drawerOpen || noteOpen));
+  function isOpen(element) {
+    return Boolean(element && !element.hidden);
   }
 
-  function updateButtons() {
-    const savedByUrl = new Map(readSaved().map(item => [item.link, item]));
+  function syncBodyLock() {
+    const locked = [drawer, noteDialog, previewDialog, authDialog].some(isOpen);
+    document.body.classList.toggle('drawer-open', locked);
+  }
+
+  function itemForUrl(url) {
+    return savedItems.find(item => item.link === url) || currentByUrl.get(url) || null;
+  }
+
+  function savedMap() {
+    return new Map(savedItems.map(item => [item.link, item]));
+  }
+
+  function updateSavedIndicators() {
+    const byUrl = savedMap();
     document.querySelectorAll('.save-button').forEach(button => {
-      const savedItem = savedByUrl.get(button.dataset.url);
+      const savedItem = byUrl.get(button.dataset.url);
       const isSaved = Boolean(savedItem);
       const hasNote = Boolean(savedItem && savedItem.note.trim());
       button.classList.toggle('is-saved', isSaved);
@@ -802,27 +1451,173 @@ footer {
       if (label) label.textContent = isSaved ? (hasNote ? '메모 보기' : '메모 추가') : '저장';
     });
     document.querySelectorAll('[data-saved-count]').forEach(node => {
-      node.textContent = String(savedByUrl.size);
+      node.textContent = String(byUrl.size);
     });
+    if (savedDrawerSubtitle) {
+      savedDrawerSubtitle.textContent = byUrl.size
+        ? `${byUrl.size}개의 아티클을 모아두었어요.`
+        : '좋았던 아티클을 저장하고 메모를 남겨보세요.';
+    }
+  }
+
+  function shortAccountLabel(email) {
+    if (!email) return '내 계정';
+    const local = email.split('@')[0] || '내 계정';
+    return local.length > 7 ? `${local.slice(0, 7)}…` : local;
+  }
+
+  function updateAuthIndicators() {
+    const label = currentUser ? shortAccountLabel(currentUser.email) : '로그인';
+    document.querySelectorAll('[data-auth-label]').forEach(node => { node.textContent = label; });
+
+    if (!syncTitle || !syncText || !syncAction) return;
+    if (!authEnabled) {
+      syncTitle.textContent = '이 기기에 저장 중';
+      syncText.textContent = '로그인 연동 전에도 기사와 메모는 이 브라우저에 남아요.';
+      syncAction.textContent = '안내';
+      return;
+    }
+    if (currentUser) {
+      syncTitle.textContent = syncBusy ? '계정과 동기화 중…' : '계정에 안전하게 동기화';
+      syncText.textContent = currentUser.email || '로그인된 계정';
+      syncAction.textContent = '내 계정';
+    } else {
+      syncTitle.textContent = '다른 기기에서도 이어보기';
+      syncText.textContent = '로그인하면 저장한 기사와 메모가 계정에 동기화돼요.';
+      syncAction.textContent = '로그인';
+    }
+  }
+
+  function makeElement(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
+
+  function isVideo(item) {
+    const type = String(item.contentType || '').toLowerCase();
+    const link = String(item.link || '').toLowerCase();
+    return type.includes('영상') || type.includes('video') || link.includes('youtube.com') || link.includes('youtu.be');
+  }
+
+  function fillThumbnail(container, item) {
+    if (!container) return;
+    container.replaceChildren();
+    container.classList.add('noimg');
+    container.classList.toggle('is-video', isVideo(item));
+    container.dataset.initial = (item.source || 'S').slice(0, 1);
+    container.style.setProperty('--fallback', item.fallbackA || '#2752B8');
+    container.style.setProperty('--fallback-2', item.fallbackB || '#6D9CFF');
+
+    if (item.image) {
+      const image = document.createElement('img');
+      image.alt = '';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.addEventListener('load', () => container.classList.remove('noimg'), { once: true });
+      image.addEventListener('error', () => image.remove(), { once: true });
+      image.src = item.image;
+      container.append(image);
+    }
+
+    if (isVideo(item)) {
+      const triangle = makeElement('span', 'play-triangle');
+      triangle.setAttribute('aria-hidden', 'true');
+      container.append(triangle);
+    }
+    if (container === previewThumb && previewMediaLabel) container.append(previewMediaLabel);
+  }
+
+  function renderSaved() {
+    if (!savedList) return;
+    savedList.replaceChildren();
+    updateSavedIndicators();
+    updateAuthIndicators();
+
+    if (!storageAvailable) {
+      savedList.append(makeElement('p', 'saved-empty', '현재 브라우저의 저장 공간을 사용할 수 없어요.'));
+      return;
+    }
+    if (!savedItems.length) {
+      savedList.append(makeElement('p', 'saved-empty', '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'));
+      return;
+    }
+
+    savedItems.forEach(item => {
+      const article = makeElement('article', 'saved-item');
+      const previewButton = makeElement('button', 'saved-preview-trigger');
+      previewButton.type = 'button';
+      previewButton.dataset.previewUrl = item.link;
+      previewButton.setAttribute('aria-label', `${item.title || '저장한 기사'} 상세 보기`);
+
+      const thumb = makeElement('span', 'saved-thumb');
+      fillThumbnail(thumb, item);
+
+      const copy = makeElement('span', 'saved-copy');
+      const meta = makeElement('span', 'saved-meta', [item.briefingDate, item.source].filter(Boolean).join(' · '));
+      const title = makeElement('span', 'saved-title', item.title || '제목 없음');
+      copy.append(meta, title);
+
+      if (item.note && item.note.trim()) {
+        const notePreview = makeElement('span', 'saved-note-preview');
+        const noteLabel = makeElement('strong', '', 'MY NOTE · ');
+        notePreview.append(noteLabel, document.createTextNode(item.note.trim()));
+        copy.append(notePreview);
+      }
+      copy.append(makeElement('span', 'saved-open-hint', '카드로 다시 보기 →'));
+      previewButton.append(thumb, copy);
+
+      const actions = makeElement('div', 'saved-actions');
+      const previewAction = makeElement('button', 'saved-action-button preview-action', '상세 보기');
+      previewAction.type = 'button';
+      previewAction.dataset.previewUrl = item.link;
+      const editButton = makeElement(
+        'button',
+        'saved-action-button edit-note',
+        item.note && item.note.trim() ? '메모 수정' : '메모 추가'
+      );
+      editButton.type = 'button';
+      editButton.dataset.editNoteUrl = item.link;
+      const removeButton = makeElement('button', 'saved-action-button remove-saved', '삭제');
+      removeButton.type = 'button';
+      removeButton.dataset.removeUrl = item.link;
+      actions.append(previewAction, editButton, removeButton);
+
+      article.append(previewButton, actions);
+      savedList.append(article);
+    });
+  }
+
+  function openDrawer() {
+    if (!drawer) return;
+    drawerTrigger = document.activeElement;
+    renderSaved();
+    drawer.hidden = false;
+    syncBodyLock();
+    const closeButton = drawer.querySelector('.close-button');
+    if (closeButton) closeButton.focus();
+  }
+
+  function closeDrawer(restoreFocus = true) {
+    if (!drawer) return;
+    drawer.hidden = true;
+    syncBodyLock();
+    if (restoreFocus && drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
   }
 
   function updateNoteCount() {
     if (noteCount && noteInput) noteCount.textContent = String(noteInput.value.length);
   }
 
-  function itemForUrl(url) {
-    return readSaved().find(item => item.link === url) || currentByUrl.get(url) || null;
-  }
-
   function openNoteDialog(url) {
     if (!noteDialog || !noteInput) return;
     const item = itemForUrl(url);
     if (!item) return;
-
-    const savedItem = readSaved().find(entry => entry.link === url);
+    const savedItem = savedItems.find(entry => entry.link === url);
     activeNoteUrl = url;
     noteTrigger = document.activeElement;
-    noteArticleTitle.textContent = item.title || '제목 없음';
+    if (noteArticleTitle) noteArticleTitle.textContent = item.title || '제목 없음';
     noteInput.value = savedItem ? savedItem.note : '';
     if (noteSaveButton) noteSaveButton.textContent = savedItem ? '메모 저장' : '스크랩 저장';
     updateNoteCount();
@@ -839,142 +1634,382 @@ footer {
     if (restoreFocus && noteTrigger && typeof noteTrigger.focus === 'function') noteTrigger.focus();
   }
 
-  function saveWithNote() {
+  function renderPreview(item) {
+    if (!item) return;
+    fillThumbnail(previewThumb, item);
+    if (previewMediaLabel) previewMediaLabel.textContent = item.contentType || '기사';
+    if (previewCategory) previewCategory.textContent = item.category || '생태계 업데이트';
+    if (previewSource) previewSource.textContent = item.source || '기타';
+    if (previewTitle) previewTitle.textContent = item.title || '제목 없음';
+    if (previewSummary) previewSummary.textContent = item.summary || '';
+    if (previewTakeaway) {
+      previewTakeaway.textContent = item.takeaway || '원문에서 이번 변화가 창업가와 팀에 주는 의미를 확인해보세요.';
+    }
+    if (previewNoteWrap && previewNote) {
+      const hasNote = Boolean(item.note && item.note.trim());
+      previewNoteWrap.hidden = !hasNote;
+      previewNote.textContent = hasNote ? item.note.trim() : '';
+    }
+    if (previewReadLink) previewReadLink.href = item.link;
+    if (previewEditButton) previewEditButton.dataset.previewEditUrl = item.link;
+    if (previewDeleteButton) previewDeleteButton.dataset.previewDeleteUrl = item.link;
+  }
+
+  function openPreview(url) {
+    if (!previewDialog) return;
+    const item = itemForUrl(url);
+    if (!item) return;
+    activePreviewUrl = url;
+    previewTrigger = document.activeElement;
+    renderPreview(item);
+    previewDialog.hidden = false;
+    syncBodyLock();
+    const closeButton = previewDialog.querySelector('.close-button');
+    if (closeButton) closeButton.focus();
+  }
+
+  function closePreview(restoreFocus = true) {
+    if (!previewDialog) return;
+    previewDialog.hidden = true;
+    activePreviewUrl = '';
+    syncBodyLock();
+    if (restoreFocus && previewTrigger && typeof previewTrigger.focus === 'function') previewTrigger.focus();
+  }
+
+  function remoteRowToItem(row) {
+    return normalizeItem({
+      title: row.title,
+      link: row.article_url,
+      source: row.source,
+      summary: row.summary,
+      takeaway: row.takeaway,
+      category: row.category,
+      contentType: row.content_type,
+      briefingDate: row.briefing_date,
+      image: row.thumbnail_url,
+      fallbackA: row.fallback_a,
+      fallbackB: row.fallback_b,
+      note: row.note,
+      savedAt: row.saved_at,
+      updatedAt: row.updated_at,
+      pendingSync: false,
+    });
+  }
+
+  function itemToRemote(item) {
+    return {
+      user_id: currentUser.id,
+      article_url: item.link,
+      title: item.title || '제목 없음',
+      source: item.source || '기타',
+      summary: item.summary || '',
+      takeaway: item.takeaway || '',
+      category: item.category || '생태계 업데이트',
+      content_type: item.contentType || '기사',
+      briefing_date: item.briefingDate || '',
+      thumbnail_url: item.image || '',
+      fallback_a: item.fallbackA || '#2752B8',
+      fallback_b: item.fallbackB || '#6D9CFF',
+      note: item.note || '',
+      saved_at: item.savedAt || new Date().toISOString(),
+      updated_at: item.updatedAt || new Date().toISOString(),
+    };
+  }
+
+  async function upsertItemsToCloud(items) {
+    if (!supabaseClient || !currentUser || !items.length) return true;
+    const { error } = await supabaseClient
+      .from('saved_articles')
+      .upsert(items.map(itemToRemote), { onConflict: 'user_id,article_url' });
+    if (error) {
+      console.error('SNAAC saved article upsert failed:', error);
+      return false;
+    }
+    return true;
+  }
+
+  async function syncSavedFromCloud() {
+    if (!supabaseClient || !currentUser || syncBusy) return;
+    syncBusy = true;
+    updateAuthIndicators();
+
+    const userKey = activeStorageKey();
+    const userLocal = readStorage(userKey);
+    const pendingLocal = userLocal.filter(item => item.pendingSync);
+    const guestItems = readStorage(GUEST_STORAGE_KEY);
+
+    const { data, error } = await supabaseClient
+      .from('saved_articles')
+      .select('*')
+      .order('saved_at', { ascending: false });
+
+    if (error) {
+      console.error('SNAAC saved article fetch failed:', error);
+      savedItems = dedupeItems([userLocal, guestItems]);
+      writeStorage(userKey, savedItems);
+      syncBusy = false;
+      updateSavedIndicators();
+      renderSaved();
+      announce('계정 동기화에 실패했지만 이 기기에는 저장되어 있어요.');
+      return;
+    }
+
+    const remoteItems = (data || []).map(remoteRowToItem);
+    savedItems = dedupeItems([remoteItems, pendingLocal, guestItems]).map(item => ({ ...item, pendingSync: true }));
+    writeStorage(userKey, savedItems);
+
+    const uploaded = await upsertItemsToCloud(savedItems);
+    if (uploaded) {
+      savedItems = savedItems.map(item => ({ ...item, pendingSync: false }));
+      writeStorage(userKey, savedItems);
+      clearStorage(GUEST_STORAGE_KEY);
+    }
+
+    syncBusy = false;
+    updateSavedIndicators();
+    renderSaved();
+    if (!uploaded) announce('기기 저장은 완료됐지만 계정 동기화를 다시 시도해 주세요.');
+  }
+
+  async function saveWithNote() {
     if (!activeNoteUrl || !noteInput) return;
-    const saved = readSaved();
-    const index = saved.findIndex(item => item.link === activeNoteUrl);
+    const existingIndex = savedItems.findIndex(item => item.link === activeNoteUrl);
     const currentItem = currentByUrl.get(activeNoteUrl);
-    const existingItem = index >= 0 ? saved[index] : null;
+    const existingItem = existingIndex >= 0 ? savedItems[existingIndex] : null;
     const item = currentItem || existingItem;
     if (!item) return;
 
     const note = noteInput.value.trim();
     const now = new Date().toISOString();
-    if (index >= 0) {
-      saved[index] = {
-        ...existingItem,
-        ...(currentItem || {}),
-        note,
-        savedAt: existingItem.savedAt || now,
-        updatedAt: now,
-      };
-    } else {
-      saved.unshift({ ...item, note, savedAt: now, updatedAt: now });
-    }
+    const nextItem = normalizeItem({
+      ...(existingItem || {}),
+      ...(currentItem || {}),
+      note,
+      savedAt: existingItem && existingItem.savedAt || now,
+      updatedAt: now,
+      pendingSync: Boolean(currentUser),
+    });
 
-    if (!writeSaved(saved)) {
+    if (existingIndex >= 0) savedItems.splice(existingIndex, 1);
+    savedItems.unshift(nextItem);
+    savedItems = dedupeItems([savedItems]);
+
+    if (!persistActive()) {
       announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
       return;
     }
 
     closeNoteDialog();
-    updateButtons();
+    updateSavedIndicators();
     renderSaved();
-    announce(note ? '메모와 함께 저장했어요.' : '기사만 저장했어요.');
+    if (activePreviewUrl === nextItem.link) renderPreview(nextItem);
+
+    if (currentUser) {
+      const uploaded = await upsertItemsToCloud([nextItem]);
+      if (uploaded) {
+        const saved = savedItems.find(savedItem => savedItem.link === nextItem.link);
+        if (saved) saved.pendingSync = false;
+        persistActive();
+        announce(note ? '메모와 함께 계정에 저장했어요.' : '기사를 계정에 저장했어요.');
+      } else {
+        announce('이 기기에는 저장했지만 계정 동기화에 실패했어요.');
+      }
+    } else {
+      announce(note ? '메모와 함께 이 기기에 저장했어요.' : '기사를 이 기기에 저장했어요.');
+    }
   }
 
-  function removeSaved(url) {
-    const saved = readSaved().filter(item => item.link !== url);
-    if (!writeSaved(saved)) {
+  async function removeSaved(url) {
+    savedItems = savedItems.filter(item => item.link !== url);
+    if (!persistActive()) {
       announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
       return;
     }
-    if (activeNoteUrl === url && noteDialog && !noteDialog.hidden) closeNoteDialog(false);
-    updateButtons();
+
+    if (activeNoteUrl === url && isOpen(noteDialog)) closeNoteDialog(false);
+    if (activePreviewUrl === url && isOpen(previewDialog)) closePreview(false);
+    updateSavedIndicators();
     renderSaved();
-    announce('저장한 기사에서 삭제했어요.');
-  }
 
-  function renderSaved() {
-    if (!savedList) return;
-    const saved = readSaved();
-    savedList.replaceChildren();
-
-    if (!storageAvailable) {
-      const note = document.createElement('p');
-      note.className = 'saved-empty';
-      note.textContent = '현재 브라우저의 저장 공간을 사용할 수 없어요.';
-      savedList.append(note);
-      return;
-    }
-
-    if (!saved.length) {
-      const note = document.createElement('p');
-      note.className = 'saved-empty';
-      note.textContent = '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.';
-      savedList.append(note);
-      return;
-    }
-
-    saved.forEach(item => {
-      const article = document.createElement('article');
-      article.className = 'saved-item';
-
-      const meta = document.createElement('div');
-      meta.className = 'saved-meta';
-      meta.textContent = [item.briefingDate, item.source].filter(Boolean).join(' · ');
-
-      const link = document.createElement('a');
-      link.className = 'saved-title';
-      link.href = item.link;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = item.title || '제목 없음';
-
-      article.append(meta, link);
-
-      if (item.note && item.note.trim()) {
-        const noteBox = document.createElement('p');
-        noteBox.className = 'saved-note';
-        const noteLabel = document.createElement('span');
-        noteLabel.className = 'saved-note-label';
-        noteLabel.textContent = 'MY NOTE';
-        noteBox.append(noteLabel, document.createTextNode(item.note.trim()));
-        article.append(noteBox);
+    if (currentUser && supabaseClient) {
+      const { error } = await supabaseClient
+        .from('saved_articles')
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('article_url', url);
+      if (error) {
+        console.error('SNAAC saved article delete failed:', error);
+        announce('기기에서는 삭제했지만 계정 동기화에 실패했어요.');
+        return;
       }
+    }
+    announce('저장함에서 삭제했어요.');
+  }
 
-      const actions = document.createElement('div');
-      actions.className = 'saved-actions';
-
-      const editButton = document.createElement('button');
-      editButton.type = 'button';
-      editButton.className = 'saved-action-button edit-note';
-      editButton.dataset.editNoteUrl = item.link;
-      editButton.textContent = item.note && item.note.trim() ? '메모 수정' : '메모 추가';
-
-      const removeButton = document.createElement('button');
-      removeButton.type = 'button';
-      removeButton.className = 'saved-action-button remove-saved';
-      removeButton.dataset.removeUrl = item.link;
-      removeButton.textContent = '삭제';
-
-      actions.append(editButton, removeButton);
-      article.append(actions);
-      savedList.append(article);
+  function setAuthMode(mode) {
+    authMode = mode === 'signup' ? 'signup' : 'login';
+    document.querySelectorAll('[data-auth-mode]').forEach(button => {
+      const active = button.dataset.authMode === authMode;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-selected', String(active));
     });
+    if (authSubmit) authSubmit.textContent = authMode === 'signup' ? '회원가입' : '로그인';
+    if (authPassword) authPassword.autocomplete = authMode === 'signup' ? 'new-password' : 'current-password';
+    if (authMessage) {
+      authMessage.textContent = '';
+      authMessage.classList.remove('is-error');
+    }
   }
 
-  function openDrawer() {
-    if (!drawer) return;
-    drawerTrigger = document.activeElement;
-    renderSaved();
-    drawer.hidden = false;
-    syncBodyLock();
-    const closeButton = drawer.querySelector('.close-button');
-    if (closeButton) closeButton.focus();
+  function updateAuthDialogView() {
+    if (!authGuestView || !authUserView || !authSetupView) return;
+    authSetupView.hidden = authEnabled;
+    authGuestView.hidden = !authEnabled || Boolean(currentUser);
+    authUserView.hidden = !authEnabled || !currentUser;
+    if (accountEmail) accountEmail.textContent = currentUser && currentUser.email || '';
   }
 
-  function closeDrawer() {
-    if (!drawer) return;
-    drawer.hidden = true;
+  function openAuthDialog() {
+    if (!authDialog) return;
+    authTrigger = document.activeElement;
+    updateAuthDialogView();
+    setAuthMode(authMode);
+    authDialog.hidden = false;
     syncBodyLock();
-    if (drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
+    window.setTimeout(() => {
+      if (currentUser) {
+        const logout = authDialog.querySelector('[data-logout]');
+        if (logout) logout.focus();
+      } else if (authEnabled && authEmail) {
+        authEmail.focus();
+      } else {
+        const closeButton = authDialog.querySelector('.close-button');
+        if (closeButton) closeButton.focus();
+      }
+    }, 40);
+  }
+
+  function closeAuthDialog(restoreFocus = true) {
+    if (!authDialog) return;
+    authDialog.hidden = true;
+    syncBodyLock();
+    if (restoreFocus && authTrigger && typeof authTrigger.focus === 'function') authTrigger.focus();
+  }
+
+  function setAuthMessage(message, isError = false) {
+    if (!authMessage) return;
+    authMessage.textContent = message;
+    authMessage.classList.toggle('is-error', isError);
+  }
+
+  async function handleAuthSubmit(event) {
+    event.preventDefault();
+    if (!supabaseClient || !authEmail || !authPassword || !authSubmit) return;
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    if (!email || !password) {
+      setAuthMessage('이메일과 비밀번호를 모두 입력해 주세요.', true);
+      return;
+    }
+    if (password.length < 8) {
+      setAuthMessage('비밀번호는 8자 이상으로 입력해 주세요.', true);
+      return;
+    }
+
+    authSubmit.disabled = true;
+    setAuthMessage(authMode === 'signup' ? '계정을 만들고 있어요…' : '로그인하고 있어요…');
+    try {
+      if (authMode === 'signup') {
+        const redirectTo = authConfig.redirectUrl || new URL(authConfig.homeHref || './', window.location.href).href;
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: redirectTo },
+        });
+        if (error) throw error;
+        if (data && data.session) {
+          setAuthMessage('회원가입과 로그인이 완료됐어요.');
+          closeAuthDialog();
+        } else {
+          setAuthMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인해 주세요.');
+        }
+      } else {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setAuthMessage('로그인했어요. 저장함을 동기화합니다.');
+        closeAuthDialog();
+      }
+    } catch (error) {
+      console.error('SNAAC auth error:', error);
+      setAuthMessage(error && error.message ? error.message : '로그인 처리 중 오류가 발생했어요.', true);
+    } finally {
+      authSubmit.disabled = false;
+    }
+  }
+
+  async function handleSignOut() {
+    if (!supabaseClient) return;
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      announce('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    closeAuthDialog();
+  }
+
+  async function applySession(session) {
+    const nextUser = session && session.user || null;
+    const previousId = currentUser && currentUser.id || '';
+    const nextId = nextUser && nextUser.id || '';
+    currentUser = nextUser;
+    updateAuthDialogView();
+    updateAuthIndicators();
+
+    if (nextUser) {
+      if (nextId !== previousId || !savedItems.length) await syncSavedFromCloud();
+    } else {
+      savedItems = readStorage(GUEST_STORAGE_KEY);
+      updateSavedIndicators();
+      renderSaved();
+    }
+  }
+
+  async function initSupabase() {
+    updateAuthDialogView();
+    updateAuthIndicators();
+    if (!authEnabled) return;
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      console.error('Supabase library did not load.');
+      return;
+    }
+
+    supabaseClient = window.supabase.createClient(authConfig.url, authConfig.publishableKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) console.error('Supabase session error:', error);
+    await applySession(data && data.session || null);
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      window.setTimeout(() => { void applySession(session); }, 0);
+    });
   }
 
   document.addEventListener('click', event => {
     const saveButton = event.target.closest('.save-button');
     if (saveButton) {
       openNoteDialog(saveButton.dataset.url);
+      return;
+    }
+
+    const previewButton = event.target.closest('[data-preview-url]');
+    if (previewButton) {
+      openPreview(previewButton.dataset.previewUrl);
       return;
     }
 
@@ -986,7 +2021,7 @@ footer {
 
     const saveNoteButton = event.target.closest('[data-save-note]');
     if (saveNoteButton) {
-      saveWithNote();
+      void saveWithNote();
       return;
     }
 
@@ -996,20 +2031,62 @@ footer {
       return;
     }
 
-    const openButton = event.target.closest('[data-open-saved]');
-    if (openButton) {
+    const openSavedButton = event.target.closest('[data-open-saved]');
+    if (openSavedButton) {
       openDrawer();
       return;
     }
 
-    const closeButton = event.target.closest('[data-close-saved]');
-    if (closeButton) {
+    const closeSavedButton = event.target.closest('[data-close-saved]');
+    if (closeSavedButton) {
       closeDrawer();
       return;
     }
 
     const removeButton = event.target.closest('[data-remove-url]');
-    if (removeButton) removeSaved(removeButton.dataset.removeUrl);
+    if (removeButton) {
+      void removeSaved(removeButton.dataset.removeUrl);
+      return;
+    }
+
+    const closePreviewButton = event.target.closest('[data-close-preview]');
+    if (closePreviewButton) {
+      closePreview();
+      return;
+    }
+
+    const previewEditButtonTarget = event.target.closest('[data-preview-edit-url]');
+    if (previewEditButtonTarget) {
+      openNoteDialog(previewEditButtonTarget.dataset.previewEditUrl);
+      return;
+    }
+
+    const previewDeleteButtonTarget = event.target.closest('[data-preview-delete-url]');
+    if (previewDeleteButtonTarget) {
+      void removeSaved(previewDeleteButtonTarget.dataset.previewDeleteUrl);
+      return;
+    }
+
+    const openAuthButton = event.target.closest('[data-open-auth]');
+    if (openAuthButton) {
+      openAuthDialog();
+      return;
+    }
+
+    const closeAuthButton = event.target.closest('[data-close-auth]');
+    if (closeAuthButton) {
+      closeAuthDialog();
+      return;
+    }
+
+    const authTab = event.target.closest('[data-auth-mode]');
+    if (authTab) {
+      setAuthMode(authTab.dataset.authMode);
+      return;
+    }
+
+    const logoutButton = event.target.closest('[data-logout]');
+    if (logoutButton) void handleSignOut();
   });
 
   if (noteInput) {
@@ -1017,28 +2094,36 @@ footer {
     noteInput.addEventListener('keydown', event => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
-        saveWithNote();
+        void saveWithNote();
       }
     });
   }
 
+  if (authForm) authForm.addEventListener('submit', event => { void handleAuthSubmit(event); });
+
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
-    if (noteDialog && !noteDialog.hidden) {
-      closeNoteDialog();
-    } else if (drawer && !drawer.hidden) {
-      closeDrawer();
-    }
+    if (isOpen(authDialog)) closeAuthDialog();
+    else if (isOpen(noteDialog)) closeNoteDialog();
+    else if (isOpen(previewDialog)) closePreview();
+    else if (isOpen(drawer)) closeDrawer();
   });
 
   window.addEventListener('storage', () => {
-    updateButtons();
+    savedItems = readStorage(activeStorageKey());
+    updateSavedIndicators();
     renderSaved();
+    if (activePreviewUrl) {
+      const item = itemForUrl(activePreviewUrl);
+      if (item) renderPreview(item);
+      else closePreview(false);
+    }
   });
 
-  updateButtons();
+  setAuthMode('login');
+  updateSavedIndicators();
   renderSaved();
-})();
-</script>
+  void initSupabase();
+})();</script>
 </body>
 </html>
