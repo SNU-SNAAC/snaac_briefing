@@ -13,7 +13,9 @@
 - 저장한 항목을 누르면 원문으로 바로 이동하지 않고 브리핑 카드 상세 화면 표시
 - 선택형 스크랩 메모 지원
 - Supabase 설정 시 이메일/비밀번호 로그인과 저장함·메모 기기 간 동기화
-- Supabase 미설정 또는 비로그인 상태에서도 브라우저 localStorage 저장 기능 유지
+- 기사 저장과 저장함 열람은 로그인 후 이용하며, 기존 비로그인 저장 데이터는 첫 로그인 때 계정으로 이전
+- 지난 브리핑은 월 → 주차 → 날짜 순의 서랍형 아카이브로 정리
+- 지난 브리핑 아래에 SNAAC 공식 홈페이지로 연결되는 소개 카드 제공
 """
 
 from __future__ import annotations
@@ -716,6 +718,9 @@ footer {
   .save-button:hover,
   .close-button:hover,
   .saved-action-button:hover { border-color: var(--ink); }
+  .archive-summary:hover { background: #fafafa; }
+  .archive-day-row:hover { background: #fafafa; }
+  .about-snaac-card:hover { transform: translateY(-1px); box-shadow: 0 13px 32px rgba(17,17,17,.15); }
 }
 
 @media (max-width: 390px) {
@@ -740,8 +745,8 @@ footer {
 }
 """
 
-CSS_V4 = r"""
-/* ── v4: 로고, 눈에 띄는 저장함, 상세 카드, 로그인 ── */
+CSS_V5 = r"""
+/* ── v5: 로그인 필수 저장, 서랍형 아카이브, ABOUT SNAAC ── */
 .logo-row {
   display: flex;
   align-items: center;
@@ -1169,6 +1174,181 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
 .auth-setup-note h3 { margin: 0 0 7px; font-size: 15px; }
 .auth-setup-note p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
 
+
+/* 로그인 목적 안내 */
+.auth-intent {
+  margin: 0 0 13px;
+  padding: 12px 13px;
+  border: 1px solid var(--ink);
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+/* 월 → 주차 → 날짜 순 서랍형 아카이브 */
+.archive-tree {
+  display: grid;
+  gap: 10px;
+}
+.archive-month,
+.archive-week {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+}
+.archive-month[open] {
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 24px rgba(20,20,18,.045);
+}
+.archive-summary {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 15px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.archive-summary::-webkit-details-marker { display: none; }
+.archive-summary::marker { content: ''; }
+.archive-summary-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.archive-summary-title {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -.015em;
+}
+.archive-summary-meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+.archive-chevron {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 14px;
+  transition: transform .16s ease;
+}
+details[open] > .archive-summary .archive-chevron { transform: rotate(180deg); }
+.archive-month-body {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+.archive-week {
+  border-radius: 12px;
+  box-shadow: none;
+}
+.archive-week .archive-summary {
+  min-height: 54px;
+  padding-left: 13px;
+  padding-right: 13px;
+}
+.archive-week .archive-summary-title { font-size: 13.5px; }
+.archive-week .archive-chevron {
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+}
+.archive-day-list {
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.archive-day-row {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+.archive-day-row:last-child { border-bottom: 0; }
+.archive-day-date {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.archive-day-count {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.archive-day-arrow { color: var(--muted); font-size: 14px; }
+.archive-tree-compact .archive-month:not([open]) .archive-month-body { display: none; }
+
+/* 지난 브리핑 아래 ABOUT SNAAC */
+.about-snaac-section { margin-top: 18px; }
+.about-snaac-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 20px 58px 20px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 16px;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 10px 28px rgba(17,17,17,.11);
+}
+.about-snaac-card::after {
+  content: '↗';
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 50%;
+  font-size: 17px;
+  transform: translateY(-50%);
+}
+.about-snaac-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255,255,255,.62);
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+.about-snaac-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -.015em;
+}
+.about-snaac-copy {
+  display: block;
+  margin-top: 5px;
+  color: rgba(255,255,255,.7);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 @media (max-width: 390px) {
   .logo-row { padding-top: 11px; padding-bottom: 15px; }
   .site-logo { width: 164px; }
@@ -1178,6 +1358,9 @@ body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: 
   .saved-thumb { min-height: 72px; }
   .floating-saved { min-width: 164px; min-height: 48px; }
   .preview-card { margin-left: 10px; margin-right: 10px; }
+  .archive-day-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .archive-day-count { display: none; }
+  .about-snaac-card { padding-left: 16px; }
 }
 """
 
@@ -1229,10 +1412,13 @@ JS = r"""(() => {
   const authPassword = document.getElementById('authPassword');
   const authSubmit = document.getElementById('authSubmit');
   const authMessage = document.getElementById('authMessage');
+  const authIntent = document.getElementById('authIntent');
   const accountEmail = document.getElementById('accountEmail');
 
   let storageAvailable = true;
-  let savedItems = readStorage(GUEST_STORAGE_KEY);
+  // 기존 버전의 비로그인 저장 데이터는 localStorage에 남겨 두었다가 첫 로그인 때 이전합니다.
+  // 새 저장은 로그인 후에만 허용하므로, 로그아웃 화면에서는 저장함을 비워 둡니다.
+  let savedItems = [];
   let drawerTrigger = null;
   let noteTrigger = null;
   let previewTrigger = null;
@@ -1243,6 +1429,8 @@ JS = r"""(() => {
   let currentUser = null;
   let supabaseClient = null;
   let syncBusy = false;
+  let pendingSaveUrl = '';
+  let pendingOpenSaved = false;
 
   const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
 
@@ -1365,7 +1553,7 @@ JS = r"""(() => {
     if (savedDrawerSubtitle) {
       savedDrawerSubtitle.textContent = byUrl.size
         ? `${byUrl.size}개의 아티클을 모아두었어요.`
-        : '좋았던 아티클을 저장하고 메모를 남겨보세요.';
+        : (currentUser ? '좋았던 아티클을 저장하고 메모를 남겨보세요.' : '로그인 후 나만의 저장함을 만들어보세요.');
     }
   }
 
@@ -1381,9 +1569,9 @@ JS = r"""(() => {
 
     if (!syncTitle || !syncText || !syncAction) return;
     if (!authEnabled) {
-      syncTitle.textContent = '이 기기에 저장 중';
-      syncText.textContent = '로그인 연동 전에도 기사와 메모는 이 브라우저에 남아요.';
-      syncAction.textContent = '안내';
+      syncTitle.textContent = '로그인 연결이 필요해요';
+      syncText.textContent = 'Supabase 설정을 완료해야 저장함을 사용할 수 있어요.';
+      syncAction.textContent = '설정 안내';
       return;
     }
     if (currentUser) {
@@ -1391,8 +1579,8 @@ JS = r"""(() => {
       syncText.textContent = currentUser.email || '로그인된 계정';
       syncAction.textContent = '내 계정';
     } else {
-      syncTitle.textContent = '다른 기기에서도 이어보기';
-      syncText.textContent = '로그인하면 저장한 기사와 메모가 계정에 동기화돼요.';
+      syncTitle.textContent = '로그인 후 저장 가능';
+      syncText.textContent = '저장한 기사와 메모는 로그인한 계정에 동기화돼요.';
       syncAction.textContent = '로그인';
     }
   }
@@ -1449,7 +1637,9 @@ JS = r"""(() => {
       return;
     }
     if (!savedItems.length) {
-      savedList.append(makeElement('p', 'saved-empty', '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'));
+      savedList.append(makeElement('p', 'saved-empty', currentUser
+        ? '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'
+        : '저장함은 로그인 후 사용할 수 있어요.'));
       return;
     }
 
@@ -1498,7 +1688,26 @@ JS = r"""(() => {
     });
   }
 
+  function setAuthIntent(message = '') {
+    if (!authIntent) return;
+    authIntent.textContent = message;
+    authIntent.hidden = !message;
+  }
+
+  function requestLogin(intent, { saveUrl = '', openSaved = false } = {}) {
+    pendingSaveUrl = saveUrl;
+    pendingOpenSaved = openSaved;
+    setAuthMode('login');
+    openAuthDialog();
+    setAuthIntent(intent);
+    if (!authEnabled) announce('로그인 연결이 완료된 뒤 저장함을 사용할 수 있어요.');
+  }
+
   function openDrawer() {
+    if (!currentUser) {
+      requestLogin('저장함은 로그인 후 사용할 수 있어요. 로그인하면 저장한 기사와 메모를 여러 기기에서 이어볼 수 있습니다.', { openSaved: true });
+      return;
+    }
     if (!drawer) return;
     drawerTrigger = document.activeElement;
     renderSaved();
@@ -1520,6 +1729,10 @@ JS = r"""(() => {
   }
 
   function openNoteDialog(url) {
+    if (!currentUser) {
+      requestLogin('기사를 저장하려면 먼저 로그인해 주세요. 로그인하면 바로 스크랩 메모 화면으로 이어집니다.', { saveUrl: url });
+      return;
+    }
     if (!noteDialog || !noteInput) return;
     const item = itemForUrl(url);
     if (!item) return;
@@ -1682,6 +1895,12 @@ JS = r"""(() => {
 
   async function saveWithNote() {
     if (!activeNoteUrl || !noteInput) return;
+    if (!currentUser) {
+      const requestedUrl = activeNoteUrl;
+      closeNoteDialog(false);
+      requestLogin('기사를 저장하려면 먼저 로그인해 주세요. 로그인하면 바로 스크랩 메모 화면으로 이어집니다.', { saveUrl: requestedUrl });
+      return;
+    }
     const existingIndex = savedItems.findIndex(item => item.link === activeNoteUrl);
     const currentItem = currentByUrl.get(activeNoteUrl);
     const existingItem = existingIndex >= 0 ? savedItems[existingIndex] : null;
@@ -1723,8 +1942,6 @@ JS = r"""(() => {
       } else {
         announce('이 기기에는 저장했지만 계정 동기화에 실패했어요.');
       }
-    } else {
-      announce(note ? '메모와 함께 이 기기에 저장했어요.' : '기사를 이 기기에 저장했어요.');
     }
   }
 
@@ -1798,9 +2015,14 @@ JS = r"""(() => {
     }, 40);
   }
 
-  function closeAuthDialog(restoreFocus = true) {
+  function closeAuthDialog(restoreFocus = true, preserveIntent = false) {
     if (!authDialog) return;
     authDialog.hidden = true;
+    if (!preserveIntent && !currentUser) {
+      pendingSaveUrl = '';
+      pendingOpenSaved = false;
+      setAuthIntent('');
+    }
     syncBodyLock();
     if (restoreFocus && authTrigger && typeof authTrigger.focus === 'function') authTrigger.focus();
   }
@@ -1838,7 +2060,7 @@ JS = r"""(() => {
         if (error) throw error;
         if (data && data.session) {
           setAuthMessage('회원가입과 로그인이 완료됐어요.');
-          closeAuthDialog();
+          closeAuthDialog(true, true);
         } else {
           setAuthMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인해 주세요.');
         }
@@ -1846,7 +2068,7 @@ JS = r"""(() => {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setAuthMessage('로그인했어요. 저장함을 동기화합니다.');
-        closeAuthDialog();
+        closeAuthDialog(true, true);
       }
     } catch (error) {
       console.error('SNAAC auth error:', error);
@@ -1876,8 +2098,15 @@ JS = r"""(() => {
 
     if (nextUser) {
       if (nextId !== previousId || !savedItems.length) await syncSavedFromCloud();
+      const saveUrl = pendingSaveUrl;
+      const shouldOpenSaved = pendingOpenSaved;
+      pendingSaveUrl = '';
+      pendingOpenSaved = false;
+      setAuthIntent('');
+      if (saveUrl) window.setTimeout(() => openNoteDialog(saveUrl), 20);
+      else if (shouldOpenSaved) window.setTimeout(() => openDrawer(), 20);
     } else {
-      savedItems = readStorage(GUEST_STORAGE_KEY);
+      savedItems = [];
       updateSavedIndicators();
       renderSaved();
     }
@@ -1978,6 +2207,9 @@ JS = r"""(() => {
 
     const openAuthButton = event.target.closest('[data-open-auth]');
     if (openAuthButton) {
+      pendingSaveUrl = '';
+      pendingOpenSaved = false;
+      setAuthIntent('');
       openAuthDialog();
       return;
     }
@@ -2287,15 +2519,92 @@ def _archive_entries(exclude_slug: str | None = None) -> list[dict]:
             except (OSError, json.JSONDecodeError):
                 pass
 
+        week_number = ((date.day - 1) // 7) + 1
         entries.append(
             {
                 "slug": slug,
                 "label": f"{date.month}월 {date.day}일",
+                "day_label": f"{date.month}월 {date.day}일 {WEEKDAYS[date.weekday()]}요일",
                 "full_label": f"{date.year}년 {date.month}월 {date.day}일",
+                "month_key": date.strftime("%Y-%m"),
+                "month_label": f"{date.month}월 브리핑",
+                "year_label": f"{date.year}년",
+                "week_number": week_number,
+                "week_label": f"{week_number}주차 브리핑",
                 "count": count,
+                "date": date,
             }
         )
     return entries
+
+
+def _archive_tree(entries: list[dict], item_prefix: str = "", *, compact: bool = False) -> str:
+    """아카이브를 월 → 주차 → 날짜 순의 details 서랍으로 렌더링합니다."""
+    if not entries:
+        return '<p class="empty-archive">지난 브리핑이 쌓이면 이곳에서 다시 볼 수 있어요.</p>'
+
+    months: dict[str, dict] = {}
+    for entry in entries:
+        month = months.setdefault(
+            entry["month_key"],
+            {
+                "label": entry["month_label"],
+                "year": entry["year_label"],
+                "entries": [],
+                "weeks": {},
+            },
+        )
+        month["entries"].append(entry)
+        month["weeks"].setdefault(entry["week_number"], []).append(entry)
+
+    month_blocks: list[str] = []
+    for month_index, month in enumerate(months.values()):
+        week_blocks: list[str] = []
+        for week_index, (week_number, week_entries) in enumerate(month["weeks"].items()):
+            dates = [entry["date"] for entry in week_entries]
+            start = min(dates)
+            end = max(dates)
+            range_label = (
+                f"{start.month}/{start.day} · 1회"
+                if start.date() == end.date()
+                else f"{start.month}/{start.day}–{end.month}/{end.day} · {len(week_entries)}회"
+            )
+            day_rows = "".join(
+                f'<a class="archive-day-row" href="{item_prefix}{entry["slug"]}.html">'
+                f'<span class="archive-day-date">{entry["day_label"]}</span>'
+                f'<span class="archive-day-count">{entry["count"]}개의 큐레이션</span>'
+                '<span class="archive-day-arrow" aria-hidden="true">→</span>'
+                '</a>'
+                for entry in week_entries
+            )
+            week_open = " open" if month_index == 0 and week_index == 0 else ""
+            week_blocks.append(
+                f'<details class="archive-week"{week_open}>'
+                '<summary class="archive-summary archive-week-summary">'
+                '<span class="archive-summary-copy">'
+                f'<span class="archive-summary-title">{week_number}주차 브리핑</span>'
+                f'<span class="archive-summary-meta">{range_label}</span>'
+                '</span><span class="archive-chevron" aria-hidden="true">⌄</span>'
+                '</summary>'
+                f'<div class="archive-day-list">{day_rows}</div>'
+                '</details>'
+            )
+
+        month_open = " open" if month_index == 0 else ""
+        month_blocks.append(
+            f'<details class="archive-month"{month_open}>'
+            '<summary class="archive-summary archive-month-summary">'
+            '<span class="archive-summary-copy">'
+            f'<span class="archive-summary-title">{month["label"]}</span>'
+            f'<span class="archive-summary-meta">{month["year"]} · {len(month["entries"])}회</span>'
+            '</span><span class="archive-chevron" aria-hidden="true">⌄</span>'
+            '</summary>'
+            f'<div class="archive-month-body">{"".join(week_blocks)}</div>'
+            '</details>'
+        )
+
+    compact_class = " archive-tree-compact" if compact else ""
+    return f'<div class="archive-tree{compact_class}">{"".join(month_blocks)}</div>'
 
 
 def _archive_section(today_slug: str, context: str) -> str:
@@ -2307,25 +2616,25 @@ def _archive_section(today_slug: str, context: str) -> str:
         item_prefix = ""
         index_href = "./"
 
-    if entries:
-        rows = "".join(
-            f'<a class="archive-row" href="{item_prefix}{entry["slug"]}.html">'
-            f'<span class="archive-date">{entry["label"]}</span>'
-            f'<span class="archive-count">{entry["count"]}개의 큐레이션</span>'
-            '<span class="archive-arrow" aria-hidden="true">→</span>'
-            "</a>"
-            for entry in entries
-        )
-    else:
-        rows = '<p class="empty-archive">지난 브리핑이 쌓이면 이곳에서 다시 볼 수 있어요.</p>'
-
+    tree = _archive_tree(entries, item_prefix, compact=True)
     return f"""
 <section class="archive-section" id="archive">
   <div class="section-head">
     <h2>지난 브리핑</h2>
     <a href="{index_href}">전체 보기 →</a>
   </div>
-  <div class="archive-list">{rows}</div>
+  {tree}
+</section>"""
+
+
+def _about_snaac_section() -> str:
+    return """
+<section class="about-snaac-section" aria-label="SNAAC 소개">
+  <a class="about-snaac-card" href="https://www.snaac.co.kr" target="_blank" rel="noopener noreferrer">
+    <span class="about-snaac-eyebrow">ABOUT SNAAC</span>
+    <span class="about-snaac-title">SNAAC을 더 알아보세요</span>
+    <span class="about-snaac-copy">대학 스타트업 동아리 SNAAC의 활동과 소식을 공식 홈페이지에서 확인할 수 있어요.</span>
+  </a>
 </section>"""
 
 
@@ -2379,8 +2688,8 @@ def _overlays_html() -> str:
     </div>
     <div class="sync-strip">
       <div class="sync-copy">
-        <p class="sync-title" id="syncTitle">이 기기에 저장 중</p>
-        <p class="sync-text" id="syncText">로그인하면 다른 기기에서도 이어볼 수 있어요.</p>
+        <p class="sync-title" id="syncTitle">계정 저장함</p>
+        <p class="sync-text" id="syncText">로그인한 계정에서만 기사와 메모를 저장할 수 있어요.</p>
       </div>
       <button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button>
     </div>
@@ -2458,6 +2767,7 @@ def _overlays_html() -> str:
     </div>
     <div class="auth-content">
       <div id="authGuestView">
+        <p class="auth-intent" id="authIntent" hidden></p>
         <div class="auth-tabs" role="tablist" aria-label="로그인 방식">
           <button class="auth-tab is-active" type="button" role="tab" data-auth-mode="login" aria-selected="true">로그인</button>
           <button class="auth-tab" type="button" role="tab" data-auth-mode="signup" aria-selected="false">회원가입</button>
@@ -2483,7 +2793,7 @@ def _overlays_html() -> str:
       <div id="authSetupView" hidden>
         <div class="auth-setup-note">
           <h3>로그인 연결 전이에요</h3>
-          <p>운영자가 Supabase 공개 설정을 연결하면 이메일 회원가입과 여러 기기 저장함 동기화가 활성화됩니다. 지금도 저장함은 이 브라우저에서 사용할 수 있어요.</p>
+          <p>기사 저장과 저장함을 사용하려면 Supabase 로그인 연결이 필요합니다. 운영자가 공개 설정을 연결한 뒤 다시 시도해 주세요.</p>
         </div>
       </div>
     </div>
@@ -2534,7 +2844,7 @@ def _page_html(picks: list[dict], now: datetime, context: str) -> str:
     ]
 
     return f"""<!DOCTYPE html>
-<html lang="ko" data-snaac-ui="4">
+<html lang="ko" data-snaac-ui="5">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -2545,7 +2855,7 @@ def _page_html(picks: list[dict], now: datetime, context: str) -> str:
 <meta property="og:description" content="무료로 확인할 수 있는 스타트업 업데이트와 창업가·VC 인사이트">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
-<style>{CSS}\n{CSS_V4}</style>
+<style>{CSS}\n{CSS_V5}</style>
 </head>
 <body>
 <div class="wrap">
@@ -2568,11 +2878,12 @@ def _page_html(picks: list[dict], now: datetime, context: str) -> str:
 
   <main class="cards">{cards}</main>
   {_archive_section(slug, context)}
+  {_about_snaac_section()}
 
   <footer>
     매일 아침 자동 업데이트 · SNAAC Community Team<br>
     원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<br>
-    비로그인 저장은 현재 브라우저에, 로그인 저장은 개인 계정에 동기화됩니다.
+    저장함은 로그인한 개인 계정에 동기화됩니다.
   </footer>
 </div>
 {_overlays_html()}
@@ -2585,20 +2896,10 @@ def _page_html(picks: list[dict], now: datetime, context: str) -> str:
 
 
 def _archive_index_html(entries: list[dict]) -> str:
-    rows = "".join(
-        f'<a class="archive-row" href="{entry["slug"]}.html">'
-        f'<span class="archive-date">{entry["full_label"]}</span>'
-        f'<span class="archive-count">{entry["count"]}개의 큐레이션</span>'
-        '<span class="archive-arrow" aria-hidden="true">→</span>'
-        "</a>"
-        for entry in entries
-    )
-    if not rows:
-        rows = '<p class="empty-archive">아직 저장된 지난 브리핑이 없어요.</p>'
-
+    tree = _archive_tree(entries)
     context = "archive"
     return f"""<!DOCTYPE html>
-<html lang="ko" data-snaac-ui="4">
+<html lang="ko" data-snaac-ui="5">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -2607,7 +2908,8 @@ def _archive_index_html(entries: list[dict]) -> str:
 <meta name="description" content="SNAAC 모닝 브리핑 지난 회차 모아보기">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
-<style>{CSS}\n{CSS_V4}</style>
+<style>{CSS}
+{CSS_V5}</style>
 </head>
 <body>
 <div class="wrap">
@@ -2617,11 +2919,12 @@ def _archive_index_html(entries: list[dict]) -> str:
   <header class="archive-hero">
     <p class="kicker">SNAAC morning archive</p>
     <h1>지난 브리핑</h1>
-    <p>날짜를 눌러 그날 소개한 아티클을 다시 확인하세요.</p>
+    <p>월별 서랍을 열고, 주차와 날짜 순으로 지난 큐레이션을 찾아보세요.</p>
   </header>
   <main class="archive-page-list">
-    <div class="archive-list">{rows}</div>
+    {tree}
   </main>
+  {_about_snaac_section()}
   <footer>
     아카이브 열람에는 별도 AI 호출이나 토큰 비용이 발생하지 않습니다.<br>
     SNAAC Community Team
@@ -2637,7 +2940,7 @@ def _archive_index_html(entries: list[dict]) -> str:
 
 
 def _existing_image_hints(html_path: Path) -> dict[str, str]:
-    """기존 아카이브를 v4로 올릴 때 이미 쓰던 OG 이미지 URL을 재사용합니다."""
+    """기존 아카이브를 최신 UI로 올릴 때 이미 쓰던 OG 이미지 URL을 재사용합니다."""
     if not html_path.exists():
         return {}
     try:
@@ -2660,7 +2963,7 @@ def _existing_image_hints(html_path: Path) -> dict[str, str]:
 
 
 def _upgrade_existing_archives(current_slug: str) -> int:
-    """기존 날짜별 JSON을 사용해 과거 HTML에도 새 저장함·로그인 UI를 적용합니다.
+    """기존 날짜별 JSON을 사용해 과거 HTML에도 최신 저장함·아카이브 UI를 적용합니다.
 
     기존 HTML에 있던 썸네일 URL을 재사용하고, 새 네트워크 요청은 하지 않습니다.
     """
@@ -2675,7 +2978,7 @@ def _upgrade_existing_archives(current_slug: str) -> int:
             continue
         try:
             existing_head = html_path.read_text(encoding="utf-8")[:500]
-            if 'data-snaac-ui="4"' in existing_head:
+            if 'data-snaac-ui="5"' in existing_head:
                 continue
             data = json.loads(json_path.read_text(encoding="utf-8"))
             raw_picks = data.get("picks", [])
@@ -2740,7 +3043,7 @@ def build_page(picks: list[dict]) -> None:
         _archive_index_html(_archive_entries()), encoding="utf-8"
     )
 
-    auth_status = "Supabase 로그인 활성" if AUTH_ENABLED else "로컬 저장 모드"
+    auth_status = "Supabase 로그인 활성" if AUTH_ENABLED else "로그인 설정 대기"
     print(
         f"[페이지 생성 완료] docs/index.html, docs/archive/{slug}.html, "
         f"docs/archive/{slug}.json, docs/archive/index.html, docs/assets/{LOGO_ASSET_NAME} "
