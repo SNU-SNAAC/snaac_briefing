@@ -1,76 +1,651 @@
-"""OpenAI API(GPT)를 이용해 수집된 기사 중 5개를 선별하고 1~2줄 요약을 생성합니다."""
+"""OpenAI API로 오늘의 스타트업 콘텐츠 5개를 선별하고 요약합니다.
+
+핵심 변경점
+- 투자 유치 단신 우선이 아니라 '읽고 얻어갈 것이 있는가'를 최우선 평가
+- 뉴스, 인터뷰, 창업가/VC 관점, 제품·성장 인사이트, 영상의 다양성 확보
+- RSS 후보에 더해 OpenAI Responses API 웹 검색으로 공개 LinkedIn/YouTube/
+  인터뷰/칼럼 후보를 보완
+- Structured Outputs로 응답 형식을 고정
+"""
+
+from __future__ import annotations
 
 import json
 import os
+import re
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urlsplit
 
 import requests
 
-OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
+from collect import normalize_link, strip_html
 
-# 비용/품질 균형 기본값. 더 저렴하게는 "gpt-5-mini".
-# 모델명 오류가 나면 https://platform.openai.com/docs/models 에서 최신 이름 확인.
-MODEL = "gpt-5.4-mini"
+KST = timezone(timedelta(hours=9))
+OPENAI_API_URL = "https://api.openai.com/v1/responses"
 
-SYSTEM_PROMPT = """당신은 스타트업 커뮤니티 'SNAAC'의 뉴스 큐레이터입니다.
-대학생·초기 창업가·스타트업 취업 희망자 400명이 모인 커뮤니티에 매일 아침 공유할 뉴스를 고릅니다.
+# 기존 저장소의 모델을 기본값으로 유지해 갑작스러운 호환성 문제를 줄였습니다.
+# GitHub Actions 환경변수 OPENAI_MODEL로 언제든 교체할 수 있습니다.
+MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.4-mini")
+ENABLE_WEB_DISCOVERY = os.environ.get("ENABLE_WEB_DISCOVERY", "1").lower() not in {
+    "0",
+    "false",
+    "no",
+    "off",
+}
+MAX_CANDIDATES = 60
+MAX_PER_SOURCE_IN_FINAL = 2
 
-선별 기준 (우선순위 순):
-1. 투자 유치, M&A, IPO 등 스타트업 생태계의 굵직한 소식
-2. 새로운 트렌드·기술 (AI, SaaS 등) 관련 인사이트
-3. 창업가에게 실질적으로 유용한 정보 (정부 지원사업, 정책 변화 등)
-4. 화제성 있고 대화 소재가 될 만한 소식
-- 단순 홍보성 보도자료, 관련성 낮은 대기업 일반 뉴스는 제외
+CATEGORY_VALUES = [
+    "생태계 업데이트",
+    "창업가 인터뷰",
+    "VC·창업가 관점",
+    "제품·성장 인사이트",
+    "기술·시장 트렌드",
+    "정책·기회",
+]
+CONTENT_TYPE_VALUES = [
+    "기사",
+    "인터뷰",
+    "영상",
+    "칼럼·리포트",
+    "링크드인",
+    "뉴스레터",
+    "기타",
+]
 
-요약 작성 기준:
-- 각 기사당 한국어 1~2문장, 최대 90자
-- 기사 원문을 베끼지 말고 핵심만 자신의 말로 재구성
-- 커뮤니티 멤버가 "클릭하고 싶어지게" 하되 낚시성 과장은 금지
+FUNDING_TERMS = (
+    "투자 유치",
+    "투자를 유치",
+    "시드 투자",
+    "프리a",
+    "프리 a",
+    "시리즈a",
+    "시리즈 a",
+    "시리즈b",
+    "시리즈 b",
+    "시리즈c",
+    "시리즈 c",
+    "투자받",
+    "투자 받",
+    "억원 투자",
+    "funding",
+    "million in funding",
+    "raises",
+    "raised",
+)
+FUNDING_CONTEXT_TERMS = (
+    "인터뷰",
+    "전략",
+    "시장",
+    "제품",
+    "고객",
+    "성장",
+    "사업 모델",
+    "비즈니스 모델",
+    "전환",
+    "회고",
+    "교훈",
+    "분석",
+    "왜",
+    "how",
+    "why",
+    "strategy",
+    "market",
+    "product",
+    "customer",
+    "growth",
+    "lessons",
+)
 
-반드시 아래 JSON 형식으로만 응답하세요:
-{"picks": [{"title": "기사 제목", "link": "원문 URL", "source": "매체명", "summary": "1~2줄 요약"}]}
-정확히 5개를 고르세요. 후보가 5개 미만이면 있는 만큼만 반환하세요.
-link는 반드시 입력에 주어진 URL을 그대로 사용하세요."""
+SYSTEM_PROMPT = """당신은 대학생·초기 창업가·스타트업 취업 희망자 400명이 모인
+SNAAC 커뮤니티의 편집장입니다. 목표는 '투자 소식 5개'가 아니라, 독자가 오늘
+스타트업 생태계를 더 잘 이해하고 실무적 관점 하나를 얻어가게 만드는 것입니다.
+
+평가 기준(중요도 순):
+1. 인사이트 가치: 새로운 관점, 구체적 경험, 데이터, 실행 가능한 교훈이 있는가
+2. 스타트업 관련성: 창업가·팀·제품·시장·VC·정책을 이해하는 데 도움이 되는가
+3. 맥락성: 단순 사실 발표가 아니라 왜 일어났고 무엇이 달라지는지 설명하는가
+4. 출처 신뢰도: 당사자 인터뷰, 평판 있는 매체/기관, 창업가·VC의 공개 발언인가
+5. 신선도와 대화 가치: 지금 커뮤니티에서 이야기할 만한가
+
+반드시 지킬 편집 규칙:
+- 단순히 '어느 회사가 얼마를 투자받았다'로 끝나는 투자 유치 단신은 최대 1개.
+- 투자 기사를 고르더라도 사업 모델, 시장 변화, 창업자 판단 등 배울 맥락이 있어야 함.
+- 5개 안에 최소 3개 이상의 서로 다른 카테고리를 포함.
+- 같은 매체/채널은 최대 2개. 사실상 같은 사건의 중복 보도는 1개만 선택.
+- 한국 스타트업 생태계와 직접 연결된 콘텐츠를 최소 3개 포함.
+- 해외 콘텐츠는 최대 2개이며, 국내 독자에게 옮겨 적용할 명확한 이유가 있어야 함.
+- 단순 보도자료 재전송, 제품 홍보, 수상/협약/행사 개최 사실만 있는 글은 제외.
+- 링크드인 글은 유명세만 보지 말고, 구체적 주장·경험·데이터가 있을 때만 선택.
+- 영상은 제목만 자극적인 콘텐츠보다 인터뷰·강연·토론처럼 밀도가 높은 것을 선호.
+- 공개 웹 검색 결과는 최근 7일 이내를 우선하되, 실행 가치가 매우 높은 심층 글은
+  최근 14일까지 허용.
+
+작성 규칙:
+- summary: '무슨 내용인지 + 핵심 맥락'을 한국어 1~2문장, 120자 이내로 작성.
+- takeaway: 독자가 왜 읽어야 하는지 또는 무엇을 생각해볼지 70자 이내로 작성.
+- 원문의 주장을 과장하거나 원문에 없는 사실을 만들지 말 것.
+- link는 입력 후보의 URL 또는 웹 검색에서 실제 확인한 원문 URL만 사용할 것.
+"""
+
+OUTPUT_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "picks": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "title": {"type": "string"},
+                    "link": {"type": "string"},
+                    "source": {"type": "string"},
+                    "published": {"type": "string"},
+                    "category": {"type": "string", "enum": CATEGORY_VALUES},
+                    "content_type": {"type": "string", "enum": CONTENT_TYPE_VALUES},
+                    "summary": {"type": "string"},
+                    "takeaway": {"type": "string"},
+                },
+                "required": [
+                    "title",
+                    "link",
+                    "source",
+                    "published",
+                    "category",
+                    "content_type",
+                    "summary",
+                    "takeaway",
+                ],
+            },
+        }
+    },
+    "required": ["picks"],
+}
 
 
-def select_top5(articles: list[dict]) -> list[dict]:
-    """기사 목록을 GPT에 전달해 5개 선별 + 요약 반환."""
+def _parse_iso(value: str) -> datetime | None:
+    if not value or value == "unknown":
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=KST)
+        return parsed.astimezone(KST)
+    except ValueError:
+        return None
+
+
+def _candidate_score(article: dict) -> float:
+    """API에 보낼 후보 수를 줄이기 위한 가벼운 사전 점수입니다.
+
+    최종 판단은 모델이 하며, 여기서는 오래된 단순 투자 단신이 후보 공간을
+    독점하지 않도록 정리하는 역할만 합니다.
+    """
+    score = 0.0
+    content_type = article.get("content_type", "news")
+    source_group = article.get("source_group", "news")
+    text = f"{article.get('title', '')} {article.get('summary', '')}".lower()
+
+    score += {
+        "interview": 5.0,
+        "insight": 4.5,
+        "video": 4.0,
+        "linkedin": 4.0,
+        "news": 2.5,
+    }.get(content_type, 2.0)
+
+    if source_group == "insight":
+        score += 2.5
+    elif source_group == "video":
+        score += 2.0
+
+    high_value_terms = (
+        "인터뷰", "인사이트", "전략", "분석", "리포트", "회고", "실패", "교훈",
+        "제품", "고객", "리텐션", "그로스", "가격", "조직", "리더십", "시장",
+        "interview", "playbook", "lessons", "strategy", "product", "growth",
+        "retention", "pricing", "leadership", "market",
+    )
+    score += min(4.0, sum(0.8 for term in high_value_terms if term in text))
+
+    # 투자 키워드만 있고 맥락형 단어가 거의 없는 제목은 후보 우선도를 낮춥니다.
+    funding_terms = ("투자 유치", "시리즈a", "시리즈 a", "시리즈b", "시드 투자")
+    context_terms = ("전략", "시장", "제품", "고객", "인터뷰", "성장", "왜", "분석")
+    if any(term in text for term in funding_terms) and not any(
+        term in text for term in context_terms
+    ):
+        score -= 2.5
+
+    published = _parse_iso(article.get("published", "unknown"))
+    if published:
+        age_hours = max(0.0, (datetime.now(KST) - published).total_seconds() / 3600)
+        if age_hours <= 24:
+            score += 3.0
+        elif age_hours <= 72:
+            score += 2.0
+        elif age_hours <= 168:
+            score += 1.0
+
+    return score
+
+
+def _prepare_candidates(articles: list[dict]) -> list[dict]:
+    ranked = sorted(articles, key=_candidate_score, reverse=True)
+    selected: list[dict] = []
+    source_counts: dict[str, int] = {}
+
+    for article in ranked:
+        source = article.get("source", "기타")
+        # 한 피드가 후보 전체를 독점하지 않도록 사전 단계에서 최대 12개만 허용합니다.
+        if source_counts.get(source, 0) >= 12:
+            continue
+        selected.append(
+            {
+                "title": article.get("title", "")[:240],
+                "link": article.get("link", ""),
+                "source": source,
+                "summary": strip_html(article.get("summary", ""))[:500],
+                "published": article.get("published", "unknown"),
+                "author": article.get("author", "")[:100],
+                "source_group": article.get("source_group", "news"),
+                "content_type": article.get("content_type", "news"),
+            }
+        )
+        source_counts[source] = source_counts.get(source, 0) + 1
+        if len(selected) >= MAX_CANDIDATES:
+            break
+
+    return selected
+
+
+def _extract_output_text(data: dict) -> str:
+    texts: list[str] = []
+    for item in data.get("output", []):
+        if item.get("type") != "message":
+            continue
+        for content in item.get("content", []):
+            if content.get("type") == "output_text" and content.get("text"):
+                texts.append(content["text"])
+    if not texts:
+        raise ValueError("OpenAI 응답에서 output_text를 찾지 못했습니다.")
+    return "\n".join(texts)
+
+
+def _extract_web_source_urls(data: dict) -> set[str]:
+    """웹 검색 도구가 실제로 참고한 URL을 추출합니다."""
+    urls: set[str] = set()
+    for item in data.get("output", []):
+        if item.get("type") != "web_search_call":
+            continue
+        action = item.get("action") or {}
+        for source in action.get("sources") or []:
+            url = source.get("url") or source.get("link")
+            if url:
+                urls.add(normalize_link(url))
+    return urls
+
+
+def _is_safe_http_url(url: str) -> bool:
+    try:
+        parts = urlsplit(url)
+        if parts.scheme not in {"http", "https"} or not parts.netloc:
+            return False
+        host = parts.netloc.lower()
+        blocked_hosts = {
+            "google.com",
+            "www.google.com",
+            "bing.com",
+            "www.bing.com",
+            "search.naver.com",
+        }
+        return host not in blocked_hosts
+    except Exception:
+        return False
+
+
+def _clean_pick(pick: dict) -> dict:
+    return {
+        "title": strip_html(str(pick.get("title", "")))[:240],
+        "link": str(pick.get("link", "")).strip(),
+        "source": strip_html(str(pick.get("source", "")))[:80],
+        "published": strip_html(str(pick.get("published", "unknown")))[:40] or "unknown",
+        "category": str(pick.get("category", "생태계 업데이트")),
+        "content_type": str(pick.get("content_type", "기사")),
+        "summary": strip_html(str(pick.get("summary", "")))[:180],
+        "takeaway": strip_html(str(pick.get("takeaway", "")))[:120],
+    }
+
+
+def _is_funding_only(item: dict) -> bool:
+    """맥락 없이 투자 사실만 전달하는 콘텐츠인지 보수적으로 추정합니다."""
+    text = f"{item.get('title', '')} {item.get('summary', '')}".lower()
+    has_funding = any(term in text for term in FUNDING_TERMS)
+    has_context = any(term in text for term in FUNDING_CONTEXT_TERMS)
+    return has_funding and not has_context
+
+
+def _infer_category(candidate: dict) -> str:
+    """모델 응답 보충 시 후보의 주제 카테고리를 가볍게 추정합니다."""
+    text = f"{candidate.get('title', '')} {candidate.get('summary', '')}".lower()
+    content_type = candidate.get("content_type", "news")
+
+    if any(term in text for term in ("정책", "규제", "지원사업", "법안", "policy", "regulation")):
+        return "정책·기회"
+    if content_type in {"video", "interview"}:
+        return "창업가 인터뷰"
+    if any(term in text for term in ("vc", "심사역", "투자자", "founder", "창업가 관점")):
+        return "VC·창업가 관점"
+    if any(
+        term in text
+        for term in (
+            "ai", "인공지능", "시장", "산업", "트렌드", "기술", "market", "technology",
+        )
+    ):
+        return "기술·시장 트렌드"
+    if any(
+        term in text
+        for term in (
+            "제품", "고객", "그로스", "성장", "리텐션", "가격", "gtm",
+            "product", "customer", "growth", "retention", "pricing",
+        )
+    ) or content_type == "insight":
+        return "제품·성장 인사이트"
+    return "생태계 업데이트"
+
+
+def _enforce_editorial_limits(picks: list[dict]) -> list[dict]:
+    """모델이 놓칠 수 있는 핵심 편집 규칙을 코드에서도 한 번 더 적용합니다."""
+    selected: list[dict] = []
+    source_counts: dict[str, int] = {}
+    funding_only_count = 0
+
+    for pick in picks:
+        source = pick.get("source", "기타")
+        if source_counts.get(source, 0) >= MAX_PER_SOURCE_IN_FINAL:
+            print(f"[편집 제외] 같은 출처 2개 초과: {pick.get('title', '')}")
+            continue
+
+        funding_only = _is_funding_only(pick)
+        if funding_only and funding_only_count >= 1:
+            print(f"[편집 제외] 단순 투자 단신 1개 초과: {pick.get('title', '')}")
+            continue
+
+        selected.append(pick)
+        source_counts[source] = source_counts.get(source, 0) + 1
+        if funding_only:
+            funding_only_count += 1
+
+    return selected
+
+
+def _validate_picks(
+    raw_picks: list[dict],
+    candidates: list[dict],
+    web_source_urls: set[str],
+    web_enabled: bool,
+    excluded_links: set[str],
+) -> list[dict]:
+    candidate_map = {normalize_link(item["link"]): item for item in candidates}
+    validated: list[dict] = []
+    seen_links: set[str] = set()
+
+    for raw_pick in raw_picks:
+        pick = _clean_pick(raw_pick)
+        link = pick["link"]
+        if not _is_safe_http_url(link):
+            continue
+
+        link_key = normalize_link(link)
+        if link_key in seen_links:
+            continue
+        if link_key in excluded_links:
+            print(f"[제외] 최근 브리핑에서 이미 소개한 URL: {link}")
+            continue
+
+        original = candidate_map.get(link_key)
+        if original:
+            # 입력 후보를 골랐다면 제목·출처·날짜는 원본 데이터로 고정합니다.
+            pick["title"] = original["title"]
+            pick["source"] = original["source"]
+            pick["published"] = original.get("published", "unknown")
+        elif not web_enabled:
+            continue
+        elif web_enabled:
+            # 웹에서 새로 찾은 항목은 검색 도구가 실제로 반환한 원문 URL만 허용합니다.
+            # 이렇게 해야 모델이 존재하지 않는 링크를 만들어내는 경우를 차단할 수 있습니다.
+            if not web_source_urls or link_key not in web_source_urls:
+                print(f"[제외] 웹 검색 출처로 확인되지 않은 URL: {link}")
+                continue
+
+        if not pick["title"] or not pick["summary"]:
+            continue
+        if pick["category"] not in CATEGORY_VALUES:
+            pick["category"] = "생태계 업데이트"
+        if pick["content_type"] not in CONTENT_TYPE_VALUES:
+            pick["content_type"] = "기타"
+        if not pick["takeaway"]:
+            pick["takeaway"] = "원문에서 이번 변화가 창업가와 팀에 주는 의미를 확인해보세요."
+
+        seen_links.add(link_key)
+        validated.append(pick)
+        if len(validated) >= 5:
+            break
+
+    return validated
+
+
+def _fallback_fill(
+    picks: list[dict],
+    candidates: list[dict],
+    excluded_links: set[str],
+) -> list[dict]:
+    """모델 응답이 5개 미만일 때 다양성 규칙을 지키며 원본 후보로 보충합니다."""
+    seen = {normalize_link(item["link"]) for item in picks}
+    source_counts: dict[str, int] = {}
+    for item in picks:
+        source = item.get("source", "기타")
+        source_counts[source] = source_counts.get(source, 0) + 1
+    funding_only_count = sum(1 for item in picks if _is_funding_only(item))
+    categories = {item.get("category") for item in picks if item.get("category")}
+
+    content_type_map = {
+        "video": "영상",
+        "interview": "인터뷰",
+        "insight": "칼럼·리포트",
+        "linkedin": "링크드인",
+        "news": "기사",
+    }
+
+    def as_pick(candidate: dict) -> dict:
+        summary = strip_html(candidate.get("summary", ""))
+        if not summary:
+            summary = "스타트업 생태계의 최근 변화를 다룬 콘텐츠입니다."
+        return {
+            "title": candidate["title"],
+            "link": candidate["link"],
+            "source": candidate["source"],
+            "published": candidate.get("published", "unknown"),
+            "category": _infer_category(candidate),
+            "content_type": content_type_map.get(
+                candidate.get("content_type", "news"), "기사"
+            ),
+            "summary": summary[:160],
+            "takeaway": "핵심 맥락과 창업가에게 주는 의미를 원문에서 확인해보세요.",
+        }
+
+    # 1차: 아직 없는 카테고리를 우선하며 모든 편집 제한을 지킵니다.
+    # 2차: 카테고리 중복은 허용하되 출처/투자 단신 제한은 유지합니다.
+    # 3차: 정말 후보가 부족한 경우에만 출처 제한을 완화합니다.
+    for require_new_category, relax_source_limit in (
+        (True, False),
+        (False, False),
+        (False, True),
+    ):
+        for candidate in candidates:
+            link_key = normalize_link(candidate["link"])
+            if link_key in seen or link_key in excluded_links:
+                continue
+
+            fallback_pick = as_pick(candidate)
+            source = fallback_pick["source"]
+            category = fallback_pick["category"]
+            funding_only = _is_funding_only(fallback_pick)
+
+            if require_new_category and category in categories:
+                continue
+            if not relax_source_limit and source_counts.get(source, 0) >= MAX_PER_SOURCE_IN_FINAL:
+                continue
+            if funding_only and funding_only_count >= 1:
+                continue
+
+            picks.append(fallback_pick)
+            seen.add(link_key)
+            source_counts[source] = source_counts.get(source, 0) + 1
+            categories.add(category)
+            if funding_only:
+                funding_only_count += 1
+            if len(picks) >= 5:
+                return picks[:5]
+
+    return picks[:5]
+
+
+def _request_openai(
+    candidates: list[dict],
+    web_enabled: bool,
+    excluded_links: set[str],
+) -> tuple[dict, set[str]]:
     api_key = os.environ["OPENAI_API_KEY"]
+    today = datetime.now(KST)
+    date_text = today.strftime("%Y-%m-%d")
 
-    # 토큰 절약을 위해 필요한 필드만 전달
-    candidates = [
-        {"title": a["title"], "link": a["link"], "source": a["source"],
-         "summary": a["summary"], "published": a["published"]}
-        for a in articles
-    ]
+    recent_links_text = json.dumps(sorted(excluded_links), ensure_ascii=False)
 
-    resp = requests.post(
+    user_prompt = f"""오늘은 한국시간 {date_text}입니다.
+아래 RSS/Atom 후보를 우선 검토하세요. 웹 검색이 활성화되어 있다면 최근 7일의 공개 웹에서
+다음 후보도 보완 탐색하세요: 한국 스타트업 대표·VC 심사역의 공개 LinkedIn 글,
+창업가 인터뷰, 유튜브 인터뷰/강연, 제품·성장·조직·시장에 관한 깊이 있는 아티클.
+
+검색 시 특정 유명인만 반복하지 말고, 실제 내용의 밀도와 커뮤니티 유용성을 평가하세요.
+최종적으로 편집 규칙에 맞는 5개를 고르세요. 후보가 정말 부족한 경우에만 5개 미만을 허용합니다.
+아래 '최근 소개 URL'에 있는 링크는 웹 검색 결과에 나오더라도 다시 선택하지 마세요.
+
+최근 소개 URL JSON:
+{recent_links_text}
+
+RSS/Atom 후보 JSON:
+{json.dumps(candidates, ensure_ascii=False)}"""
+
+    payload: dict = {
+        "model": MODEL,
+        "max_output_tokens": 3500,
+        "input": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ],
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "snaac_briefing_picks",
+                "strict": True,
+                "schema": OUTPUT_SCHEMA,
+            }
+        },
+    }
+
+    if web_enabled:
+        payload.update(
+            {
+                "tools": [
+                    {
+                        "type": "web_search",
+                        "external_web_access": True,
+                        "user_location": {
+                            "type": "approximate",
+                            "country": "KR",
+                            "city": "Seoul",
+                            "region": "Seoul",
+                        },
+                        "filters": {
+                            "blocked_domains": [
+                                "wikipedia.org",
+                                "namu.wiki",
+                                "reddit.com",
+                                "quora.com",
+                            ]
+                        },
+                    }
+                ],
+                "tool_choice": "required",
+                "include": ["web_search_call.action.sources"],
+            }
+        )
+
+    response = requests.post(
         OPENAI_API_URL,
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         },
-        json={
-            "model": MODEL,
-            "max_completion_tokens": 2000,
-            # JSON 모드: 응답이 항상 유효한 JSON으로 오도록 강제
-            "response_format": {"type": "json_object"},
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user",
-                 "content": "오늘의 후보 기사 목록입니다:\n" + json.dumps(candidates, ensure_ascii=False)},
-            ],
-        },
-        timeout=120,
+        json=payload,
+        timeout=180,
     )
-    resp.raise_for_status()
-    data = resp.json()
+    response.raise_for_status()
+    data = response.json()
+    return data, _extract_web_source_urls(data)
 
-    text = data["choices"][0]["message"]["content"]
-    picks = json.loads(text)["picks"]
 
-    # 안전장치: 모델이 만들어낸(입력에 없는) 링크는 제거
-    valid_links = {a["link"] for a in articles}
-    picks = [p for p in picks if p.get("link") in valid_links][:5]
+def select_top5(
+    articles: list[dict],
+    excluded_links: set[str] | None = None,
+) -> list[dict]:
+    """후보를 평가해 다양성 있는 5개 콘텐츠와 요약을 반환합니다."""
+    excluded_links = {
+        normalize_link(link) for link in (excluded_links or set()) if link
+    }
+    candidates = _prepare_candidates(articles)
+    if not candidates:
+        return []
 
-    print(f"[선별 완료] {len(picks)}건 (모델: {MODEL})")
-    return picks
+    web_enabled = ENABLE_WEB_DISCOVERY
+    try:
+        data, web_source_urls = _request_openai(
+            candidates,
+            web_enabled=web_enabled,
+            excluded_links=excluded_links,
+        )
+    except requests.RequestException as exc:
+        if not web_enabled:
+            raise
+        # 웹 검색 기능에 일시 오류가 생겨도 RSS 기반 브리핑은 계속 생성합니다.
+        print(f"[경고] 웹 탐색 포함 선별 실패 → RSS 전용으로 재시도: {exc}")
+        data, web_source_urls = _request_openai(
+            candidates,
+            web_enabled=False,
+            excluded_links=excluded_links,
+        )
+        web_enabled = False
+
+    text = _extract_output_text(data)
+    parsed = json.loads(text)
+    raw_picks = parsed.get("picks", [])
+    picks = _validate_picks(
+        raw_picks,
+        candidates,
+        web_source_urls,
+        web_enabled,
+        excluded_links,
+    )
+    picks = _enforce_editorial_limits(picks)
+
+    if len(picks) < 5:
+        print(f"[안내] 모델 선별 {len(picks)}건 → 원본 후보로 안전 보충")
+        picks = _fallback_fill(picks, candidates, excluded_links)
+
+    print(
+        f"[선별 완료] {len(picks)}건 "
+        f"(모델: {MODEL}, 웹 탐색: {'사용' if web_enabled else '미사용'})"
+    )
+    return picks[:5]
