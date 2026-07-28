@@ -2633,7 +2633,7 @@ def _about_snaac_section() -> str:
   <a class="about-snaac-card" href="https://www.snaac.co.kr" target="_blank" rel="noopener noreferrer">
     <span class="about-snaac-eyebrow">ABOUT SNAAC</span>
     <span class="about-snaac-title">SNAAC을 더 알아보세요</span>
-    <span class="about-snaac-copy">대학 스타트업 동아리 SNAAC의 활동과 소식을 공식 홈페이지에서 확인할 수 있어요.</span>
+    <span class="about-snaac-copy">서울대학교 학생 주도 액셀레러이팅 단체 SNAAC의 활동과 소식을 공식 홈페이지에서 확인할 수 있어요.</span>
   </a>
 </section>"""
 
@@ -2896,8 +2896,20 @@ def _page_html(picks: list[dict], now: datetime, context: str) -> str:
 
 
 def _archive_index_html(entries: list[dict]) -> str:
-    tree = _archive_tree(entries)
+    rows = "".join(
+        f'<a class="archive-row" href="{entry["slug"]}.html">'
+        f'<span class="archive-date">{entry["full_label"]}</span>'
+        f'<span class="archive-count">{entry["count"]}개의 큐레이션</span>'
+        '<span class="archive-arrow" aria-hidden="true">→</span>'
+        "</a>"
+        for entry in entries
+    )
+
+    if not rows:
+        rows = '<p class="empty-archive">아직 저장된 지난 브리핑이 없어요.</p>'
+
     context = "archive"
+
     return f"""<!DOCTYPE html>
 <html lang="ko" data-snaac-ui="5">
 <head>
@@ -2916,20 +2928,25 @@ def _archive_index_html(entries: list[dict]) -> str:
   <header class="masthead">
     {_header_html(context)}
   </header>
+
   <header class="archive-hero">
     <p class="kicker">SNAAC morning archive</p>
     <h1>지난 브리핑</h1>
-    <p>월별 서랍을 열고, 주차와 날짜 순으로 지난 큐레이션을 찾아보세요.</p>
+    <p>날짜를 눌러 그날 소개한 아티클을 다시 확인하세요.</p>
   </header>
+
   <main class="archive-page-list">
-    {tree}
+    <div class="archive-list">{rows}</div>
   </main>
+
   {_about_snaac_section()}
+
   <footer>
     아카이브 열람에는 별도 AI 호출이나 토큰 비용이 발생하지 않습니다.<br>
     SNAAC Community Team
   </footer>
 </div>
+
 {_overlays_html()}
 <script id="briefingData" type="application/json">[]</script>
 <script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script>
