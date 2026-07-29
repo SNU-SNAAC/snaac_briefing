@@ -82,7 +82,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Python 문법 검사
-        run: python -m py_compile collect.py select_news.py main.py page.py smoke_check.py kakao.py get_kakao_token.py
+        run: python -m py_compile link_utils.py collect.py select_news.py main.py page.py smoke_check.py repair_article_links.py kakao.py get_kakao_token.py
 
       - name: 브리핑 생성
         env:
@@ -107,6 +107,9 @@ jobs:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: python main.py
+
+      - name: 현재·과거 기사 링크 정리
+        run: python repair_article_links.py "$BRIEFING_OUTPUT_DIR"
 
       - name: 생성 결과 검사
         run: python smoke_check.py "$BRIEFING_OUTPUT_DIR"
