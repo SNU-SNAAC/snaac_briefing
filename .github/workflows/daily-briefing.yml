@@ -90,13 +90,13 @@ jobs:
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.4-mini' }}
           ENABLE_WEB_DISCOVERY: "1"
           MIN_QUALITY_SCORE: ${{ vars.MIN_QUALITY_SCORE || '72' }}
-          MIN_PICKS_TO_PUBLISH: "3"
+          MIN_PICKS_TO_PUBLISH: "4"
+          MIN_SUPPLEMENT_QUALITY_SCORE: ${{ vars.MIN_SUPPLEMENT_QUALITY_SCORE || '60' }}
 
           # Supabase의 브라우저 공개 설정입니다. service_role/secret key는 넣지 마세요.
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_REDIRECT_URL: ${{ vars.SUPABASE_REDIRECT_URL }}
-          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
           DELETE_ACCOUNT_FUNCTION: ${{ vars.DELETE_ACCOUNT_FUNCTION || 'delete-account' }}
 
           SITE_URL: ${{ vars.SITE_URL }}
