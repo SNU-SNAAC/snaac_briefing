@@ -21,7 +21,7 @@ from urllib.parse import urlsplit
 
 import requests
 
-from collect import normalize_link, strip_html
+from collect import clean_public_link, normalize_link, strip_html
 
 KST = timezone(timedelta(hours=9))
 OPENAI_API_URL = "https://api.openai.com/v1/responses"
@@ -68,7 +68,7 @@ PAYWALL_BLOCKED_DOMAINS = {
     "seekingalpha.com",
 }
 
-# 현재 수집 소스이거나 공개 콘텐츠 플랫폼인 도메인은 네트워크 재검사를 생략합니다.
+# 공개 매체 도메인도 리디렉션·상태코드는 확인하되, 자동화 차단 응답은 보수적으로 해석합니다.
 KNOWN_FREE_DOMAINS = {
     "platum.kr",
     "venturesquare.net",
@@ -324,7 +324,9 @@ def _prepare_candidates(articles: list[dict]) -> list[dict]:
 
     for article in ranked:
         source = article.get("source", "기타")
-        link = article.get("link", "")
+        link = clean_public_link(article.get("link", ""))
+        if not _is_safe_http_url(link):
+            continue
         if _is_blocked_paywall_domain(link):
             print(f"[무료 원문 제외] 구독형 도메인: {link}")
             continue
@@ -334,7 +336,7 @@ def _prepare_candidates(articles: list[dict]) -> list[dict]:
         selected.append(
             {
                 "title": article.get("title", "")[:240],
-                "link": article.get("link", ""),
+                "link": link,
                 "source": source,
                 "summary": strip_html(article.get("summary", ""))[:500],
                 "published": article.get("published", "unknown"),
@@ -349,7 +351,6 @@ def _prepare_candidates(articles: list[dict]) -> list[dict]:
             break
 
     return selected
-
 
 def _extract_output_text(data: dict) -> str:
     texts: list[str] = []
@@ -415,62 +416,106 @@ def _looks_paywalled(page_html: str) -> bool:
     return any(re.search(pattern, sample, flags=re.I | re.S) for pattern in PAYWALL_PATTERNS)
 
 
-_FREE_ACCESS_CACHE: dict[str, bool] = {}
+_PUBLIC_LINK_CACHE: dict[str, str | None] = {}
+MAX_LINK_REDIRECTS = 8
+LINK_CHECK_TIMEOUT = (6, 15)
+LINK_CHECK_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) "
+        "AppleWebKit/605.1.15 Version/17.5 Mobile/15E148 Safari/604.1"
+    ),
+    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
+}
+
+
+def _resolve_public_url(url: str) -> str | None:
+    """최종 공개 전에 링크를 정리하고 리디렉션·접근성·페이월을 확인합니다.
+
+    반환값은 추적 파라미터가 제거된 최종 URL입니다. 리디렉션 루프, 명백한
+    404/410, 인증·결제 장벽은 ``None``으로 처리해 다른 후보로 교체합니다.
+    """
+    cleaned = clean_public_link(url)
+    normalized = normalize_link(cleaned)
+    if normalized in _PUBLIC_LINK_CACHE:
+        return _PUBLIC_LINK_CACHE[normalized]
+    if not _is_safe_http_url(cleaned) or _is_blocked_paywall_domain(cleaned):
+        _PUBLIC_LINK_CACHE[normalized] = None
+        return None
+
+    session = requests.Session()
+    session.max_redirects = MAX_LINK_REDIRECTS
+    try:
+        response = session.get(
+            cleaned,
+            timeout=LINK_CHECK_TIMEOUT,
+            allow_redirects=True,
+            headers=LINK_CHECK_HEADERS,
+        )
+    except requests.TooManyRedirects:
+        print(f"[링크 제외] 리디렉션이 {MAX_LINK_REDIRECTS}회를 초과했습니다: {cleaned}")
+        _PUBLIC_LINK_CACHE[normalized] = None
+        return None
+    except requests.RequestException as exc:
+        # 실제 접근 여부를 확인하지 못한 후보를 억지로 발행하지 않습니다.
+        # 뒤의 RSS 보완 단계가 다른 정상 링크로 최소 4건을 채웁니다.
+        print(f"[링크 확인 실패 → 제외] {cleaned}: {exc}")
+        _PUBLIC_LINK_CACHE[normalized] = None
+        return None
+
+    final_url = clean_public_link(response.url or cleaned)
+    final_key = normalize_link(final_url)
+    if not _is_safe_http_url(final_url) or _is_blocked_paywall_domain(final_url):
+        _PUBLIC_LINK_CACHE[normalized] = None
+        return None
+
+    if response.status_code in {401, 402, 404, 410, 451}:
+        print(f"[링크 제외] HTTP {response.status_code}: {final_url}")
+        _PUBLIC_LINK_CACHE[normalized] = None
+        return None
+
+    original_host = urlsplit(cleaned).netloc
+    final_host = urlsplit(final_url).netloc
+    known_free = _host_matches(original_host, KNOWN_FREE_DOMAINS) or _host_matches(
+        final_host, KNOWN_FREE_DOMAINS
+    )
+
+    if response.status_code >= 400:
+        # 일부 공개 매체는 자동화 요청에만 403/405/429 또는 일시적인 5xx를 돌려줍니다.
+        # 이 경우 리디렉션 루프는 이미 통과했으므로 깨진 링크로 단정하지 않습니다.
+        ambiguous_block = response.status_code in {403, 405, 429} or response.status_code >= 500
+        if known_free and ambiguous_block:
+            print(
+                f"[링크 확인 경고] HTTP {response.status_code}, 브라우저 공개 링크로 유지: "
+                f"{final_url}"
+            )
+        else:
+            print(f"[링크 제외] HTTP {response.status_code}: {final_url}")
+            _PUBLIC_LINK_CACHE[normalized] = None
+            return None
+
+    if not known_free:
+        content_type = response.headers.get("Content-Type", "").lower()
+        if "html" in content_type and _looks_paywalled(response.text):
+            print(f"[무료 원문 제외] 구독·로그인 장벽 감지: {final_url}")
+            _PUBLIC_LINK_CACHE[normalized] = None
+            return None
+
+    if final_url != cleaned:
+        print(f"[링크 최종 정리] {cleaned} -> {final_url}")
+    _PUBLIC_LINK_CACHE[normalized] = final_url
+    if final_key:
+        _PUBLIC_LINK_CACHE[final_key] = final_url
+    return final_url
 
 
 def _is_free_to_read(url: str) -> bool:
-    """유료 구독 없이 핵심 원문을 볼 수 있는 링크인지 보수적으로 확인합니다."""
-    normalized = normalize_link(url)
-    if normalized in _FREE_ACCESS_CACHE:
-        return _FREE_ACCESS_CACHE[normalized]
-    if not _is_safe_http_url(url) or _is_blocked_paywall_domain(url):
-        _FREE_ACCESS_CACHE[normalized] = False
-        return False
-
-    try:
-        host = urlsplit(url).netloc
-        if _host_matches(host, KNOWN_FREE_DOMAINS):
-            _FREE_ACCESS_CACHE[normalized] = True
-            return True
-
-        response = requests.get(
-            url,
-            timeout=12,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) "
-                    "AppleWebKit/605.1.15 Version/17.5 Mobile/15E148 Safari/604.1"
-                ),
-                "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
-            },
-        )
-        if _is_blocked_paywall_domain(response.url):
-            _FREE_ACCESS_CACHE[normalized] = False
-            return False
-        if response.status_code in {401, 402, 451}:
-            _FREE_ACCESS_CACHE[normalized] = False
-            return False
-        if response.status_code >= 400:
-            # 무료 여부를 확인할 수 없는 신규 도메인은 보수적으로 제외합니다.
-            _FREE_ACCESS_CACHE[normalized] = False
-            return False
-
-        content_type = response.headers.get("Content-Type", "").lower()
-        result = "html" not in content_type or not _looks_paywalled(response.text)
-        _FREE_ACCESS_CACHE[normalized] = result
-        return result
-    except requests.RequestException as exc:
-        # 신규 도메인은 원문 공개 여부를 직접 확인하지 못하면 최종 후보에서 제외합니다.
-        print(f"[무료 원문 확인 실패 → 제외] {url}: {exc}")
-        _FREE_ACCESS_CACHE[normalized] = False
-        return False
-
+    """기존 호출부 호환용: 공개 가능한 최종 URL이 존재하는지 반환합니다."""
+    return _resolve_public_url(url) is not None
 
 def _clean_pick(pick: dict) -> dict:
     return {
         "title": strip_html(str(pick.get("title", "")))[:240],
-        "link": str(pick.get("link", "")).strip(),
+        "link": clean_public_link(str(pick.get("link", "")).strip()),
         "source": strip_html(str(pick.get("source", "")))[:80],
         "published": strip_html(str(pick.get("published", "unknown")))[:40] or "unknown",
         "category": str(pick.get("category", "생태계 업데이트")),
@@ -481,7 +526,6 @@ def _clean_pick(pick: dict) -> dict:
         "quality_reason": strip_html(str(pick.get("quality_reason", "")))[:120],
         "thumbnail": str(pick.get("thumbnail", "")).strip(),
     }
-
 
 def _is_funding_only(item: dict) -> bool:
     """맥락 없이 투자 사실만 전달하는 콘텐츠인지 보수적으로 추정합니다."""
@@ -625,35 +669,42 @@ def _validate_picks(
                 f"{pick.get('title', '')}"
             )
             continue
-        link = pick["link"]
-        if not _is_safe_http_url(link):
+
+        requested_link = pick["link"]
+        if not _is_safe_http_url(requested_link):
+            continue
+        requested_key = normalize_link(requested_link)
+        if requested_key in excluded_links:
+            print(f"[제외] 최근 브리핑에서 이미 소개한 URL: {requested_link}")
             continue
 
-        link_key = normalize_link(link)
-        if link_key in seen_links:
-            continue
-        if link_key in excluded_links:
-            print(f"[제외] 최근 브리핑에서 이미 소개한 URL: {link}")
-            continue
-        if not _is_free_to_read(link):
-            print(f"[무료 원문 제외] 구독·결제 필요 가능성: {link}")
-            continue
+        original = candidate_map.get(requested_key)
+        if not original:
+            if not web_enabled:
+                continue
+            # 웹에서 새로 찾은 항목은 검색 도구가 실제로 반환한 원문 URL만 허용합니다.
+            if not web_source_urls or requested_key not in web_source_urls:
+                print(f"[제외] 웹 검색 출처로 확인되지 않은 URL: {requested_link}")
+                continue
 
-        original = candidate_map.get(link_key)
+        final_link = _resolve_public_url(requested_link)
+        if not final_link:
+            print(f"[원문 제외] 열 수 없는 링크 또는 구독·로그인 장벽: {requested_link}")
+            continue
+        final_key = normalize_link(final_link)
+        if not final_key or final_key in seen_links:
+            continue
+        if final_key in excluded_links:
+            print(f"[제외] 최근 브리핑에서 이미 소개한 최종 URL: {final_link}")
+            continue
+        pick["link"] = final_link
+
         if original:
             # 입력 후보를 골랐다면 제목·출처·날짜는 원본 데이터로 고정합니다.
             pick["title"] = original["title"]
             pick["source"] = original["source"]
             pick["published"] = original.get("published", "unknown")
             pick["thumbnail"] = original.get("thumbnail", "")
-        elif not web_enabled:
-            continue
-        elif web_enabled:
-            # 웹에서 새로 찾은 항목은 검색 도구가 실제로 반환한 원문 URL만 허용합니다.
-            # 이렇게 해야 모델이 존재하지 않는 링크를 만들어내는 경우를 차단할 수 있습니다.
-            if not web_source_urls or link_key not in web_source_urls:
-                print(f"[제외] 웹 검색 출처로 확인되지 않은 URL: {link}")
-                continue
 
         if not pick["title"] or not pick["summary"]:
             continue
@@ -664,13 +715,12 @@ def _validate_picks(
         if not pick["takeaway"]:
             pick["takeaway"] = "원문에서 이번 변화가 창업가와 팀에 주는 의미를 확인해보세요."
 
-        seen_links.add(link_key)
+        seen_links.add(final_key)
         validated.append(pick)
         if len(validated) >= MAX_MODEL_PICKS:
             break
 
     return validated
-
 
 def _supplement_from_ranked_candidates(
     validated: list[dict],
@@ -679,9 +729,8 @@ def _supplement_from_ranked_candidates(
 ) -> list[dict]:
     """모델 선별 후 4건이 남지 않으면 상위 RSS 후보로 안전하게 보완합니다.
 
-    모델이 반환한 링크가 페이월·중복 검사에서 탈락해도 브리핑이 3건으로 줄지
-    않도록 하는 마지막 안전장치입니다. 후보는 공개 원문 검사, 최근 중복 제외,
-    최소 요약 길이를 모두 통과해야 하며 60점 보완 후보로 표시됩니다.
+    모델이 반환한 링크가 페이월·중복·리디렉션 검사에서 탈락해도 브리핑이
+    3건으로 줄지 않도록 하는 마지막 안전장치입니다.
     """
     if len(validated) >= MIN_FINAL_PICKS:
         return validated
@@ -694,27 +743,31 @@ def _supplement_from_ranked_candidates(
         "linkedin": "링크드인",
         "insight": "칼럼·리포트",
     }
-
     for candidate in candidates:
         if len(validated) >= MAX_MODEL_PICKS:
             break
-        link = str(candidate.get("link", "")).strip()
-        link_key = normalize_link(link)
-        if not link_key or link_key in seen_links or link_key in excluded_links:
+        requested_link = clean_public_link(str(candidate.get("link", "")).strip())
+        requested_key = normalize_link(requested_link)
+        if not requested_key or requested_key in seen_links or requested_key in excluded_links:
             continue
-        if not _is_safe_http_url(link) or not _is_free_to_read(link):
+        if not _is_safe_http_url(requested_link):
+            continue
+        final_link = _resolve_public_url(requested_link)
+        if not final_link:
+            continue
+        final_key = normalize_link(final_link)
+        if not final_key or final_key in seen_links or final_key in excluded_links:
             continue
 
         title = strip_html(str(candidate.get("title", "")))[:240]
         summary = strip_html(str(candidate.get("summary", "")))[:180]
         if not title or len(summary) < 20:
             continue
-
         category = _infer_category(candidate)
         raw_type = str(candidate.get("content_type", "news")).lower()
         pick = {
             "title": title,
-            "link": link,
+            "link": final_link,
             "source": strip_html(str(candidate.get("source", "기타")))[:80] or "기타",
             "published": strip_html(str(candidate.get("published", "unknown")))[:40] or "unknown",
             "category": category,
@@ -726,11 +779,9 @@ def _supplement_from_ranked_candidates(
             "thumbnail": str(candidate.get("thumbnail", "")).strip(),
         }
         validated.append(pick)
-        seen_links.add(link_key)
+        seen_links.add(final_key)
         print(f"[RSS 보완 후보] {pick['source']}: {pick['title']}")
-
     return validated
-
 
 def _request_openai(
     candidates: list[dict],

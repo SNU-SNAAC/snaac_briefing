@@ -15,9 +15,11 @@ import calendar
 import html as html_lib
 import re
 from datetime import datetime, timedelta, timezone
-from urllib.parse import parse_qs, parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qs, urlsplit
 
 import feedparser
+
+from link_utils import clean_public_link, normalize_link
 
 KST = timezone(timedelta(hours=9))
 
@@ -116,7 +118,6 @@ PROFESSIONAL_SOURCES = {
     "EO Korea",
 }
 
-TRACKING_QUERY_PREFIXES = ("utm_", "fbclid", "gclid", "mc_cid", "mc_eid")
 MAX_PER_SOURCE = 20
 
 
@@ -128,26 +129,6 @@ def strip_html(value: str) -> str:
     value = re.sub(r"<[^>]+>", " ", value)
     value = re.sub(r"\s+", " ", value).strip()
     return value
-
-
-def normalize_link(url: str) -> str:
-    """중복 판별용 URL 정규화. 추적 파라미터와 fragment를 제거합니다."""
-    try:
-        parts = urlsplit(url.strip())
-        query = sorted([
-            (key, value)
-            for key, value in parse_qsl(parts.query, keep_blank_values=True)
-            if not key.lower().startswith(TRACKING_QUERY_PREFIXES)
-        ])
-        path = parts.path.rstrip("/") or "/"
-        netloc = parts.netloc.lower()
-        if netloc.startswith("www."):
-            netloc = netloc[4:]
-        return urlunsplit(
-            (parts.scheme.lower(), netloc, path, urlencode(query), "")
-        )
-    except Exception:
-        return url.strip()
 
 
 def _entry_datetime(entry: dict) -> datetime | None:
@@ -312,7 +293,8 @@ def collect_articles(hours: int = 36) -> list[dict]:
                 continue
 
             title = strip_html(entry.get("title", ""))
-            link = (entry.get("link") or "").strip()
+            raw_link = (entry.get("link") or "").strip()
+            link = clean_public_link(raw_link)
             raw_summary = _entry_summary(entry)
             summary = strip_html(raw_summary)[:700]
             author = strip_html(entry.get("author", ""))[:100]
