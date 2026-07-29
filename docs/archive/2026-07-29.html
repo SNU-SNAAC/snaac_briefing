@@ -1,2522 +1,844 @@
 <!DOCTYPE html>
-<html lang="ko" data-snaac-ui="5">
+<html lang="ko" data-briefing-ui="1" data-domain="economy">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f2f2f2">
-<title>SNAAC 모닝 브리핑 · 2026년 7월 29일 수요일</title>
-<meta name="description" content="SNAAC이 고른 오늘의 무료 스타트업 업데이트, 인터뷰와 인사이트 5가지">
-<meta property="og:title" content="SNAAC 모닝 브리핑 · 7/29">
-<meta property="og:description" content="무료로 확인할 수 있는 스타트업 업데이트와 창업가·VC 인사이트">
+<meta name="theme-color" content="#F2F3F4">
+<title>오늘의 경제 · 2026년 7월 29일 수요일</title>
+<meta name="description" content="국내외 경제 흐름과 주식·금리·환율·산업 변화를 한 번에 읽을 수 있도록 무료 원문 가운데 오늘 꼭 볼 소식만 골랐어요.">
+<meta property="og:title" content="오늘의 경제 · 7/29">
+<meta property="og:description" content="국내외 경제 흐름과 주식·금리·환율·산업 변화를 한 번에 읽을 수 있도록 무료 원문 가운데 오늘 꼭 볼 소식만 골랐어요.">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
 <style>
-@font-face {
-  font-family: 'GmarketSans';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
-  font-weight: 700;
-  font-display: swap;
-}
-
 :root {
-  --page: #f2f2f2;
-  --surface: #ffffff;
-  --surface-soft: #e9e9e9;
-  --ink: #171717;
-  --ink-2: #3f3f3f;
-  --muted: #717171;
-  --line: #d5d5d5;
-  --line-strong: #b9b9b9;
-  --shadow: 0 10px 30px rgba(20, 20, 18, .055);
-  --radius: 18px;
-}
-
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  background: var(--page);
-  color: var(--ink);
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-body.drawer-open { overflow: hidden; }
-a { color: inherit; }
-button, a { -webkit-tap-highlight-color: transparent; }
-button, textarea { font: inherit; }
-[hidden] { display: none !important; }
-
-.wrap {
-  width: min(100%, 600px);
-  margin: 0 auto;
-  padding: 0 18px calc(72px + env(safe-area-inset-bottom));
-}
-
-.masthead {
-  padding: 18px 0 20px;
-  border-bottom: 1px solid var(--ink);
-}
-.topline {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .16em;
-  white-space: nowrap;
-}
-.brand-mark {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ink);
-}
-.top-actions { display: flex; align-items: center; gap: 7px; }
-.utility-button {
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink-2);
-  text-decoration: none;
-  font-size: 12.5px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.utility-button:active { transform: scale(.98); }
-.count-badge {
-  min-width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 11px;
-  line-height: 1;
-}
-
-.date-lockup {
-  position: relative;
-  padding: 28px 0 6px;
-  min-height: 150px;
-}
-.kicker {
-  margin: 0 0 9px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-.date-big {
-  margin: 0;
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: clamp(58px, 18vw, 88px);
-  line-height: .95;
-  letter-spacing: -.055em;
-}
-.date-sub {
-  margin-top: 12px;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-}
-.stamp {
-  position: absolute;
-  top: 27px;
-  right: 2px;
-  width: 76px;
-  height: 76px;
-  display: grid;
-  place-content: center;
-  border: 1px solid var(--line-strong);
-  border-radius: 50%;
-  color: var(--ink-2);
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: 9px;
-  line-height: 1.25;
-  letter-spacing: .08em;
-  text-align: center;
-  transform: rotate(6deg);
-}
-.stamp strong { display: block; font-size: 15px; letter-spacing: 0; }
-
-.intro { padding: 18px 0 8px; }
-.intro p {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 15px;
-  line-height: 1.65;
-}
-.editorial-rule {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 14px;
-}
-.editorial-rule span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 11.5px;
-  font-weight: 700;
-}
-
-.cards { padding-top: 14px; }
-.card {
-  margin-bottom: 18px;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-.thumb {
-  position: relative;
-  display: block;
-  aspect-ratio: 16 / 8.8;
-  overflow: hidden;
-  background: #dedede;
-  text-decoration: none;
-}
-.thumb img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  transform: scale(1.002);
-}
-.thumb::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, .12), transparent 42%);
-  pointer-events: none;
-}
-.thumb.noimg {
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.24), transparent 56%),
-    linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
-}
-.thumb.noimg::before {
-  content: attr(data-initial);
-  position: relative;
-  z-index: 1;
-  color: rgba(255, 255, 255, .94);
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: 44px;
-  text-shadow: 0 2px 16px rgba(0,0,0,.18);
-}
-.media-label {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 2;
-  min-height: 27px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 9px;
-  border: 1px solid rgba(255,255,255,.45);
-  border-radius: 999px;
-  background: rgba(20,20,18,.72);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-  backdrop-filter: blur(6px);
-}
-.card-body { padding: 17px 17px 18px; }
-.card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.meta-left { min-width: 0; display: flex; align-items: center; gap: 8px; }
-.category {
-  max-width: 72vw;
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 9px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 11.5px;
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.source {
-  min-width: 0;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card-index {
-  flex: 0 0 auto;
-  color: var(--muted);
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: 11px;
-}
-.title-link { text-decoration: none; }
-.card h2 {
-  margin: 0;
-  font-size: clamp(18px, 4.8vw, 20px);
-  line-height: 1.42;
-  letter-spacing: -.025em;
-}
-.summary {
-  margin: 10px 0 0;
-  color: var(--ink-2);
-  font-size: 15px;
-  line-height: 1.68;
-}
-.takeaway {
-  margin-top: 15px;
-  padding: 13px 14px;
-  border-left: 3px solid var(--ink);
-  background: var(--surface-soft);
-}
-.takeaway-label {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--muted);
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: .11em;
-}
-.takeaway p {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 13.5px;
-  line-height: 1.55;
-}
-.card-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 15px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-}
-.read-link {
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 13.5px;
-  font-weight: 800;
-}
-.read-link::after { content: '↗'; font-size: 15px; }
-.save-button {
-  min-width: 84px;
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 13px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--ink-2);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.save-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-.save-button.is-saved { background: var(--ink); border-color: var(--ink); color: #fff; }
-.save-button.is-saved svg { fill: currentColor; }
-.save-button:active { transform: scale(.97); }
-
-.archive-section {
-  margin-top: 42px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line-strong);
-}
-.section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 12px;
-}
-.section-head h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
-.section-head a {
-  color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-decoration: none;
-}
-.archive-list {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--surface);
-}
-.archive-row {
-  min-height: 58px;
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 11px;
-  padding: 0 14px;
-  border-bottom: 1px solid var(--line);
-  text-decoration: none;
-}
-.archive-row:last-child { border-bottom: 0; }
-.archive-date { font-size: 14px; font-weight: 800; }
-.archive-count { color: var(--muted); font-size: 12px; }
-.archive-arrow { color: var(--muted); font-size: 15px; }
-.empty-archive {
-  padding: 22px 16px;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-}
-
-.archive-hero { padding: 32px 0 18px; border-bottom: 1px solid var(--ink); }
-.archive-hero h1 {
-  margin: 8px 0 6px;
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: clamp(35px, 10vw, 52px);
-  line-height: 1.08;
-  letter-spacing: -.045em;
-}
-.archive-hero p { margin: 0; color: var(--muted); font-size: 14px; }
-.archive-page-list { margin-top: 22px; }
-
-footer {
-  margin-top: 44px;
-  color: var(--muted);
-  font-size: 11.5px;
-  line-height: 1.8;
-  text-align: center;
-}
-
-.drawer,
-.note-dialog {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.drawer { z-index: 50; }
-.note-dialog { z-index: 70; }
-.drawer-backdrop,
-.note-backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  background: rgba(15, 15, 14, .5);
-  cursor: pointer;
-}
-.drawer-panel,
-.note-panel {
-  position: relative;
-  width: min(100%, 600px);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  border-radius: 22px 22px 0 0;
-  background: var(--surface);
-  box-shadow: 0 -18px 50px rgba(0,0,0,.17);
-  animation: drawer-up .18s ease-out both;
-}
-.drawer-panel {
-  max-height: min(78vh, 720px);
-  display: flex;
-  flex-direction: column;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.note-panel {
-  max-height: min(88vh, 720px);
-  overflow-y: auto;
-  padding: 8px 17px calc(18px + env(safe-area-inset-bottom));
-}
-@keyframes drawer-up {
-  from { transform: translateY(18px); opacity: .5; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.drawer-handle {
-  width: 42px;
-  height: 4px;
-  margin: 9px auto 2px;
-  border-radius: 999px;
-  background: var(--line-strong);
-}
-.drawer-head,
-.note-head {
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.drawer-head { padding: 0 17px; border-bottom: 1px solid var(--line); }
-.drawer-head h2,
-.note-head h2 { margin: 0; font-size: 17px; }
-.close-button {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: #fff;
-  color: var(--ink);
-  font-size: 20px;
-  cursor: pointer;
-}
-.saved-list {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 8px 16px 18px;
-}
-.saved-empty {
-  padding: 44px 18px;
-  color: var(--muted);
-  font-size: 14px;
-  text-align: center;
-}
-.saved-item { padding: 14px 0; border-bottom: 1px solid var(--line); }
-.saved-item:last-child { border-bottom: 0; }
-.saved-meta {
-  margin-bottom: 4px;
-  color: var(--muted);
-  font-size: 11.5px;
-  font-weight: 700;
-}
-.saved-title {
-  display: block;
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.45;
-}
-.saved-note {
-  margin: 10px 0 0;
-  padding: 10px 11px;
-  border-left: 3px solid var(--ink);
-  background: var(--surface-soft);
-  color: var(--ink-2);
-  font-size: 13px;
-  line-height: 1.55;
-  white-space: pre-wrap;
-}
-.saved-note-label {
-  display: block;
-  margin-bottom: 3px;
-  color: var(--muted);
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: .08em;
-}
-.saved-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 7px;
-  margin-top: 10px;
-}
-.saved-action-button {
-  min-height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.edit-note { color: var(--ink-2); }
-
-.note-article-title {
-  margin: 1px 0 13px;
-  color: var(--ink-2);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.note-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 7px;
-  color: var(--ink-2);
-  font-size: 12.5px;
-  font-weight: 800;
-}
-.note-optional { color: var(--muted); font-weight: 600; }
-.note-count { color: var(--muted); font-size: 11px; font-weight: 600; }
-.note-input {
-  width: 100%;
-  min-height: 122px;
-  display: block;
-  resize: vertical;
-  border: 1px solid var(--line-strong);
-  border-radius: 13px;
-  background: #fff;
-  color: var(--ink);
-  padding: 12px 13px;
-  font-size: 14px;
-  line-height: 1.55;
-  word-break: break-word;
-  outline: none;
-}
-.note-input:focus {
-  border-color: var(--ink);
-  box-shadow: 0 0 0 3px rgba(23,23,23,.08);
-}
-.note-input::placeholder { color: #9a9a9a; }
-.note-help { margin: 8px 1px 0; color: var(--muted); font-size: 11.5px; }
-.note-actions {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 9px;
-  margin-top: 15px;
-}
-.note-button {
-  min-height: 46px;
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--ink-2);
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.note-button-primary { border-color: var(--ink); background: var(--ink); color: #fff; }
-.note-button:active { transform: scale(.985); }
-
-.sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-
-@media (hover: hover) {
-  .card { transition: transform .16s ease, box-shadow .16s ease; }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(20,20,18,.085); }
-  .thumb img { transition: transform .25s ease; }
-  .card:hover .thumb img { transform: scale(1.018); }
-  .utility-button:hover,
-  .save-button:hover,
-  .close-button:hover,
-  .saved-action-button:hover { border-color: var(--ink); }
-  .archive-summary:hover { background: #fafafa; }
-  .archive-day-row:hover { background: #fafafa; }
-  .about-snaac-card:hover { transform: translateY(-1px); box-shadow: 0 13px 32px rgba(17,17,17,.15); }
-}
-
-@media (max-width: 390px) {
-  .wrap { padding-left: 14px; padding-right: 14px; }
-  .utility-button { padding: 0 10px; }
-  .utility-label-optional { display: none; }
-  .stamp { width: 68px; height: 68px; top: 31px; }
-  .stamp strong { font-size: 14px; }
-  .card-body { padding-left: 15px; padding-right: 15px; }
-  .source { max-width: 100px; }
-  .archive-count { display: none; }
-  .archive-row { grid-template-columns: 1fr auto; }
-  .note-panel { padding-left: 14px; padding-right: 14px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-  }
-}
-
-
-/* ── v5: 로그인 필수 저장, 서랍형 아카이브, ABOUT SNAAC ── */
-.logo-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 0 18px;
-}
-.logo-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-.site-logo {
-  width: clamp(158px, 47vw, 208px);
-  height: auto;
-  display: block;
-}
-.topline {
-  min-height: 44px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 7px;
-}
-.topline .utility-button {
-  width: 100%;
-  min-width: 0;
-  padding: 0 9px;
-  white-space: nowrap;
-}
-.utility-button.saved-vault {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: #fff;
-  box-shadow: 0 7px 18px rgba(17,17,17,.14);
-}
-.utility-button.saved-vault .count-badge {
-  background: #fff;
-  color: var(--ink);
-}
-.utility-button.saved-vault svg { width: 15px; height: 15px; fill: currentColor; }
-.note-dialog { z-index: 90; }
-.utility-button.auth-control {
-  overflow: hidden;
-}
-.utility-button.auth-control span[data-auth-label] {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.masthead { padding-top: 0; }
-.date-lockup { padding-top: 24px; }
-
-.free-access-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.free-access-note::before {
-  content: '✓';
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.thumb.is-video::before,
-.preview-thumb.is-video::after,
-.saved-thumb.is-video::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 3;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(17,17,17,.82);
-  box-shadow: 0 7px 22px rgba(0,0,0,.2);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-.thumb.is-video .play-triangle,
-.preview-thumb.is-video .play-triangle,
-.saved-thumb.is-video .play-triangle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 4;
-  width: 0;
-  height: 0;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-left: 13px solid #fff;
-  transform: translate(-36%, -50%);
-  pointer-events: none;
-}
-
-.floating-saved {
-  position: fixed;
-  left: 50%;
-  bottom: calc(14px + env(safe-area-inset-bottom));
-  z-index: 32;
-  min-width: 176px;
-  min-height: 50px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 0 18px;
-  border: 1px solid #111;
-  border-radius: 999px;
-  background: #111;
-  color: #fff;
-  box-shadow: 0 12px 34px rgba(0,0,0,.24);
-  font-size: 14px;
-  font-weight: 850;
-  cursor: pointer;
-  transform: translateX(-50%);
-  transition: opacity .16s ease, transform .16s ease;
-}
-.floating-saved svg { width: 17px; height: 17px; fill: currentColor; }
-.floating-saved .count-badge { background: #fff; color: #111; }
-.floating-saved:active { transform: translateX(-50%) scale(.98); }
-body.drawer-open .floating-saved { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(12px); }
-
-.drawer-panel { max-height: min(92dvh, 820px); }
-.drawer-head {
-  min-height: 70px;
-  padding: 0 16px;
-}
-.drawer-title-wrap { min-width: 0; }
-.drawer-head h2 { display: flex; align-items: center; gap: 8px; }
-.drawer-head h2 svg { width: 18px; height: 18px; fill: currentColor; }
-.drawer-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 11.5px; }
-
-.sync-strip {
-  margin: 12px 16px 4px;
-  padding: 12px 13px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--surface-soft);
-}
-.sync-copy { min-width: 0; }
-.sync-title { margin: 0; color: var(--ink); font-size: 12.5px; font-weight: 800; }
-.sync-text { margin: 2px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
-.sync-action {
-  flex: 0 0 auto;
-  min-height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--ink);
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 11.5px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.saved-list { padding: 10px 14px 24px; }
-.saved-item {
-  margin-bottom: 11px;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #fff;
-}
-.saved-item:last-child { margin-bottom: 0; border-bottom: 1px solid var(--line); }
-.saved-preview-trigger {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 94px minmax(0, 1fr);
-  gap: 12px;
-  padding: 11px;
-  border: 0;
-  background: #fff;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.saved-thumb {
-  position: relative;
-  min-height: 78px;
-  overflow: hidden;
-  border-radius: 11px;
-  background: linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
-}
-.saved-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.saved-thumb.noimg::before {
-  content: attr(data-initial);
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: rgba(255,255,255,.94);
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-}
-.saved-thumb.is-video::after { width: 34px; height: 34px; }
-.saved-thumb.is-video .play-triangle {
-  border-top-width: 6px;
-  border-bottom-width: 6px;
-  border-left-width: 10px;
-}
-.saved-copy { min-width: 0; align-self: center; }
-.saved-meta { margin: 0 0 5px; }
-.saved-title {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 14.5px;
-  line-height: 1.43;
-}
-.saved-note-preview {
-  margin: 7px 0 0;
-  color: var(--muted);
-  font-size: 11.5px;
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.saved-note-preview strong { color: var(--ink-2); font-size: 10px; letter-spacing: .06em; }
-.saved-open-hint { margin-top: 7px; color: var(--ink-2); font-size: 11px; font-weight: 800; }
-.saved-actions {
-  margin: 0;
-  padding: 9px 11px 10px;
-  border-top: 1px solid var(--line);
-}
-.saved-action-button { background: #fff; }
-.saved-action-button.preview-action { margin-right: auto; color: var(--ink); border-color: var(--line-strong); }
-
-.preview-dialog,
-.auth-dialog {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.preview-dialog { z-index: 80; }
-.auth-dialog { z-index: 100; }
-.preview-backdrop,
-.auth-backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  background: rgba(15,15,14,.56);
-  cursor: pointer;
-}
-.preview-panel,
-.auth-panel {
-  position: relative;
-  width: min(100%, 600px);
-  max-height: min(92dvh, 820px);
-  overflow-y: auto;
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  border-radius: 22px 22px 0 0;
-  background: var(--surface);
-  box-shadow: 0 -18px 50px rgba(0,0,0,.2);
-  padding-bottom: env(safe-area-inset-bottom);
-  animation: drawer-up .18s ease-out both;
-}
-.preview-head,
-.auth-head {
-  position: sticky;
-  top: 0;
-  z-index: 7;
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255,255,255,.96);
-  backdrop-filter: blur(12px);
-}
-.preview-head h2,
-.auth-head h2 { margin: 0; font-size: 17px; }
-.preview-card { margin: 14px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
-.preview-thumb {
-  position: relative;
-  aspect-ratio: 16 / 8.8;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--fallback, #2752B8), var(--fallback-2, #6D9CFF));
-}
-.preview-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.preview-thumb.noimg::before {
-  content: attr(data-initial);
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: rgba(255,255,255,.94);
-  font-family: GmarketSans, Pretendard, sans-serif;
-  font-size: 42px;
-}
-.preview-body { padding: 17px; }
-.preview-body h3 { margin: 0; font-size: 20px; line-height: 1.42; letter-spacing: -.025em; }
-.preview-summary { margin: 11px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.65; }
-.preview-note {
-  margin-top: 14px;
-  padding: 12px 13px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-soft);
-  color: var(--ink-2);
-  font-size: 13px;
-  line-height: 1.55;
-  white-space: pre-wrap;
-}
-.preview-note strong { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10.5px; letter-spacing: .09em; }
-.preview-actions {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 9px;
-  margin-top: 15px;
-}
-.preview-read,
-.preview-secondary {
-  min-height: 46px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-size: 13.5px;
-  font-weight: 800;
-  text-decoration: none;
-  cursor: pointer;
-}
-.preview-read { border: 1px solid var(--ink); background: var(--ink); color: #fff; }
-.preview-secondary { border: 1px solid var(--line-strong); background: #fff; color: var(--ink-2); }
-.preview-delete {
-  width: 100%;
-  min-height: 42px;
-  margin-top: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.auth-content { padding: 18px 16px calc(22px + env(safe-area-inset-bottom)); }
-.auth-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 4px;
-  border-radius: 12px;
-  background: var(--surface-soft);
-}
-.auth-tab {
-  min-height: 40px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.auth-tab.is-active { background: #fff; color: var(--ink); box-shadow: 0 2px 9px rgba(0,0,0,.06); }
-.auth-form { margin-top: 16px; }
-.auth-label { display: block; margin-top: 12px; color: var(--ink-2); font-size: 12px; font-weight: 800; }
-.auth-input {
-  width: 100%;
-  min-height: 48px;
-  margin-top: 6px;
-  padding: 0 13px;
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--ink);
-  font-size: 15px;
-  outline: none;
-}
-.auth-input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(23,23,23,.08); }
-.auth-submit {
-  width: 100%;
-  min-height: 49px;
-  margin-top: 17px;
-  border: 1px solid var(--ink);
-  border-radius: 12px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 850;
-  cursor: pointer;
-}
-.auth-submit:disabled { opacity: .55; cursor: wait; }
-.auth-message { min-height: 20px; margin: 11px 2px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-.auth-message.is-error { color: #4a2020; }
-.auth-help { margin: 12px 2px 0; color: var(--muted); font-size: 11.5px; line-height: 1.55; }
-.account-card {
-  padding: 17px;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: var(--surface-soft);
-}
-.account-eyebrow { margin: 0 0 5px; color: var(--muted); font-size: 10.5px; font-weight: 800; letter-spacing: .1em; }
-.account-email { margin: 0; color: var(--ink); font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
-.account-copy { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
-.account-logout {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 13px;
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--ink-2);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.auth-setup-note { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-soft); }
-.auth-setup-note h3 { margin: 0 0 7px; font-size: 15px; }
-.auth-setup-note p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
-
-
-/* 로그인 목적 안내 */
-.auth-intent {
-  margin: 0 0 13px;
-  padding: 12px 13px;
-  border: 1px solid var(--ink);
-  border-radius: 12px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 12.5px;
-  font-weight: 750;
-  line-height: 1.55;
-}
-
-/* 월 → 주차 → 날짜 순 서랍형 아카이브 */
-.archive-tree {
-  display: grid;
-  gap: 10px;
-}
-.archive-month,
-.archive-week {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: var(--surface);
-}
-.archive-month[open] {
-  border-color: var(--line-strong);
-  box-shadow: 0 8px 24px rgba(20,20,18,.045);
-}
-.archive-summary {
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 15px;
-  list-style: none;
-  cursor: pointer;
-  user-select: none;
-}
-.archive-summary::-webkit-details-marker { display: none; }
-.archive-summary::marker { content: ''; }
-.archive-summary-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.archive-summary-title {
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 850;
-  letter-spacing: -.015em;
-}
-.archive-summary-meta {
-  color: var(--muted);
-  font-size: 11.5px;
-  font-weight: 650;
-}
-.archive-chevron {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  color: var(--muted);
-  font-size: 14px;
-  transition: transform .16s ease;
-}
-details[open] > .archive-summary .archive-chevron { transform: rotate(180deg); }
-.archive-month-body {
-  display: grid;
-  gap: 9px;
-  padding: 10px;
-  border-top: 1px solid var(--line);
-  background: var(--surface-soft);
-}
-.archive-week {
-  border-radius: 12px;
-  box-shadow: none;
-}
-.archive-week .archive-summary {
-  min-height: 54px;
-  padding-left: 13px;
-  padding-right: 13px;
-}
-.archive-week .archive-summary-title { font-size: 13.5px; }
-.archive-week .archive-chevron {
-  width: 25px;
-  height: 25px;
-  font-size: 12px;
-}
-.archive-day-list {
-  border-top: 1px solid var(--line);
-  background: #fff;
-}
-.archive-day-row {
-  min-height: 56px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 10px;
-  padding: 0 13px;
-  border-bottom: 1px solid var(--line);
-  color: inherit;
-  text-decoration: none;
-}
-.archive-day-row:last-child { border-bottom: 0; }
-.archive-day-date {
-  min-width: 0;
-  color: var(--ink);
-  font-size: 13.5px;
-  font-weight: 800;
-}
-.archive-day-count {
-  color: var(--muted);
-  font-size: 11.5px;
-  white-space: nowrap;
-}
-.archive-day-arrow { color: var(--muted); font-size: 14px; }
-.archive-tree-compact .archive-month:not([open]) .archive-month-body { display: none; }
-
-/* 지난 브리핑 아래 ABOUT SNAAC */
-.about-snaac-section { margin-top: 18px; }
-.about-snaac-card {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  padding: 20px 58px 20px 18px;
-  border: 1px solid var(--ink);
-  border-radius: 16px;
-  background: var(--ink);
-  color: #fff;
-  text-decoration: none;
-  box-shadow: 0 10px 28px rgba(17,17,17,.11);
-}
-.about-snaac-card::after {
-  content: '↗';
-  position: absolute;
-  top: 50%;
-  right: 18px;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255,255,255,.34);
-  border-radius: 50%;
-  font-size: 17px;
-  transform: translateY(-50%);
-}
-.about-snaac-eyebrow {
-  display: block;
-  margin-bottom: 5px;
-  color: rgba(255,255,255,.62);
-  font-size: 10.5px;
-  font-weight: 850;
-  letter-spacing: .14em;
-}
-.about-snaac-title {
-  display: block;
-  font-size: 16px;
-  font-weight: 850;
-  letter-spacing: -.015em;
-}
-.about-snaac-copy {
-  display: block;
-  margin-top: 5px;
-  color: rgba(255,255,255,.7);
-  font-size: 12px;
-  line-height: 1.55;
-}
-
-@media (max-width: 390px) {
-  .logo-row { padding-top: 11px; padding-bottom: 15px; }
-  .site-logo { width: 164px; }
-  .topline { gap: 5px; }
-  .topline .utility-button { min-height: 39px; padding: 0 6px; font-size: 11.5px; }
-  .saved-preview-trigger { grid-template-columns: 82px minmax(0, 1fr); gap: 10px; }
-  .saved-thumb { min-height: 72px; }
-  .floating-saved { min-width: 164px; min-height: 48px; }
-  .preview-card { margin-left: 10px; margin-right: 10px; }
-  .archive-day-row { grid-template-columns: minmax(0, 1fr) auto; }
-  .archive-day-count { display: none; }
-  .about-snaac-card { padding-left: 16px; }
-}
+  --bg:#f2f3f4;
+  --paper:#fff;
+  --ink:#151515;
+  --muted:#686868;
+  --soft:#8b8b8b;
+  --line:#d9dadd;
+  --line-dark:#b9bbc0;
+  --accent:#176B5B;
+  --shadow:0 14px 34px rgba(18,18,18,.08);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+button,input,textarea{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+button{color:inherit}
+a{color:inherit}
+body.modal-open{overflow:hidden}
+.wrap{width:min(100%,620px);margin:0 auto;padding:0 18px calc(100px + env(safe-area-inset-bottom))}
+.masthead{padding:18px 0 12px;border-bottom:2px solid var(--ink)}
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;min-height:58px}
+.topbar-side{display:flex;align-items:center;gap:7px;min-width:0}
+.topbar-side.right{justify-content:flex-end}
+.nav-btn{appearance:none;border:1px solid var(--line-dark);background:rgba(255,255,255,.72);border-radius:999px;min-height:38px;padding:8px 11px;text-decoration:none;font-size:12px;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;cursor:pointer}
+.nav-btn:active{transform:scale(.98)}
+.saved-nav{background:var(--ink);color:#fff;border-color:var(--ink)}
+.saved-count{min-width:19px;height:19px;border-radius:999px;background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;padding:0 5px}
+.brand{display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;line-height:1;text-align:center;min-width:116px}
+.brand-top{font-size:16px;font-weight:900;letter-spacing:.13em}
+.brand-bottom{margin-top:6px;font-size:8px;font-weight:800;letter-spacing:.23em;color:var(--muted)}
+.date-lockup{position:relative;padding:22px 0 8px}
+.kicker{margin:0 0 5px;font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.date-big{margin:0;font-size:clamp(58px,17vw,86px);font-weight:900;line-height:.95;letter-spacing:-.065em}
+.date-sub{margin-top:9px;font-size:13px;color:var(--muted);font-weight:600}
+.stamp{position:absolute;right:2px;top:22px;width:76px;height:76px;border:2px solid var(--ink);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(7deg);font-size:9px;font-weight:800;letter-spacing:.12em;background:rgba(242,243,244,.78)}
+.stamp strong{font-size:16px;letter-spacing:.02em;line-height:1.1}
+.intro{padding:19px 0 20px}
+.intro>p{margin:0;font-size:14px;color:#4d4d4d;word-break:keep-all}
+.editorial-rule{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.editorial-rule span{font-size:11px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.64);border-radius:999px;padding:5px 9px;color:#5f5f5f}
+.editorial-rule span:first-child{border-color:var(--ink);color:var(--ink)}
+.section-divider{display:flex;align-items:center;gap:10px;margin:28px 0 13px}
+.section-divider::after{content:"";height:1px;flex:1;background:var(--line-dark)}
+.section-divider h2{margin:0;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:17px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.thumb{position:relative;display:block;aspect-ratio:16/8.6;background:linear-gradient(135deg,var(--fa),var(--fb));overflow:hidden;text-decoration:none}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.no-image::after{content:attr(data-initial);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.92);font-size:48px;font-weight:900;letter-spacing:-.05em}
+.video-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.74);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.2)}
+.video-mark::after{content:"";margin-left:4px;border-left:14px solid currentColor;border-top:9px solid transparent;border-bottom:9px solid transparent}
+.card-body{padding:17px 18px 18px}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.meta-left{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;min-height:24px;border:1px solid #d5d6d9;background:#f6f6f7;border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:800;color:#555}
+.tag.section{background:#202020;border-color:#202020;color:#fff}
+.idx{font-size:11px;color:var(--soft);font-weight:750;white-space:nowrap}
+.card h2{margin:0 0 9px;font-size:19px;line-height:1.38;letter-spacing:-.025em;word-break:keep-all}
+.summary{margin:0;color:#5e5e5e;font-size:14px;word-break:keep-all}
+.takeaway{margin:14px 0 0;padding:12px 13px;border-left:3px solid var(--ink);background:#f5f5f5;font-size:13px;color:#454545;word-break:keep-all}
+.takeaway strong{display:block;margin-bottom:3px;font-size:10px;letter-spacing:.12em;color:#777}
+.card-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:15px}
+.open-link,.save-btn{min-height:43px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:800;text-decoration:none;cursor:pointer}
+.open-link{background:var(--ink);color:#fff;border:1px solid var(--ink)}
+.save-btn{border:1px solid var(--line-dark);background:#fff;padding:0 13px}
+.save-btn.saved{background:#ececed;border-color:#999}
+.save-btn svg,.nav-btn svg{width:16px;height:16px;flex:none}
+.archive-section{margin-top:34px;padding-top:24px;border-top:1px solid var(--line-dark)}
+.archive-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:13px}
+.archive-heading h2{margin:0;font-size:16px}
+.archive-heading a{font-size:12px;color:var(--muted);font-weight:700}
+.archive-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.archive-chips::-webkit-scrollbar{display:none}
+.archive-chips a{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;text-decoration:none;font-size:12px;font-weight:700}
+.about-section{margin-top:20px}
+.about-card{display:block;position:relative;overflow:hidden;background:#1c1c1c;color:#fff;border-radius:18px;padding:20px 72px 20px 19px;text-decoration:none;min-height:128px}
+.about-card::after{content:"↗";position:absolute;right:18px;top:17px;font-size:25px}
+.about-eyebrow{display:block;font-size:9px;font-weight:850;letter-spacing:.18em;color:#bdbdbd}
+.about-title{display:block;margin-top:11px;font-size:20px;font-weight:850;letter-spacing:-.02em}
+.about-copy{display:block;margin-top:7px;font-size:12.5px;color:#d0d0d0;word-break:keep-all}
+footer{margin:34px 0 0;text-align:center;color:#858585;font-size:11px;line-height:1.8}
+.mobile-saved{position:fixed;z-index:30;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(calc(100% - 36px),584px);height:50px;border:0;border-radius:15px;background:#161616;color:#fff;box-shadow:0 12px 32px rgba(0,0,0,.23);font-weight:850;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.mobile-saved .saved-count{background:#fff}
+.archive-hero{padding:28px 0 18px;border-bottom:1px solid var(--line-dark)}
+.archive-hero h1{font-size:38px;line-height:1.05;letter-spacing:-.04em;margin:4px 0 9px}
+.archive-hero p:last-child{margin:0;color:var(--muted);font-size:13px}
+.archive-list{margin-top:18px;border-top:1px solid var(--line-dark)}
+.archive-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;min-height:72px;padding:13px 2px;border-bottom:1px solid var(--line);text-decoration:none}
+.archive-date{font-size:15px;font-weight:800}
+.archive-count{font-size:11px;color:var(--muted)}
+.archive-arrow{font-size:18px}
+.empty{padding:34px 0;color:var(--muted);text-align:center;font-size:13px}
+.overlay{position:fixed;z-index:90;inset:0;display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);padding:16px;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.panel{width:min(100%,600px);max-height:min(88vh,820px);overflow:auto;background:#fff;border-radius:22px 22px 16px 16px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+.panel-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 17px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}
+.panel-header h2{margin:0;font-size:18px}
+.close-btn{width:36px;height:36px;border:1px solid var(--line);background:#f5f5f5;border-radius:50%;font-size:20px;cursor:pointer}
+.panel-body{padding:17px}
+.saved-empty{padding:38px 8px;text-align:center;color:var(--muted);font-size:13px}
+.saved-list{display:grid;gap:10px}
+.saved-item{width:100%;display:grid;grid-template-columns:88px 1fr;gap:12px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:0;overflow:hidden;cursor:pointer}
+.saved-item-thumb{min-height:94px;background:linear-gradient(135deg,var(--fa),var(--fb));overflow:hidden}
+.saved-item-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.saved-item-body{padding:11px 11px 11px 0;min-width:0}
+.saved-item-source{font-size:10px;color:var(--muted);font-weight:800}
+.saved-item-title{display:block;margin-top:4px;font-size:13px;line-height:1.35;font-weight:850;word-break:keep-all}
+.saved-item-note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:6px;font-size:11px;color:#777}
+.form-label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}
+.note-textarea,.auth-input{width:100%;border:1px solid var(--line-dark);border-radius:12px;background:#fff;padding:12px 13px;outline:none}
+.note-textarea{min-height:140px;resize:vertical}
+.note-textarea:focus,.auth-input:focus{border-color:#444;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+.form-help{margin:7px 0 0;font-size:11px;color:var(--muted)}
+.form-actions{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;margin-top:15px}
+.secondary-btn,.primary-btn,.danger-btn{min-height:45px;border-radius:12px;font-weight:850;cursor:pointer}
+.secondary-btn{border:1px solid var(--line-dark);background:#fff}
+.primary-btn{border:1px solid var(--ink);background:var(--ink);color:#fff}
+.danger-btn{border:1px solid #c8c8c8;background:#f4f4f4;color:#444}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:16px}
+.auth-tab{border:0;background:transparent;border-radius:9px;min-height:38px;font-size:12px;font-weight:800;cursor:pointer}
+.auth-tab.active{background:#1c1c1c;color:#fff}
+.auth-label{display:block;margin:12px 0 6px;font-size:12px;font-weight:800}
+.auth-submit{width:100%;min-height:46px;margin-top:15px;border:0;border-radius:12px;background:#171717;color:#fff;font-weight:850;cursor:pointer}
+.auth-message{min-height:20px;margin:9px 0 0;font-size:12px;color:#555}
+.auth-help{margin:4px 0 0;font-size:11px;color:#888}
+.account-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:#f7f7f7}
+.account-eyebrow{margin:0;font-size:9px;letter-spacing:.15em;color:#777;font-weight:800}
+.account-email{margin:8px 0 0;font-size:16px;font-weight:850;word-break:break-all}
+.account-copy{margin:7px 0 0;font-size:12px;color:#666}
+.account-logout{width:100%;min-height:44px;margin-top:12px;border:1px solid var(--line-dark);background:#fff;border-radius:12px;font-weight:800;cursor:pointer}
+.setup-note{padding:18px;border:1px solid var(--line);border-radius:14px;background:#f6f6f6}
+.setup-note h3{margin:0 0 6px;font-size:16px}
+.setup-note p{margin:0;color:#666;font-size:12px}
+.preview-thumb{aspect-ratio:16/8.6;background:linear-gradient(135deg,var(--fa),var(--fb));overflow:hidden}
+.preview-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.preview-content{padding:17px}
+.preview-tags{display:flex;gap:6px;flex-wrap:wrap}
+.preview-content h3{font-size:21px;line-height:1.37;letter-spacing:-.025em;margin:12px 0 9px;word-break:keep-all}
+.preview-summary{margin:0;color:#5d5d5d;font-size:14px}
+.preview-note{margin-top:13px;padding:12px;border-radius:12px;background:#f3f3f3;font-size:13px;white-space:pre-wrap;word-break:break-word}
+.preview-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.preview-actions .open-link{grid-column:1/-1}
+.status{position:fixed;z-index:120;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translate(-50%,16px);max-width:calc(100% - 36px);background:#111;color:#fff;border-radius:999px;padding:10px 14px;font-size:12px;opacity:0;pointer-events:none;transition:.2s}
+.status.show{opacity:1;transform:translate(-50%,0)}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+[hidden]{display:none!important}
+@media(min-width:700px){
+  .mobile-saved{display:none}
+  .wrap{padding-bottom:70px}
+  .overlay{align-items:center}
+  .panel{border-radius:22px}
+}
+@media(max-width:410px){
+  .wrap{padding-left:14px;padding-right:14px}
+  .topbar{gap:5px}
+  .nav-btn{padding:7px 8px;font-size:10.5px}
+  .brand{min-width:102px}
+  .brand-top{font-size:14px}
+  .brand-bottom{font-size:7px}
+  .stamp{width:67px;height:67px;font-size:8px}
+  .stamp strong{font-size:14px}
+  .card h2{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="masthead">
     
-<div class="logo-row"><a class="logo-link" href="../" aria-label="SNAAC 오늘 브리핑"><img class="site-logo" src="../assets/snaac-logo.png" alt="SNAAC" width="932" height="232"></a></div>
-<div class="topline">
-  <a class="utility-button" href="../" aria-label="오늘 보기"><span>오늘</span><span aria-hidden="true">←</span></a>
-  <button class="utility-button saved-vault" type="button" data-open-saved><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span>저장함</span><span class="count-badge" data-saved-count>0</span></button>
-  <button class="utility-button auth-control" type="button" data-open-auth aria-label="로그인 또는 내 계정"><span aria-hidden="true">◎</span><span data-auth-label>로그인</span></button>
+<div class="topbar">
+  <div class="topbar-side"><a class="nav-btn" href="index.html">지난 회차</a></div>
+  <a class="brand" href="../" aria-label="오늘의 경제 홈">
+    <span class="brand-top">ECONOMY</span>
+    <span class="brand-bottom">MORNING BRIEFING</span>
+  </a>
+  <div class="topbar-side right">
+    <button class="nav-btn saved-nav" type="button" data-open-saved>저장함 <span class="saved-count" data-saved-count>0</span></button>
+    <button class="nav-btn" type="button" data-open-auth><span data-account-label>로그인</span></button>
+  </div>
 </div>
-    <div class="date-lockup">
-      <p class="kicker">Daily startup journal</p>
-      <h1 class="date-big">7.29.</h1>
-      <div class="date-sub">2026년 7월 29일 수요일</div>
-      <div class="stamp">DAILY<strong>AM 9</strong>DROP</div>
-    </div>
+    <div class="date-lockup"><p class="kicker">Daily economy &amp; market journal</p><h1 class="date-big">7.29.</h1><div class="date-sub">2026년 7월 29일 수요일</div><div class="stamp">DAILY<strong>AM 8</strong>DROP</div></div>
   </header>
-
-  <section class="intro">
-    <p>단순 투자 단신보다, 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 관점을 골랐어요. 각 카드에는 핵심 맥락과 읽어볼 이유를 함께 담았습니다.</p>
-    <div class="editorial-rule" aria-label="큐레이션 범위">
-      <span>생태계 업데이트</span><span>창업가·VC 관점</span><span>제품·성장</span><span>인터뷰·영상</span>
-    </div>
-  </section>
-
-  <main class="cards">
+  <section class="intro"><p>국내외 경제 흐름과 주식·금리·환율·산업 변화를 한 번에 읽을 수 있도록 무료 원문 가운데 오늘 꼭 볼 소식만 골랐어요.</p><div class="editorial-rule"><span>무료 원문만</span><span>국내·글로벌</span><span>주식·시장</span><span>금리·거시</span><span>정책·산업</span></div></section>
+  <main><div class="section-divider"><h2>국내</h2></div>
 <article class="card">
-  <a class="thumb" href="https://byline.network/2026/07/28_129873/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="네이버의 14조 AI팩토리, 공급도 자금도 시간도 샀다 원문 열기">
-    <img src="https://cdn.byline.network/wp-content/uploads/2026/06/20260608_naver.jpeg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
+  <a class="thumb no-image" href="https://www.fsc.go.kr/no010101/87417" target="_blank" rel="noopener noreferrer" style="--fa:#1D4E89;--fb:#7DB7E8" data-initial="금">
+    
   </a>
   <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">기술·시장 트렌드</span>
-        <span class="source">바이라인네트워크</span>
-      </div>
-      <span class="card-index">01/05</span>
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">국내</span><span class="tag">정책·규제</span><span class="tag">금융위원회</span></div>
+      <span class="idx">1/8</span>
     </div>
-    <a class="title-link" href="https://byline.network/2026/07/28_129873/" target="_blank" rel="noopener noreferrer"><h2>네이버의 14조 AI팩토리, 공급도 자금도 시간도 샀다</h2></a>
-    <p class="summary">네이버·엔비디아·브룩필드 협업을 자금·공급·시간의 문제로 풀어낸 분석이다. 한국 대형 플랫폼의 AI 인프라 확장 방식과 자본 조달 논리를 읽을 수 있다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>AI 인프라는 기술보다 자금·전력·조달 속도가 승부처라는 점을 보여준다.</p>
-    </div>
+    <h2>시장 안정과 투자자 보호를 위해 단일종목 레버리지 상품 관련 보완방향을 금융투자업권과 함께 논의했습니다. - 이억원 금융위원장, 단일종목 관련 금융투자업권 간담회 개최</h2>
+    <p class="summary">금융위원회가 단일종목 레버리지 상품의 최근 시장 불안과 투자자 보호 문제를 논의했다. 레버리지 거래가 급변장에서 변동성을 키울 수 있어 제도 보완 여부가 관건이다.</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>보완안의 대상 상품과 거래 제한·위험고지 방식 확인</p>
     <div class="card-actions">
-      <a class="read-link" href="https://byline.network/2026/07/28_129873/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://byline.network/2026/07/28_129873/" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
+      <a class="open-link" href="https://www.fsc.go.kr/no010101/87417" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://www.fsc.go.kr/no010101/87417" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb" href="https://startuprecipe.co.kr/archives/5827530" target="_blank" rel="noopener noreferrer" data-initial="스" style="--fallback:#C85B1A;--fallback-2:#F3A64A" aria-label="성심당·엔비디아의 공통점은? 배민 창업자가 말하는 ‘진짜 브랜드’ 원문 열기">
-    <img src="https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/20260728_brandcon26-2-scaled.jpg?fit=2560%2C1441&amp;ssl=1" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
+  <a class="thumb" href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008679194&amp;plink=RSSLINK&amp;cooper=RSSREADER" target="_blank" rel="noopener noreferrer" style="--fa:#7B4B3A;--fb:#D6A38E" data-initial="S">
+    <img src="https://img.sbs.co.kr/newimg/news/20260728/202206630.jpg" alt="" loading="lazy" onerror="this.remove();this.parentElement.classList.add('no-image')">
   </a>
   <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">창업가 인터뷰</span>
-        <span class="source">스타트업레시피</span>
-      </div>
-      <span class="card-index">02/05</span>
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">국내</span><span class="tag">주식·시장</span><span class="tag">SBS 경제</span></div>
+      <span class="idx">2/8</span>
     </div>
-    <a class="title-link" href="https://startuprecipe.co.kr/archives/5827530" target="_blank" rel="noopener noreferrer"><h2>성심당·엔비디아의 공통점은? 배민 창업자가 말하는 ‘진짜 브랜드’</h2></a>
-    <p class="summary">김봉진 그란데클립 대표가 브랜드의 본질을 제품 품질과 운영의 축적으로 설명했다. 로고보다 고객 경험과 실행이 브랜드를 만든다는 관점을 제시한다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>브랜딩을 마케팅이 아니라 운영 역량으로 다시 보게 한다.</p>
-    </div>
+    <h2>&quot;안 그래도 위축됐는데 악재&quot;…삼전닉스 향방 가를 변수</h2>
+    <p class="summary">삼성전자와 SK하이닉스 등 반도체주가 중국 반도체 추격, 금리 인상 우려, 투자심리 위축이 겹치며 큰 폭으로 흔들렸다. 업황보다 수급과 심리가 단기 가격을 좌우하는 국면이다.</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>SK하이닉스·삼성전자 실적과 외국인 수급 변화 주목</p>
     <div class="card-actions">
-      <a class="read-link" href="https://startuprecipe.co.kr/archives/5827530" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://startuprecipe.co.kr/archives/5827530" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
+      <a class="open-link" href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008679194&amp;plink=RSSLINK&amp;cooper=RSSREADER" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://news.sbs.co.kr/news/endPage.do?news_id=N1008679194&amp;plink=RSSLINK&amp;cooper=RSSREADER" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb" href="https://startuprecipe.co.kr/archives/5827428" target="_blank" rel="noopener noreferrer" data-initial="스" style="--fallback:#C85B1A;--fallback-2:#F3A64A" aria-label="[AI서머리] 디캠프 노동조합, 조직 정상화 및 책임 경영 촉구‧세컨신드롬-SH, 도시재생 맞손 원문 열기">
-    <img src="https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/260728_2ndsyndrome.com_5020535_slimpic.webp?fit=1000%2C664&amp;ssl=1" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
+  <a class="thumb" href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008679490&amp;plink=RSSLINK&amp;cooper=RSSREADER" target="_blank" rel="noopener noreferrer" style="--fa:#7B4B3A;--fb:#D6A38E" data-initial="S">
+    <img src="https://img.sbs.co.kr/newimg/news/20260729/202206761.jpg" alt="" loading="lazy" onerror="this.remove();this.parentElement.classList.add('no-image')">
   </a>
   <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">정책·기회</span>
-        <span class="source">스타트업레시피</span>
-      </div>
-      <span class="card-index">03/05</span>
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">국내</span><span class="tag">금리·통화</span><span class="tag">SBS 경제</span></div>
+      <span class="idx">3/8</span>
     </div>
-    <a class="title-link" href="https://startuprecipe.co.kr/archives/5827428" target="_blank" rel="noopener noreferrer"><h2>[AI서머리] 디캠프 노동조합, 조직 정상화 및 책임 경영 촉구‧세컨신드롬-SH, 도시재생 맞손</h2></a>
-    <p class="summary">디캠프 내부 갈등이 단순 인사 이슈를 넘어 거버넌스와 책임경영 문제로 번졌다. 생태계 지원기관의 운영 방식이 스타트업에 어떤 신뢰를 주는지 생각하게 한다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>스타트업 생태계의 ‘지원기관 거버넌스’도 투자만큼 중요하다.</p>
-    </div>
+    <h2>&#x27;기록적&#x27; 폭락 왜?…미국 금리·빅테크 실적이 &#x27;가늠자&#x27;</h2>
+    <p class="summary">국내 증시는 SK하이닉스 실적과 미국 연방공개시장위원회 결정을 앞두고 방향성을 탐색하고 있다. 반도체 수요와 금리 경로가 주가와 원화 등 위험자산 흐름에 함께 영향을 줄 수 있다.</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>미 연준 성명과 HBM·메모리 수요 전망 비교</p>
     <div class="card-actions">
-      <a class="read-link" href="https://startuprecipe.co.kr/archives/5827428" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://startuprecipe.co.kr/archives/5827428" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
+      <a class="open-link" href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008679490&amp;plink=RSSLINK&amp;cooper=RSSREADER" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://news.sbs.co.kr/news/endPage.do?news_id=N1008679490&amp;plink=RSSLINK&amp;cooper=RSSREADER" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb" href="https://byline.network/2026/07/28-638/" target="_blank" rel="noopener noreferrer" data-initial="바" style="--fallback:#5B3DB4;--fallback-2:#A06FE8" aria-label="EU, 사이버복원력법 적용지침 공개…국내 수출 기업 대응은? 원문 열기">
-    <img src="https://cdn.byline.network/wp-content/uploads/2026/07/CRA2.jpg" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
+  <a class="thumb no-image" href="https://www.fsc.go.kr/no010101/87413" target="_blank" rel="noopener noreferrer" style="--fa:#1D4E89;--fb:#7DB7E8" data-initial="금">
+    
   </a>
   <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">정책·기회</span>
-        <span class="source">바이라인네트워크</span>
-      </div>
-      <span class="card-index">04/05</span>
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">국내</span><span class="tag">정책·규제</span><span class="tag">금융위원회</span></div>
+      <span class="idx">4/8</span>
     </div>
-    <a class="title-link" href="https://byline.network/2026/07/28-638/" target="_blank" rel="noopener noreferrer"><h2>EU, 사이버복원력법 적용지침 공개…국내 수출 기업 대응은?</h2></a>
-    <p class="summary">EU 사이버복원력법(CRA) 적용지침이 공개되며 보안 신고·지원기간 기준이 구체화됐다. 유럽 수출을 준비하는 국내 스타트업에선 제품 보안 설계와 컴플라이언스가 더 중요해졌다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>해외 진출 스타트업은 기능보다 ‘규제 대응 가능한 제품’이 필요하다.</p>
-    </div>
+    <h2>신용평가체계 개편, 소상공인부터 시작해 민생경제 활력을 불어넣겠습니다.</h2>
+    <p class="summary">금융위원회가 소상공인 특화 신용평가체계의 시범운영 대상을 7개 은행 1.8조원에서 16개 은행 2.2조원으로 확대한다고 밝혔다. 중소사업자의 대출 접근성과 은행의 리스크 관리가 함께 시험대에 오른다.</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>시범대상 확대 뒤 대출 승인·연체율 변화 점검</p>
     <div class="card-actions">
-      <a class="read-link" href="https://byline.network/2026/07/28-638/" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://byline.network/2026/07/28-638/" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
+      <a class="open-link" href="https://www.fsc.go.kr/no010101/87413" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://www.fsc.go.kr/no010101/87413" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
+    </div>
+  </div>
+</article><div class="section-divider"><h2>글로벌</h2></div>
+<article class="card">
+  <a class="thumb" href="https://www.cnbc.com/2026/07/29/oil-prices-today-brent-wti-iran-us-hormuz.html" target="_blank" rel="noopener noreferrer" style="--fa:#176B5B;--fb:#75B8A9" data-initial="C">
+    <img src="https://image.cnbcfm.com/api/v1/image/108341453-1785281973756-gettyimages-2185689219-935a8717.jpeg?v=1785281985&amp;w=1920&amp;h=1080" alt="" loading="lazy" onerror="this.remove();this.parentElement.classList.add('no-image')">
+  </a>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">글로벌</span><span class="tag">환율·원자재</span><span class="tag">CNBC Markets</span></div>
+      <span class="idx">5/8</span>
+    </div>
+    <h2>Oil jumps as U.S.-Iran resume strikes after a brief pause</h2>
+    <p class="summary">미국과 이란의 충돌 재개 소식에 국제유가가 급등했다. 에너지 가격 상승이 물가를 다시 자극하면 중앙은행의 금리 인하 기대와 채권시장에 부담이 될 수 있다.</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>브렌트유와 미 국채금리, 기대인플레이션 동향 확인</p>
+    <div class="card-actions">
+      <a class="open-link" href="https://www.cnbc.com/2026/07/29/oil-prices-today-brent-wti-iran-us-hormuz.html" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://www.cnbc.com/2026/07/29/oil-prices-today-brent-wti-iran-us-hormuz.html" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
     </div>
   </div>
 </article>
 <article class="card">
-  <a class="thumb" href="https://platum.kr/archives/291489?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%25b9%25b4%25ec%25b9%25b4%25ec%2598%25a4-%25ec%2598%25a8%25eb%2594%2594%25eb%25b0%2594%25ec%259d%25b4%25ec%258a%25a4%25ec%259a%25a9-%25ea%25b2%25bd%25eb%259f%2589-%25ec%2596%25b8%25ec%2596%25b4%25eb%25aa%25a8%25eb%258d%25b8-%25ec%2598%25a4%25ed%2594%2588%25ec%2586%258c%25ec%258a%25a4%25eb%25a1%259c" target="_blank" rel="noopener noreferrer" data-initial="플" style="--fallback:#2752B8;--fallback-2:#6D9CFF" aria-label="카카오, 온디바이스용 경량 언어모델 오픈소스로 공개 원문 열기">
-    <img src="https://cdn.platum.kr/wp-content/uploads/2026/07/kko-1024x576.png" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('noimg');this.remove()">
-    <span class="media-label">기사</span>
+  <a class="thumb" href="https://www.cnbc.com/2026/07/28/hyperscalers-face-higher-capex-scrutiny-after-alphabet-report-panned.html" target="_blank" rel="noopener noreferrer" style="--fa:#176B5B;--fb:#75B8A9" data-initial="C">
+    <img src="https://image.cnbcfm.com/api/v1/image/108341329-1785268028841-J_Z_N.jpg?v=1785268048&amp;w=1920&amp;h=1080" alt="" loading="lazy" onerror="this.remove();this.parentElement.classList.add('no-image')">
   </a>
   <div class="card-body">
-    <div class="card-meta">
-      <div class="meta-left">
-        <span class="category">생태계 업데이트</span>
-        <span class="source">플래텀</span>
-      </div>
-      <span class="card-index">05/05</span>
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">글로벌</span><span class="tag">산업·기업</span><span class="tag">CNBC Markets</span></div>
+      <span class="idx">6/8</span>
     </div>
-    <a class="title-link" href="https://platum.kr/archives/291489?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%25b9%25b4%25ec%25b9%25b4%25ec%2598%25a4-%25ec%2598%25a8%25eb%2594%2594%25eb%25b0%2594%25ec%259d%25b4%25ec%258a%25a4%25ec%259a%25a9-%25ea%25b2%25bd%25eb%259f%2589-%25ec%2596%25b8%25ec%2596%25b4%25eb%25aa%25a8%25eb%258d%25b8-%25ec%2598%25a4%25ed%2594%2588%25ec%2586%258c%25ec%258a%25a4%25eb%25a1%259c" target="_blank" rel="noopener noreferrer"><h2>카카오, 온디바이스용 경량 언어모델 오픈소스로 공개</h2></a>
-    <p class="summary">카카오가 기기 내 구동을 목표로 한 경량 언어모델 4종을 오픈소스로 공개했다. 한국어 성능과 상업적 활용 허용이 국내 AI 생태계의 실사용 폭을 넓힌다.</p>
-    <div class="takeaway">
-      <span class="takeaway-label">WHY IT MATTERS</span>
-      <p>국내 AI 경쟁이 ‘더 큰 모델’보다 배포와 활용성으로 옮겨가고 있다.</p>
-    </div>
+    <h2>Amazon, Meta and Microsoft face skeptical investors this week after Google report sparked sell-off</h2>
+    <p class="summary">알파벳의 자본지출 전망 상향과 자유현금흐름 악화가 부각되면서 아마존·메타·마이크로소프트의 AI 투자 효율성에도 시선이 쏠리고 있다. 성장 기대와 비용 부담의 균형이 핵심이다.</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>각 기업의 AI 자본지출과 클라우드 수익성 비교</p>
     <div class="card-actions">
-      <a class="read-link" href="https://platum.kr/archives/291489?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%25b9%25b4%25ec%25b9%25b4%25ec%2598%25a4-%25ec%2598%25a8%25eb%2594%2594%25eb%25b0%2594%25ec%259d%25b4%25ec%258a%25a4%25ec%259a%25a9-%25ea%25b2%25bd%25eb%259f%2589-%25ec%2596%25b8%25ec%2596%25b4%25eb%25aa%25a8%25eb%258d%25b8-%25ec%2598%25a4%25ed%2594%2588%25ec%2586%258c%25ec%258a%25a4%25eb%25a1%259c" target="_blank" rel="noopener noreferrer">원문 읽기</a>
-      <button class="save-button" type="button" data-url="https://platum.kr/archives/291489?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=%25ec%25b9%25b4%25ec%25b9%25b4%25ec%2598%25a4-%25ec%2598%25a8%25eb%2594%2594%25eb%25b0%2594%25ec%259d%25b4%25ec%258a%25a4%25ec%259a%25a9-%25ea%25b2%25bd%25eb%259f%2589-%25ec%2596%25b8%25ec%2596%25b4%25eb%25aa%25a8%25eb%258d%25b8-%25ec%2598%25a4%25ed%2594%2588%25ec%2586%258c%25ec%258a%25a4%25eb%25a1%259c" aria-pressed="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span class="save-label">저장</span>
-      </button>
+      <a class="open-link" href="https://www.cnbc.com/2026/07/28/hyperscalers-face-higher-capex-scrutiny-after-alphabet-report-panned.html" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://www.cnbc.com/2026/07/28/hyperscalers-face-higher-capex-scrutiny-after-alphabet-report-panned.html" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://www.theguardian.com/technology/2026/jul/28/ebay-harassment-lawsuit-settlement" target="_blank" rel="noopener noreferrer" style="--fa:#6D4C7D;--fb:#B89BC5" data-initial="T">
+    <img src="https://i.guim.co.uk/img/media/81cc62ceffe304dfea8d730e35628b5fe29fcd2e/218_0_2181_1744/master/2181.jpg?width=1200&amp;height=630&amp;quality=85&amp;auto=format&amp;fit=crop&amp;precrop=40:21,offset-x50,offset-y0&amp;overlay-align=bottom%2Cleft&amp;overlay-width=100p&amp;overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&amp;enable=upscale&amp;s=29f5777a978d89eac864517216bbbc8a" alt="" loading="lazy" onerror="this.remove();this.parentElement.classList.add('no-image')">
+  </a>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">글로벌</span><span class="tag">산업·기업</span><span class="tag">The Guardian Business</span></div>
+      <span class="idx">7/8</span>
+    </div>
+    <h2>Ebay and ex-executives to pay $55.7m to couple sent cockroaches in harassment campaign</h2>
+    <p class="summary">Bloggers David and Ina Steiner were stalked by eBay executives over their critical coverage of the company Ebay and three former top executives have agreed to pay $55.7m to resolve a lawsuit</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>원문에서 핵심 근거와 다음 관전 포인트를 확인해보세요.</p>
+    <div class="card-actions">
+      <a class="open-link" href="https://www.theguardian.com/technology/2026/jul/28/ebay-harassment-lawsuit-settlement" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://www.theguardian.com/technology/2026/jul/28/ebay-harassment-lawsuit-settlement" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <a class="thumb" href="https://www.theguardian.com/uk-news/2026/jul/28/rail-services-train-england-slow-heatwave-south-western-railway-greater-anglia" target="_blank" rel="noopener noreferrer" style="--fa:#6D4C7D;--fb:#B89BC5" data-initial="T">
+    <img src="https://i.guim.co.uk/img/media/d83542f2b44d4dcb0c475140a3e3e0b4ffa3a40c/90_0_2418_1935/master/2418.jpg?width=1200&amp;height=630&amp;quality=85&amp;auto=format&amp;fit=crop&amp;precrop=40:21,offset-x50,offset-y0&amp;overlay-align=bottom%2Cleft&amp;overlay-width=100p&amp;overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&amp;enable=upscale&amp;s=fd5d3fb44f558a687c936388b4cc0720" alt="" loading="lazy" onerror="this.remove();this.parentElement.classList.add('no-image')">
+  </a>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-left"><span class="tag section">글로벌</span><span class="tag">환율·원자재</span><span class="tag">The Guardian Business</span></div>
+      <span class="idx">8/8</span>
+    </div>
+    <h2>More disruption to rail services in England as heatwave shrinks soil</h2>
+    <p class="summary">South Western Railway joins operators in east of England in reducing train speeds and changing timetables Business live – latest updates Persistent drought conditions caused by the climate c</p>
+    <p class="takeaway"><strong>WHY IT MATTERS</strong>원문에서 핵심 근거와 다음 관전 포인트를 확인해보세요.</p>
+    <div class="card-actions">
+      <a class="open-link" href="https://www.theguardian.com/uk-news/2026/jul/28/rail-services-train-england-slow-heatwave-south-western-railway-greater-anglia" target="_blank" rel="noopener noreferrer">원문 읽기 <span aria-hidden="true">↗</span></a>
+      <button class="save-btn" type="button" data-save-link="https://www.theguardian.com/uk-news/2026/jul/28/rail-services-train-england-slow-heatwave-south-western-railway-greater-anglia" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.75A1.75 1.75 0 0 1 8.25 3h7.5a1.75 1.75 0 0 1 1.75 1.75V21l-5.5-3.45L6.5 21V4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-save-label>저장</span></button>
     </div>
   </div>
 </article></main>
   
-<section class="archive-section" id="archive">
-  <div class="section-head">
-    <h2>지난 브리핑</h2>
-    <a href="./">전체 보기 →</a>
-  </div>
-  <div class="archive-list"><a class="archive-row" href="2026-07-28.html"><span class="archive-date">7월 28일</span><span class="archive-count">5개의 큐레이션</span><span class="archive-arrow" aria-hidden="true">→</span></a></div>
+<section class="archive-section">
+  <div class="archive-heading"><h2>지난 브리핑</h2><a href="index.html">전체 보기 →</a></div>
+  <div class="archive-chips"><a href="2026-07-28.html">7/28</a></div>
 </section>
   
-<section class="about-snaac-section" aria-label="SNAAC 소개">
-  <a class="about-snaac-card" href="https://www.snaac.co.kr" target="_blank" rel="noopener noreferrer">
-    <span class="about-snaac-eyebrow">ABOUT SNAAC</span>
-    <span class="about-snaac-title">SNAAC을 더 알아보세요</span>
-    <span class="about-snaac-copy">서울대학교 학생 주도 액셀레러이팅 단체 SNAAC의 활동과 소식을 공식 홈페이지에서 확인할 수 있어요.</span>
+<section class="about-section">
+  <a class="about-card" href="https://github.com/SNU-SNAAC/snaac_briefing" target="_blank" rel="noopener noreferrer">
+    <span class="about-eyebrow">ABOUT THIS BRIEFING</span>
+    <span class="about-title">경제의 큰 흐름을 매일 짧게</span>
+    <span class="about-copy">시장 소음보다 중요한 변화와 맥락을 기록하는 개인용 큐레이션 프로젝트입니다.</span>
   </a>
 </section>
-
-  <footer>
-    매일 아침 자동 업데이트 · SNAAC Community Team<br>
-    원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<br>
-    저장함은 로그인한 개인 계정에 동기화됩니다.
-  </footer>
+  <footer>개인용 경제 브리핑 · 투자 자문이 아님 · 매일 자동 업데이트<br>원문 링크와 자체 요약만 제공하며, 저작권은 각 원저작자에게 있습니다.<br>저장함은 로그인한 개인 계정에 동기화됩니다.</footer>
 </div>
 
-<button class="floating-saved" type="button" data-open-saved aria-label="저장함 열기">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg><span>내 저장함</span><span class="count-badge" data-saved-count>0</span>
-</button>
+<button class="mobile-saved" type="button" data-open-saved>내 저장함 <span class="saved-count" data-saved-count>0</span></button>
 
-<div class="drawer" id="savedDrawer" hidden>
-  <button class="drawer-backdrop" type="button" data-close-saved aria-label="저장함 닫기"></button>
-  <section class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle">
-    <div class="drawer-handle" aria-hidden="true"></div>
-    <div class="drawer-head">
-      <div class="drawer-title-wrap">
-        <h2 id="savedTitle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16l-5.5-3.2-5.5 3.2z"/></svg> 내 저장함</h2>
-        <p class="drawer-subtitle" id="savedDrawerSubtitle">좋았던 아티클을 저장하고 메모를 남겨보세요.</p>
-      </div>
-      <button class="close-button" type="button" data-close-saved aria-label="닫기">×</button>
-    </div>
-    <div class="sync-strip">
-      <div class="sync-copy">
-        <p class="sync-title" id="syncTitle">계정 저장함</p>
-        <p class="sync-text" id="syncText">로그인한 계정에서만 기사와 메모를 저장할 수 있어요.</p>
-      </div>
-      <button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button>
-    </div>
-    <div class="saved-list" id="savedList"></div>
+<div class="overlay" id="savedOverlay" data-overlay="saved" aria-hidden="true">
+  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle">
+    <header class="panel-header"><h2 id="savedTitle">내 저장함</h2><button class="close-btn" type="button" data-close-overlay="saved" aria-label="닫기">×</button></header>
+    <div class="panel-body"><p class="saved-empty" id="savedEmpty">저장한 아티클이 아직 없어요.</p><div class="saved-list" id="savedList"></div></div>
   </section>
 </div>
 
-<div class="note-dialog" id="noteDialog" hidden>
-  <button class="note-backdrop" type="button" data-close-note aria-label="스크랩 메모 닫기"></button>
-  <section class="note-panel" role="dialog" aria-modal="true" aria-labelledby="noteTitle" aria-describedby="noteHelp">
-    <div class="drawer-handle" aria-hidden="true"></div>
-    <div class="note-head">
-      <h2 id="noteTitle">스크랩 메모</h2>
-      <button class="close-button" type="button" data-close-note aria-label="닫기">×</button>
-    </div>
-    <p class="note-article-title" id="noteArticleTitle"></p>
-    <label class="note-label" for="noteInput">
-      <span>이 기사를 저장한 이유 <span class="note-optional">선택</span></span>
-      <span class="note-count"><span id="noteCount">0</span>/500</span>
-    </label>
-    <textarea class="note-input" id="noteInput" maxlength="500" placeholder="예: 다음 기획 회의에서 리텐션 사례로 다시 보기"></textarea>
-    <p class="note-help" id="noteHelp">메모를 비워둔 채 기사만 저장해도 됩니다.</p>
-    <div class="note-actions">
-      <button class="note-button" type="button" data-close-note>취소</button>
-      <button class="note-button note-button-primary" id="noteSaveButton" type="button" data-save-note>스크랩 저장</button>
+<div class="overlay" id="noteOverlay" data-overlay="note" aria-hidden="true">
+  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+    <header class="panel-header"><h2 id="noteTitle">기사 저장</h2><button class="close-btn" type="button" data-close-overlay="note" aria-label="닫기">×</button></header>
+    <div class="panel-body">
+      <p id="noteArticleTitle" style="margin:0 0 15px;font-weight:850;word-break:keep-all"></p>
+      <label class="form-label" for="noteText">이 기사를 저장한 이유 <span style="font-weight:500;color:#888">(선택)</span></label>
+      <textarea class="note-textarea" id="noteText" maxlength="500" placeholder="나중에 다시 봤을 때 기억하고 싶은 생각을 적어두세요."></textarea>
+      <p class="form-help">메모 없이 기사만 저장해도 됩니다. Ctrl/Cmd + Enter로 저장할 수 있어요.</p>
+      <div class="form-actions"><button class="secondary-btn" id="noteCancel" type="button">취소</button><button class="primary-btn" id="noteSave" type="button">저장하기</button></div>
     </div>
   </section>
 </div>
 
-<div class="preview-dialog" id="previewDialog" hidden>
-  <button class="preview-backdrop" type="button" data-close-preview aria-label="저장한 기사 상세 닫기"></button>
-  <section class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="previewDialogTitle">
-    <div class="drawer-handle" aria-hidden="true"></div>
-    <div class="preview-head">
-      <h2 id="previewDialogTitle">저장한 아티클</h2>
-      <button class="close-button" type="button" data-close-preview aria-label="닫기">×</button>
-    </div>
-    <article class="preview-card">
-      <div class="preview-thumb noimg" id="previewThumb" data-initial="S">
-        <span class="media-label" id="previewMediaLabel">기사</span>
-      </div>
-      <div class="preview-body">
-        <div class="card-meta">
-          <div class="meta-left">
-            <span class="category" id="previewCategory">생태계 업데이트</span>
-            <span class="source" id="previewSource">SNAAC</span>
-          </div>
-        </div>
-        <h3 id="previewTitle">저장한 기사</h3>
-        <p class="preview-summary" id="previewSummary"></p>
-        <div class="takeaway">
-          <span class="takeaway-label">WHY IT MATTERS</span>
-          <p id="previewTakeaway"></p>
-        </div>
-        <div class="preview-note" id="previewNoteWrap" hidden>
-          <strong>MY NOTE</strong><span id="previewNote"></span>
-        </div>
-        <div class="preview-actions">
-          <a class="preview-read" id="previewReadLink" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a>
-          <button class="preview-secondary" id="previewEditButton" type="button">메모 수정</button>
-        </div>
-        <button class="preview-delete" id="previewDeleteButton" type="button">저장함에서 삭제</button>
-      </div>
-    </article>
-  </section>
-</div>
-
-<div class="auth-dialog" id="authDialog" hidden>
-  <button class="auth-backdrop" type="button" data-close-auth aria-label="로그인 창 닫기"></button>
-  <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <div class="drawer-handle" aria-hidden="true"></div>
-    <div class="auth-head">
-      <h2 id="authTitle">SNAAC 계정</h2>
-      <button class="close-button" type="button" data-close-auth aria-label="닫기">×</button>
-    </div>
-    <div class="auth-content">
-      <div id="authGuestView">
-        <p class="auth-intent" id="authIntent" hidden></p>
-        <div class="auth-tabs" role="tablist" aria-label="로그인 방식">
-          <button class="auth-tab is-active" type="button" role="tab" data-auth-mode="login" aria-selected="true">로그인</button>
-          <button class="auth-tab" type="button" role="tab" data-auth-mode="signup" aria-selected="false">회원가입</button>
-        </div>
-        <form class="auth-form" id="authForm">
-          <label class="auth-label" for="authEmail">이메일</label>
-          <input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" required placeholder="name@example.com">
-          <label class="auth-label" for="authPassword">비밀번호</label>
-          <input class="auth-input" id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상">
+<div class="overlay" id="authOverlay" data-overlay="auth" aria-hidden="true">
+  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <header class="panel-header"><h2 id="authTitle">브리핑 계정</h2><button class="close-btn" type="button" data-close-overlay="auth" aria-label="닫기">×</button></header>
+    <div class="panel-body">
+      <div id="authSignedOut">
+        <div class="auth-tabs" role="tablist"><button class="auth-tab active" type="button" data-auth-mode="signin">로그인</button><button class="auth-tab" type="button" data-auth-mode="signup">회원가입</button></div>
+        <form id="authForm">
+          <label class="auth-label" for="authEmail">이메일</label><input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" required placeholder="name@example.com">
+          <label class="auth-label" for="authPassword">비밀번호</label><input class="auth-input" id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상">
           <button class="auth-submit" id="authSubmit" type="submit">로그인</button>
           <p class="auth-message" id="authMessage" aria-live="polite"></p>
-          <p class="auth-help">로그인하면 저장한 기사와 메모가 계정에 동기화되어 다른 기기에서도 이어볼 수 있어요.</p>
+          <p class="auth-help">로그인하면 저장한 기사와 메모를 다른 기기에서도 이어볼 수 있어요.</p>
         </form>
       </div>
-      <div id="authUserView" hidden>
-        <div class="account-card">
-          <p class="account-eyebrow">SIGNED IN AS</p>
-          <p class="account-email" id="accountEmail"></p>
-          <p class="account-copy">저장한 기사와 메모를 이 계정으로 동기화하고 있어요.</p>
-        </div>
-        <button class="account-logout" type="button" data-logout>로그아웃</button>
-      </div>
-      <div id="authSetupView" hidden>
-        <div class="auth-setup-note">
-          <h3>로그인 연결 전이에요</h3>
-          <p>기사 저장과 저장함을 사용하려면 Supabase 로그인 연결이 필요합니다. 운영자가 공개 설정을 연결한 뒤 다시 시도해 주세요.</p>
-        </div>
-      </div>
+      <div id="authSignedIn" hidden><div class="account-card"><p class="account-eyebrow">SIGNED IN AS</p><p class="account-email" id="accountEmail"></p><p class="account-copy">이 계정의 저장함과 메모를 동기화하고 있어요.</p></div><button class="account-logout" id="logoutButton" type="button">로그아웃</button></div>
+      <div id="authSetup" hidden><div class="setup-note"><h3>로그인 연결 전이에요</h3><p>기사 저장과 저장함을 사용하려면 Supabase 공개 설정을 GitHub Secret에 연결해야 합니다.</p></div></div>
     </div>
   </section>
 </div>
 
-<p class="sr-only" id="saveStatus" aria-live="polite"></p>
+<div class="overlay" id="previewOverlay" data-overlay="preview" aria-hidden="true">
+  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <header class="panel-header"><h2>저장한 아티클</h2><button class="close-btn" type="button" data-close-overlay="preview" aria-label="닫기">×</button></header>
+    <div class="preview-thumb" id="previewThumb"></div>
+    <div class="preview-content">
+      <div class="preview-tags"><span class="tag section" id="previewSection"></span><span class="tag" id="previewCategory"></span><span class="tag" id="previewSource"></span></div>
+      <h3 id="previewTitle"></h3><p class="preview-summary" id="previewSummary"></p><p class="takeaway"><strong>WHY IT MATTERS</strong><span id="previewTakeaway"></span></p><div class="preview-note" id="previewNote"></div>
+      <div class="preview-actions"><a class="open-link" id="previewOriginal" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a><button class="secondary-btn" id="previewEdit" type="button">메모 수정</button><button class="danger-btn" id="previewDelete" type="button">저장 삭제</button></div>
+    </div>
+  </section>
+</div>
+<div class="status" id="statusToast" aria-live="polite"></div>
 
-<script id="briefingData" type="application/json">[{"title":"네이버의 14조 AI팩토리, 공급도 자금도 시간도 샀다","link":"https://byline.network/2026/07/28_129873/","source":"바이라인네트워크","summary":"네이버·엔비디아·브룩필드 협업을 자금·공급·시간의 문제로 풀어낸 분석이다. 한국 대형 플랫폼의 AI 인프라 확장 방식과 자본 조달 논리를 읽을 수 있다.","takeaway":"AI 인프라는 기술보다 자금·전력·조달 속도가 승부처라는 점을 보여준다.","category":"기술·시장 트렌드","contentType":"기사","briefingDate":"7/29","image":"https://cdn.byline.network/wp-content/uploads/2026/06/20260608_naver.jpeg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"성심당·엔비디아의 공통점은? 배민 창업자가 말하는 ‘진짜 브랜드’","link":"https://startuprecipe.co.kr/archives/5827530","source":"스타트업레시피","summary":"김봉진 그란데클립 대표가 브랜드의 본질을 제품 품질과 운영의 축적으로 설명했다. 로고보다 고객 경험과 실행이 브랜드를 만든다는 관점을 제시한다.","takeaway":"브랜딩을 마케팅이 아니라 운영 역량으로 다시 보게 한다.","category":"창업가 인터뷰","contentType":"기사","briefingDate":"7/29","image":"https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/20260728_brandcon26-2-scaled.jpg?fit=2560%2C1441\u0026ssl=1","fallbackA":"#C85B1A","fallbackB":"#F3A64A"},{"title":"[AI서머리] 디캠프 노동조합, 조직 정상화 및 책임 경영 촉구‧세컨신드롬-SH, 도시재생 맞손","link":"https://startuprecipe.co.kr/archives/5827428","source":"스타트업레시피","summary":"디캠프 내부 갈등이 단순 인사 이슈를 넘어 거버넌스와 책임경영 문제로 번졌다. 생태계 지원기관의 운영 방식이 스타트업에 어떤 신뢰를 주는지 생각하게 한다.","takeaway":"스타트업 생태계의 ‘지원기관 거버넌스’도 투자만큼 중요하다.","category":"정책·기회","contentType":"기사","briefingDate":"7/29","image":"https://i0.wp.com/startuprecipe.co.kr/wp-content/uploads/2026/07/260728_2ndsyndrome.com_5020535_slimpic.webp?fit=1000%2C664\u0026ssl=1","fallbackA":"#C85B1A","fallbackB":"#F3A64A"},{"title":"EU, 사이버복원력법 적용지침 공개…국내 수출 기업 대응은?","link":"https://byline.network/2026/07/28-638/","source":"바이라인네트워크","summary":"EU 사이버복원력법(CRA) 적용지침이 공개되며 보안 신고·지원기간 기준이 구체화됐다. 유럽 수출을 준비하는 국내 스타트업에선 제품 보안 설계와 컴플라이언스가 더 중요해졌다.","takeaway":"해외 진출 스타트업은 기능보다 ‘규제 대응 가능한 제품’이 필요하다.","category":"정책·기회","contentType":"기사","briefingDate":"7/29","image":"https://cdn.byline.network/wp-content/uploads/2026/07/CRA2.jpg","fallbackA":"#5B3DB4","fallbackB":"#A06FE8"},{"title":"카카오, 온디바이스용 경량 언어모델 오픈소스로 공개","link":"https://platum.kr/archives/291489?utm_source=rss\u0026utm_medium=rss\u0026utm_campaign=%25ec%25b9%25b4%25ec%25b9%25b4%25ec%2598%25a4-%25ec%2598%25a8%25eb%2594%2594%25eb%25b0%2594%25ec%259d%25b4%25ec%258a%25a4%25ec%259a%25a9-%25ea%25b2%25bd%25eb%259f%2589-%25ec%2596%25b8%25ec%2596%25b4%25eb%25aa%25a8%25eb%258d%25b8-%25ec%2598%25a4%25ed%2594%2588%25ec%2586%258c%25ec%258a%25a4%25eb%25a1%259c","source":"플래텀","summary":"카카오가 기기 내 구동을 목표로 한 경량 언어모델 4종을 오픈소스로 공개했다. 한국어 성능과 상업적 활용 허용이 국내 AI 생태계의 실사용 폭을 넓힌다.","takeaway":"국내 AI 경쟁이 ‘더 큰 모델’보다 배포와 활용성으로 옮겨가고 있다.","category":"생태계 업데이트","contentType":"기사","briefingDate":"7/29","image":"https://cdn.platum.kr/wp-content/uploads/2026/07/kko-1024x576.png","fallbackA":"#2752B8","fallbackB":"#6D9CFF"}]</script>
-<script id="authConfig" type="application/json">{"url":"https://mvvmdtrgiesankvlbbnh.supabase.co","publishableKey":"sb_publishable_Rb6eKh6L5gtB7SiFogMoHA_H-3KrkZb","redirectUrl":"","homeHref":"../"}</script>
+<script id="briefingData" type="application/json">[{"title":"시장 안정과 투자자 보호를 위해 단일종목 레버리지 상품 관련 보완방향을 금융투자업권과 함께 논의했습니다. - 이억원 금융위원장, 단일종목 관련 금융투자업권 간담회 개최","link":"https://www.fsc.go.kr/no010101/87417","source":"금융위원회","summary":"금융위원회가 단일종목 레버리지 상품의 최근 시장 불안과 투자자 보호 문제를 논의했다. 레버리지 거래가 급변장에서 변동성을 키울 수 있어 제도 보완 여부가 관건이다.","takeaway":"보완안의 대상 상품과 거래 제한·위험고지 방식 확인","section":"국내","category":"정책·규제","contentType":"공식 발표","briefingDate":"7/29","image":"","fallbackA":"#1D4E89","fallbackB":"#7DB7E8"},{"title":"\"안 그래도 위축됐는데 악재\"…삼전닉스 향방 가를 변수","link":"https://news.sbs.co.kr/news/endPage.do?news_id=N1008679194\u0026plink=RSSLINK\u0026cooper=RSSREADER","source":"SBS 경제","summary":"삼성전자와 SK하이닉스 등 반도체주가 중국 반도체 추격, 금리 인상 우려, 투자심리 위축이 겹치며 큰 폭으로 흔들렸다. 업황보다 수급과 심리가 단기 가격을 좌우하는 국면이다.","takeaway":"SK하이닉스·삼성전자 실적과 외국인 수급 변화 주목","section":"국내","category":"주식·시장","contentType":"기사","briefingDate":"7/29","image":"https://img.sbs.co.kr/newimg/news/20260728/202206630.jpg","fallbackA":"#7B4B3A","fallbackB":"#D6A38E"},{"title":"'기록적' 폭락 왜?…미국 금리·빅테크 실적이 '가늠자'","link":"https://news.sbs.co.kr/news/endPage.do?news_id=N1008679490\u0026plink=RSSLINK\u0026cooper=RSSREADER","source":"SBS 경제","summary":"국내 증시는 SK하이닉스 실적과 미국 연방공개시장위원회 결정을 앞두고 방향성을 탐색하고 있다. 반도체 수요와 금리 경로가 주가와 원화 등 위험자산 흐름에 함께 영향을 줄 수 있다.","takeaway":"미 연준 성명과 HBM·메모리 수요 전망 비교","section":"국내","category":"금리·통화","contentType":"기사","briefingDate":"7/29","image":"https://img.sbs.co.kr/newimg/news/20260729/202206761.jpg","fallbackA":"#7B4B3A","fallbackB":"#D6A38E"},{"title":"신용평가체계 개편, 소상공인부터 시작해 민생경제 활력을 불어넣겠습니다.","link":"https://www.fsc.go.kr/no010101/87413","source":"금융위원회","summary":"금융위원회가 소상공인 특화 신용평가체계의 시범운영 대상을 7개 은행 1.8조원에서 16개 은행 2.2조원으로 확대한다고 밝혔다. 중소사업자의 대출 접근성과 은행의 리스크 관리가 함께 시험대에 오른다.","takeaway":"시범대상 확대 뒤 대출 승인·연체율 변화 점검","section":"국내","category":"정책·규제","contentType":"공식 발표","briefingDate":"7/29","image":"","fallbackA":"#1D4E89","fallbackB":"#7DB7E8"},{"title":"Oil jumps as U.S.-Iran resume strikes after a brief pause","link":"https://www.cnbc.com/2026/07/29/oil-prices-today-brent-wti-iran-us-hormuz.html","source":"CNBC Markets","summary":"미국과 이란의 충돌 재개 소식에 국제유가가 급등했다. 에너지 가격 상승이 물가를 다시 자극하면 중앙은행의 금리 인하 기대와 채권시장에 부담이 될 수 있다.","takeaway":"브렌트유와 미 국채금리, 기대인플레이션 동향 확인","section":"글로벌","category":"환율·원자재","contentType":"기사","briefingDate":"7/29","image":"https://image.cnbcfm.com/api/v1/image/108341453-1785281973756-gettyimages-2185689219-935a8717.jpeg?v=1785281985\u0026w=1920\u0026h=1080","fallbackA":"#176B5B","fallbackB":"#75B8A9"},{"title":"Amazon, Meta and Microsoft face skeptical investors this week after Google report sparked sell-off","link":"https://www.cnbc.com/2026/07/28/hyperscalers-face-higher-capex-scrutiny-after-alphabet-report-panned.html","source":"CNBC Markets","summary":"알파벳의 자본지출 전망 상향과 자유현금흐름 악화가 부각되면서 아마존·메타·마이크로소프트의 AI 투자 효율성에도 시선이 쏠리고 있다. 성장 기대와 비용 부담의 균형이 핵심이다.","takeaway":"각 기업의 AI 자본지출과 클라우드 수익성 비교","section":"글로벌","category":"산업·기업","contentType":"분석·리포트","briefingDate":"7/29","image":"https://image.cnbcfm.com/api/v1/image/108341329-1785268028841-J_Z_N.jpg?v=1785268048\u0026w=1920\u0026h=1080","fallbackA":"#176B5B","fallbackB":"#75B8A9"},{"title":"Ebay and ex-executives to pay $55.7m to couple sent cockroaches in harassment campaign","link":"https://www.theguardian.com/technology/2026/jul/28/ebay-harassment-lawsuit-settlement","source":"The Guardian Business","summary":"Bloggers David and Ina Steiner were stalked by eBay executives over their critical coverage of the company Ebay and three former top executives have agreed to pay $55.7m to resolve a lawsuit","takeaway":"원문에서 핵심 근거와 다음 관전 포인트를 확인해보세요.","section":"글로벌","category":"산업·기업","contentType":"기사","briefingDate":"7/29","image":"https://i.guim.co.uk/img/media/81cc62ceffe304dfea8d730e35628b5fe29fcd2e/218_0_2181_1744/master/2181.jpg?width=1200\u0026height=630\u0026quality=85\u0026auto=format\u0026fit=crop\u0026precrop=40:21,offset-x50,offset-y0\u0026overlay-align=bottom%2Cleft\u0026overlay-width=100p\u0026overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc\u0026enable=upscale\u0026s=29f5777a978d89eac864517216bbbc8a","fallbackA":"#6D4C7D","fallbackB":"#B89BC5"},{"title":"More disruption to rail services in England as heatwave shrinks soil","link":"https://www.theguardian.com/uk-news/2026/jul/28/rail-services-train-england-slow-heatwave-south-western-railway-greater-anglia","source":"The Guardian Business","summary":"South Western Railway joins operators in east of England in reducing train speeds and changing timetables Business live – latest updates Persistent drought conditions caused by the climate c","takeaway":"원문에서 핵심 근거와 다음 관전 포인트를 확인해보세요.","section":"글로벌","category":"환율·원자재","contentType":"기사","briefingDate":"7/29","image":"https://i.guim.co.uk/img/media/d83542f2b44d4dcb0c475140a3e3e0b4ffa3a40c/90_0_2418_1935/master/2418.jpg?width=1200\u0026height=630\u0026quality=85\u0026auto=format\u0026fit=crop\u0026precrop=40:21,offset-x50,offset-y0\u0026overlay-align=bottom%2Cleft\u0026overlay-width=100p\u0026overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc\u0026enable=upscale\u0026s=fd5d3fb44f558a687c936388b4cc0720","fallbackA":"#6D4C7D","fallbackB":"#B89BC5"}]</script>
+<script id="authConfig" type="application/json">{"url":"https://mvvmdtrgiesankvlbbnh.supabase.co","publishableKey":"sb_publishable_Rb6eKh6L5gtB7SiFogMoHA_H-3KrkZb","homeHref":"../"}</script>
+<script id="siteConfig" type="application/json">{"domain":"economy","table":"saved_articles_economy"}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>(() => {
+<script>
+(() => {
   'use strict';
-
-  const GUEST_STORAGE_KEY = 'snaac-saved-articles-v1';
-  const USER_STORAGE_PREFIX = 'snaac-saved-articles-user-v1:';
-  const dataElement = document.getElementById('briefingData');
-  const authConfigElement = document.getElementById('authConfig');
-  const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
-  const authConfig = authConfigElement ? JSON.parse(authConfigElement.textContent || '{}') : {};
-  const currentByUrl = new Map(currentItems.map(item => [item.link, normalizeItem(item)]));
-
-  const liveRegion = document.getElementById('saveStatus');
-  const drawer = document.getElementById('savedDrawer');
-  const savedList = document.getElementById('savedList');
-  const savedDrawerSubtitle = document.getElementById('savedDrawerSubtitle');
-  const syncTitle = document.getElementById('syncTitle');
-  const syncText = document.getElementById('syncText');
-  const syncAction = document.getElementById('syncAction');
-
-  const noteDialog = document.getElementById('noteDialog');
-  const noteInput = document.getElementById('noteInput');
-  const noteArticleTitle = document.getElementById('noteArticleTitle');
-  const noteCount = document.getElementById('noteCount');
-  const noteSaveButton = document.getElementById('noteSaveButton');
-
-  const previewDialog = document.getElementById('previewDialog');
-  const previewThumb = document.getElementById('previewThumb');
-  const previewMediaLabel = document.getElementById('previewMediaLabel');
-  const previewCategory = document.getElementById('previewCategory');
-  const previewSource = document.getElementById('previewSource');
-  const previewTitle = document.getElementById('previewTitle');
-  const previewSummary = document.getElementById('previewSummary');
-  const previewTakeaway = document.getElementById('previewTakeaway');
-  const previewNoteWrap = document.getElementById('previewNoteWrap');
-  const previewNote = document.getElementById('previewNote');
-  const previewReadLink = document.getElementById('previewReadLink');
-  const previewEditButton = document.getElementById('previewEditButton');
-  const previewDeleteButton = document.getElementById('previewDeleteButton');
-
-  const authDialog = document.getElementById('authDialog');
-  const authGuestView = document.getElementById('authGuestView');
-  const authUserView = document.getElementById('authUserView');
-  const authSetupView = document.getElementById('authSetupView');
-  const authForm = document.getElementById('authForm');
-  const authEmail = document.getElementById('authEmail');
-  const authPassword = document.getElementById('authPassword');
-  const authSubmit = document.getElementById('authSubmit');
-  const authMessage = document.getElementById('authMessage');
-  const authIntent = document.getElementById('authIntent');
-  const accountEmail = document.getElementById('accountEmail');
-
-  let storageAvailable = true;
-  // 기존 버전의 비로그인 저장 데이터는 localStorage에 남겨 두었다가 첫 로그인 때 이전합니다.
-  // 새 저장은 로그인 후에만 허용하므로, 로그아웃 화면에서는 저장함을 비워 둡니다.
-  let savedItems = [];
-  let drawerTrigger = null;
-  let noteTrigger = null;
-  let previewTrigger = null;
-  let authTrigger = null;
-  let activeNoteUrl = '';
-  let activePreviewUrl = '';
-  let authMode = 'login';
-  let currentUser = null;
-  let supabaseClient = null;
-  let syncBusy = false;
-  let pendingSaveUrl = '';
-  let pendingOpenSaved = false;
-
+  const briefingDataEl = document.getElementById('briefingData');
+  const authConfigEl = document.getElementById('authConfig');
+  const siteConfigEl = document.getElementById('siteConfig');
+  const articles = briefingDataEl ? JSON.parse(briefingDataEl.textContent || '[]') : [];
+  const authConfig = authConfigEl ? JSON.parse(authConfigEl.textContent || '{}') : {};
+  const siteConfig = siteConfigEl ? JSON.parse(siteConfigEl.textContent || '{}') : {};
+  const articleMap = new Map(articles.map((item) => [item.link, item]));
   const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
 
-  function normalizeItem(item) {
-    const now = new Date().toISOString();
-    return {
-      title: String(item && item.title || '').trim(),
-      link: String(item && (item.link || item.article_url) || '').trim(),
-      source: String(item && item.source || '기타').trim() || '기타',
-      summary: String(item && item.summary || '').trim(),
-      takeaway: String(item && item.takeaway || '').trim(),
-      category: String(item && item.category || '생태계 업데이트').trim(),
-      contentType: String(item && (item.contentType || item.content_type) || '기사').trim(),
-      briefingDate: String(item && (item.briefingDate || item.briefing_date) || '').trim(),
-      image: String(item && (item.image || item.thumbnail_url) || '').trim(),
-      fallbackA: String(item && (item.fallbackA || item.fallback_a) || '#2752B8').trim(),
-      fallbackB: String(item && (item.fallbackB || item.fallback_b) || '#6D9CFF').trim(),
-      note: String(item && item.note || ''),
-      savedAt: String(item && (item.savedAt || item.saved_at) || now),
-      updatedAt: String(item && (item.updatedAt || item.updated_at) || now),
-      pendingSync: Boolean(item && item.pendingSync),
-    };
+  let supabaseClient = null;
+  let currentUser = null;
+  let savedMap = new Map();
+  let pendingArticle = null;
+  let activePreview = null;
+  let authMode = 'signin';
+  let statusTimer = null;
+
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  const overlays = {
+    saved: $('#savedOverlay'),
+    note: $('#noteOverlay'),
+    auth: $('#authOverlay'),
+    preview: $('#previewOverlay'),
+  };
+
+  function showStatus(message) {
+    const node = $('#statusToast');
+    if (!node) return;
+    node.textContent = message;
+    node.classList.add('show');
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => node.classList.remove('show'), 2400);
   }
 
-  function timestamp(item) {
-    const value = Date.parse(item.updatedAt || item.savedAt || '');
-    return Number.isFinite(value) ? value : 0;
+  function openOverlay(name) {
+    const node = overlays[name];
+    if (!node) return;
+    node.classList.add('open');
+    node.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
   }
 
-  function dedupeItems(groups) {
-    const map = new Map();
-    groups.flat().forEach(raw => {
-      const item = normalizeItem(raw);
-      if (!item.link) return;
-      const previous = map.get(item.link);
-      if (!previous || timestamp(item) >= timestamp(previous)) map.set(item.link, item);
-    });
-    return Array.from(map.values()).sort((a, b) => timestamp(b) - timestamp(a));
-  }
-
-  function readStorage(key) {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(key) || '[]');
-      storageAvailable = true;
-      return Array.isArray(parsed) ? dedupeItems([parsed]) : [];
-    } catch (error) {
-      storageAvailable = false;
-      return [];
+  function closeOverlay(name) {
+    const node = overlays[name];
+    if (!node) return;
+    node.classList.remove('open');
+    node.setAttribute('aria-hidden', 'true');
+    if (!Object.values(overlays).some((overlay) => overlay && overlay.classList.contains('open'))) {
+      document.body.classList.remove('modal-open');
     }
   }
 
-  function writeStorage(key, items) {
-    try {
-      localStorage.setItem(key, JSON.stringify(items));
-      storageAvailable = true;
-      return true;
-    } catch (error) {
-      storageAvailable = false;
+  function closeAll() {
+    Object.keys(overlays).forEach(closeOverlay);
+  }
+
+  function savedCount() {
+    return savedMap.size;
+  }
+
+  function updateCounts() {
+    $$('[data-saved-count]').forEach((node) => { node.textContent = String(savedCount()); });
+  }
+
+  function isSaved(link) {
+    return savedMap.has(link);
+  }
+
+  function updateSaveButtons() {
+    $$('[data-save-link]').forEach((button) => {
+      const link = button.dataset.saveLink || '';
+      const saved = isSaved(link);
+      button.classList.toggle('saved', saved);
+      const label = button.querySelector('[data-save-label]');
+      if (label) label.textContent = saved ? (savedMap.get(link)?.note ? '메모 보기' : '저장됨') : '저장';
+      button.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    });
+    updateCounts();
+  }
+
+  function normalizeRecord(record) {
+    return {
+      link: record.article_url || record.link || '',
+      title: record.title || '',
+      source: record.source || '',
+      summary: record.summary || '',
+      takeaway: record.takeaway || '',
+      section: record.section || '',
+      category: record.category || '',
+      contentType: record.content_type || record.contentType || '기사',
+      image: record.image_url || record.image || '',
+      briefingDate: record.briefing_date || record.briefingDate || '',
+      note: record.note || '',
+      fallbackA: record.fallback_a || record.fallbackA || '#3D5A6C',
+      fallbackB: record.fallback_b || record.fallbackB || '#8AA7B7',
+      savedAt: record.saved_at || '',
+    };
+  }
+
+  async function loadSaved() {
+    if (!supabaseClient || !currentUser) {
+      savedMap = new Map();
+      updateSaveButtons();
+      renderSavedList();
+      return;
+    }
+    const { data, error } = await supabaseClient
+      .from(siteConfig.table)
+      .select('*')
+      .order('saved_at', { ascending: false });
+    if (error) {
+      console.error('saved article fetch failed', error);
+      showStatus('저장함을 불러오지 못했어요.');
+      return;
+    }
+    savedMap = new Map((data || []).map((row) => {
+      const item = normalizeRecord(row);
+      return [item.link, item];
+    }));
+    updateSaveButtons();
+    renderSavedList();
+  }
+
+  function getArticle(link) {
+    return savedMap.get(link) || articleMap.get(link) || null;
+  }
+
+  function requireAuth(action, article = null) {
+    if (!authEnabled) {
+      renderAuthState();
+      openOverlay('auth');
       return false;
     }
-  }
-
-  function clearStorage(key) {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      storageAvailable = false;
-    }
-  }
-
-  function activeStorageKey() {
-    return currentUser ? `${USER_STORAGE_PREFIX}${currentUser.id}` : GUEST_STORAGE_KEY;
-  }
-
-  function persistActive() {
-    return writeStorage(activeStorageKey(), savedItems);
-  }
-
-  function announce(message) {
-    if (!liveRegion) return;
-    liveRegion.textContent = '';
-    window.setTimeout(() => { liveRegion.textContent = message; }, 20);
-  }
-
-  function isOpen(element) {
-    return Boolean(element && !element.hidden);
-  }
-
-  function syncBodyLock() {
-    const locked = [drawer, noteDialog, previewDialog, authDialog].some(isOpen);
-    document.body.classList.toggle('drawer-open', locked);
-  }
-
-  function itemForUrl(url) {
-    return savedItems.find(item => item.link === url) || currentByUrl.get(url) || null;
-  }
-
-  function savedMap() {
-    return new Map(savedItems.map(item => [item.link, item]));
-  }
-
-  function updateSavedIndicators() {
-    const byUrl = savedMap();
-    document.querySelectorAll('.save-button').forEach(button => {
-      const savedItem = byUrl.get(button.dataset.url);
-      const isSaved = Boolean(savedItem);
-      const hasNote = Boolean(savedItem && savedItem.note.trim());
-      button.classList.toggle('is-saved', isSaved);
-      button.setAttribute('aria-pressed', String(isSaved));
-      button.setAttribute(
-        'aria-label',
-        isSaved ? (hasNote ? '저장한 기사 메모 보기' : '저장한 기사에 메모 추가') : '기사 저장하기'
-      );
-      const label = button.querySelector('.save-label');
-      if (label) label.textContent = isSaved ? (hasNote ? '메모 보기' : '메모 추가') : '저장';
-    });
-    document.querySelectorAll('[data-saved-count]').forEach(node => {
-      node.textContent = String(byUrl.size);
-    });
-    if (savedDrawerSubtitle) {
-      savedDrawerSubtitle.textContent = byUrl.size
-        ? `${byUrl.size}개의 아티클을 모아두었어요.`
-        : (currentUser ? '좋았던 아티클을 저장하고 메모를 남겨보세요.' : '로그인 후 나만의 저장함을 만들어보세요.');
-    }
-  }
-
-  function shortAccountLabel(email) {
-    if (!email) return '내 계정';
-    const local = email.split('@')[0] || '내 계정';
-    return local.length > 7 ? `${local.slice(0, 7)}…` : local;
-  }
-
-  function updateAuthIndicators() {
-    const label = currentUser ? shortAccountLabel(currentUser.email) : '로그인';
-    document.querySelectorAll('[data-auth-label]').forEach(node => { node.textContent = label; });
-
-    if (!syncTitle || !syncText || !syncAction) return;
-    if (!authEnabled) {
-      syncTitle.textContent = '로그인 연결이 필요해요';
-      syncText.textContent = 'Supabase 설정을 완료해야 저장함을 사용할 수 있어요.';
-      syncAction.textContent = '설정 안내';
-      return;
-    }
-    if (currentUser) {
-      syncTitle.textContent = syncBusy ? '계정과 동기화 중…' : '계정에 안전하게 동기화';
-      syncText.textContent = currentUser.email || '로그인된 계정';
-      syncAction.textContent = '내 계정';
-    } else {
-      syncTitle.textContent = '로그인 후 저장 가능';
-      syncText.textContent = '저장한 기사와 메모는 로그인한 계정에 동기화돼요.';
-      syncAction.textContent = '로그인';
-    }
-  }
-
-  function makeElement(tag, className, text) {
-    const element = document.createElement(tag);
-    if (className) element.className = className;
-    if (text !== undefined) element.textContent = text;
-    return element;
-  }
-
-  function isVideo(item) {
-    const type = String(item.contentType || '').toLowerCase();
-    const link = String(item.link || '').toLowerCase();
-    return type.includes('영상') || type.includes('video') || link.includes('youtube.com') || link.includes('youtu.be');
-  }
-
-  function fillThumbnail(container, item) {
-    if (!container) return;
-    container.replaceChildren();
-    container.classList.add('noimg');
-    container.classList.toggle('is-video', isVideo(item));
-    container.dataset.initial = (item.source || 'S').slice(0, 1);
-    container.style.setProperty('--fallback', item.fallbackA || '#2752B8');
-    container.style.setProperty('--fallback-2', item.fallbackB || '#6D9CFF');
-
-    if (item.image) {
-      const image = document.createElement('img');
-      image.alt = '';
-      image.loading = 'lazy';
-      image.decoding = 'async';
-      image.addEventListener('load', () => container.classList.remove('noimg'), { once: true });
-      image.addEventListener('error', () => image.remove(), { once: true });
-      image.src = item.image;
-      container.append(image);
-    }
-
-    if (isVideo(item)) {
-      const triangle = makeElement('span', 'play-triangle');
-      triangle.setAttribute('aria-hidden', 'true');
-      container.append(triangle);
-    }
-    if (container === previewThumb && previewMediaLabel) container.append(previewMediaLabel);
-  }
-
-  function renderSaved() {
-    if (!savedList) return;
-    savedList.replaceChildren();
-    updateSavedIndicators();
-    updateAuthIndicators();
-
-    if (!storageAvailable) {
-      savedList.append(makeElement('p', 'saved-empty', '현재 브라우저의 저장 공간을 사용할 수 없어요.'));
-      return;
-    }
-    if (!savedItems.length) {
-      savedList.append(makeElement('p', 'saved-empty', currentUser
-        ? '아직 저장한 기사가 없어요. 카드 아래의 저장 버튼을 눌러보세요.'
-        : '저장함은 로그인 후 사용할 수 있어요.'));
-      return;
-    }
-
-    savedItems.forEach(item => {
-      const article = makeElement('article', 'saved-item');
-      const previewButton = makeElement('button', 'saved-preview-trigger');
-      previewButton.type = 'button';
-      previewButton.dataset.previewUrl = item.link;
-      previewButton.setAttribute('aria-label', `${item.title || '저장한 기사'} 상세 보기`);
-
-      const thumb = makeElement('span', 'saved-thumb');
-      fillThumbnail(thumb, item);
-
-      const copy = makeElement('span', 'saved-copy');
-      const meta = makeElement('span', 'saved-meta', [item.briefingDate, item.source].filter(Boolean).join(' · '));
-      const title = makeElement('span', 'saved-title', item.title || '제목 없음');
-      copy.append(meta, title);
-
-      if (item.note && item.note.trim()) {
-        const notePreview = makeElement('span', 'saved-note-preview');
-        const noteLabel = makeElement('strong', '', 'MY NOTE · ');
-        notePreview.append(noteLabel, document.createTextNode(item.note.trim()));
-        copy.append(notePreview);
-      }
-      copy.append(makeElement('span', 'saved-open-hint', '카드로 다시 보기 →'));
-      previewButton.append(thumb, copy);
-
-      const actions = makeElement('div', 'saved-actions');
-      const previewAction = makeElement('button', 'saved-action-button preview-action', '상세 보기');
-      previewAction.type = 'button';
-      previewAction.dataset.previewUrl = item.link;
-      const editButton = makeElement(
-        'button',
-        'saved-action-button edit-note',
-        item.note && item.note.trim() ? '메모 수정' : '메모 추가'
-      );
-      editButton.type = 'button';
-      editButton.dataset.editNoteUrl = item.link;
-      const removeButton = makeElement('button', 'saved-action-button remove-saved', '삭제');
-      removeButton.type = 'button';
-      removeButton.dataset.removeUrl = item.link;
-      actions.append(previewAction, editButton, removeButton);
-
-      article.append(previewButton, actions);
-      savedList.append(article);
-    });
-  }
-
-  function setAuthIntent(message = '') {
-    if (!authIntent) return;
-    authIntent.textContent = message;
-    authIntent.hidden = !message;
-  }
-
-  function requestLogin(intent, { saveUrl = '', openSaved = false } = {}) {
-    pendingSaveUrl = saveUrl;
-    pendingOpenSaved = openSaved;
-    setAuthMode('login');
-    openAuthDialog();
-    setAuthIntent(intent);
-    if (!authEnabled) announce('로그인 연결이 완료된 뒤 저장함을 사용할 수 있어요.');
-  }
-
-  function openDrawer() {
     if (!currentUser) {
-      requestLogin('저장함은 로그인 후 사용할 수 있어요. 로그인하면 저장한 기사와 메모를 여러 기기에서 이어볼 수 있습니다.', { openSaved: true });
-      return;
-    }
-    if (!drawer) return;
-    drawerTrigger = document.activeElement;
-    renderSaved();
-    drawer.hidden = false;
-    syncBodyLock();
-    const closeButton = drawer.querySelector('.close-button');
-    if (closeButton) closeButton.focus();
-  }
-
-  function closeDrawer(restoreFocus = true) {
-    if (!drawer) return;
-    drawer.hidden = true;
-    syncBodyLock();
-    if (restoreFocus && drawerTrigger && typeof drawerTrigger.focus === 'function') drawerTrigger.focus();
-  }
-
-  function updateNoteCount() {
-    if (noteCount && noteInput) noteCount.textContent = String(noteInput.value.length);
-  }
-
-  function openNoteDialog(url) {
-    if (!currentUser) {
-      requestLogin('기사를 저장하려면 먼저 로그인해 주세요. 로그인하면 바로 스크랩 메모 화면으로 이어집니다.', { saveUrl: url });
-      return;
-    }
-    if (!noteDialog || !noteInput) return;
-    const item = itemForUrl(url);
-    if (!item) return;
-    const savedItem = savedItems.find(entry => entry.link === url);
-    activeNoteUrl = url;
-    noteTrigger = document.activeElement;
-    if (noteArticleTitle) noteArticleTitle.textContent = item.title || '제목 없음';
-    noteInput.value = savedItem ? savedItem.note : '';
-    if (noteSaveButton) noteSaveButton.textContent = savedItem ? '메모 저장' : '스크랩 저장';
-    updateNoteCount();
-    noteDialog.hidden = false;
-    syncBodyLock();
-    window.setTimeout(() => noteInput.focus(), 40);
-  }
-
-  function closeNoteDialog(restoreFocus = true) {
-    if (!noteDialog) return;
-    noteDialog.hidden = true;
-    activeNoteUrl = '';
-    syncBodyLock();
-    if (restoreFocus && noteTrigger && typeof noteTrigger.focus === 'function') noteTrigger.focus();
-  }
-
-  function renderPreview(item) {
-    if (!item) return;
-    fillThumbnail(previewThumb, item);
-    if (previewMediaLabel) previewMediaLabel.textContent = item.contentType || '기사';
-    if (previewCategory) previewCategory.textContent = item.category || '생태계 업데이트';
-    if (previewSource) previewSource.textContent = item.source || '기타';
-    if (previewTitle) previewTitle.textContent = item.title || '제목 없음';
-    if (previewSummary) previewSummary.textContent = item.summary || '';
-    if (previewTakeaway) {
-      previewTakeaway.textContent = item.takeaway || '원문에서 이번 변화가 창업가와 팀에 주는 의미를 확인해보세요.';
-    }
-    if (previewNoteWrap && previewNote) {
-      const hasNote = Boolean(item.note && item.note.trim());
-      previewNoteWrap.hidden = !hasNote;
-      previewNote.textContent = hasNote ? item.note.trim() : '';
-    }
-    if (previewReadLink) previewReadLink.href = item.link;
-    if (previewEditButton) previewEditButton.dataset.previewEditUrl = item.link;
-    if (previewDeleteButton) previewDeleteButton.dataset.previewDeleteUrl = item.link;
-  }
-
-  function openPreview(url) {
-    if (!previewDialog) return;
-    const item = itemForUrl(url);
-    if (!item) return;
-    activePreviewUrl = url;
-    previewTrigger = document.activeElement;
-    renderPreview(item);
-    previewDialog.hidden = false;
-    syncBodyLock();
-    const closeButton = previewDialog.querySelector('.close-button');
-    if (closeButton) closeButton.focus();
-  }
-
-  function closePreview(restoreFocus = true) {
-    if (!previewDialog) return;
-    previewDialog.hidden = true;
-    activePreviewUrl = '';
-    syncBodyLock();
-    if (restoreFocus && previewTrigger && typeof previewTrigger.focus === 'function') previewTrigger.focus();
-  }
-
-  function remoteRowToItem(row) {
-    return normalizeItem({
-      title: row.title,
-      link: row.article_url,
-      source: row.source,
-      summary: row.summary,
-      takeaway: row.takeaway,
-      category: row.category,
-      contentType: row.content_type,
-      briefingDate: row.briefing_date,
-      image: row.thumbnail_url,
-      fallbackA: row.fallback_a,
-      fallbackB: row.fallback_b,
-      note: row.note,
-      savedAt: row.saved_at,
-      updatedAt: row.updated_at,
-      pendingSync: false,
-    });
-  }
-
-  function itemToRemote(item) {
-    return {
-      user_id: currentUser.id,
-      article_url: item.link,
-      title: item.title || '제목 없음',
-      source: item.source || '기타',
-      summary: item.summary || '',
-      takeaway: item.takeaway || '',
-      category: item.category || '생태계 업데이트',
-      content_type: item.contentType || '기사',
-      briefing_date: item.briefingDate || '',
-      thumbnail_url: item.image || '',
-      fallback_a: item.fallbackA || '#2752B8',
-      fallback_b: item.fallbackB || '#6D9CFF',
-      note: item.note || '',
-      saved_at: item.savedAt || new Date().toISOString(),
-      updated_at: item.updatedAt || new Date().toISOString(),
-    };
-  }
-
-  async function upsertItemsToCloud(items) {
-    if (!supabaseClient || !currentUser || !items.length) return true;
-    const { error } = await supabaseClient
-      .from('saved_articles')
-      .upsert(items.map(itemToRemote), { onConflict: 'user_id,article_url' });
-    if (error) {
-      console.error('SNAAC saved article upsert failed:', error);
+      pendingArticle = action === 'save' ? article : null;
+      setAuthMode('signin');
+      renderAuthState();
+      openOverlay('auth');
       return false;
     }
     return true;
   }
 
-  async function syncSavedFromCloud() {
-    if (!supabaseClient || !currentUser || syncBusy) return;
-    syncBusy = true;
-    updateAuthIndicators();
-
-    const userKey = activeStorageKey();
-    const userLocal = readStorage(userKey);
-    const pendingLocal = userLocal.filter(item => item.pendingSync);
-    const guestItems = readStorage(GUEST_STORAGE_KEY);
-
-    const { data, error } = await supabaseClient
-      .from('saved_articles')
-      .select('*')
-      .order('saved_at', { ascending: false });
-
-    if (error) {
-      console.error('SNAAC saved article fetch failed:', error);
-      savedItems = dedupeItems([userLocal, guestItems]);
-      writeStorage(userKey, savedItems);
-      syncBusy = false;
-      updateSavedIndicators();
-      renderSaved();
-      announce('계정 동기화에 실패했지만 이 기기에는 저장되어 있어요.');
-      return;
-    }
-
-    const remoteItems = (data || []).map(remoteRowToItem);
-    savedItems = dedupeItems([remoteItems, pendingLocal, guestItems]).map(item => ({ ...item, pendingSync: true }));
-    writeStorage(userKey, savedItems);
-
-    const uploaded = await upsertItemsToCloud(savedItems);
-    if (uploaded) {
-      savedItems = savedItems.map(item => ({ ...item, pendingSync: false }));
-      writeStorage(userKey, savedItems);
-      clearStorage(GUEST_STORAGE_KEY);
-    }
-
-    syncBusy = false;
-    updateSavedIndicators();
-    renderSaved();
-    if (!uploaded) announce('기기 저장은 완료됐지만 계정 동기화를 다시 시도해 주세요.');
+  function openNote(article) {
+    if (!article) return;
+    pendingArticle = article;
+    const existing = savedMap.get(article.link);
+    $('#noteTitle').textContent = existing ? '스크랩 메모 수정' : '기사 저장';
+    $('#noteArticleTitle').textContent = article.title || '';
+    $('#noteText').value = existing?.note || '';
+    openOverlay('note');
+    setTimeout(() => $('#noteText')?.focus(), 80);
   }
 
-  async function saveWithNote() {
-    if (!activeNoteUrl || !noteInput) return;
-    if (!currentUser) {
-      const requestedUrl = activeNoteUrl;
-      closeNoteDialog(false);
-      requestLogin('기사를 저장하려면 먼저 로그인해 주세요. 로그인하면 바로 스크랩 메모 화면으로 이어집니다.', { saveUrl: requestedUrl });
-      return;
-    }
-    const existingIndex = savedItems.findIndex(item => item.link === activeNoteUrl);
-    const currentItem = currentByUrl.get(activeNoteUrl);
-    const existingItem = existingIndex >= 0 ? savedItems[existingIndex] : null;
-    const item = currentItem || existingItem;
-    if (!item) return;
-
-    const note = noteInput.value.trim();
-    const now = new Date().toISOString();
-    const nextItem = normalizeItem({
-      ...(existingItem || {}),
-      ...(currentItem || {}),
+  async function savePendingArticle() {
+    if (!pendingArticle || !supabaseClient || !currentUser) return;
+    const article = pendingArticle;
+    const note = ($('#noteText')?.value || '').trim().slice(0, 500);
+    const payload = {
+      user_id: currentUser.id,
+      article_url: article.link,
+      title: article.title,
+      source: article.source || '',
+      summary: article.summary || '',
+      takeaway: article.takeaway || '',
+      section: article.section || '',
+      category: article.category || '',
+      content_type: article.contentType || '기사',
+      image_url: article.image || '',
+      briefing_date: article.briefingDate || '',
       note,
-      savedAt: existingItem && existingItem.savedAt || now,
-      updatedAt: now,
-      pendingSync: Boolean(currentUser),
-    });
-
-    if (existingIndex >= 0) savedItems.splice(existingIndex, 1);
-    savedItems.unshift(nextItem);
-    savedItems = dedupeItems([savedItems]);
-
-    if (!persistActive()) {
-      announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
+      fallback_a: article.fallbackA || '#3D5A6C',
+      fallback_b: article.fallbackB || '#8AA7B7',
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabaseClient
+      .from(siteConfig.table)
+      .upsert(payload, { onConflict: 'user_id,article_url' });
+    if (error) {
+      console.error('saved article upsert failed', error);
+      showStatus('저장하지 못했어요. 잠시 후 다시 시도해 주세요.');
       return;
     }
-
-    closeNoteDialog();
-    updateSavedIndicators();
-    renderSaved();
-    if (activePreviewUrl === nextItem.link) renderPreview(nextItem);
-
-    if (currentUser) {
-      const uploaded = await upsertItemsToCloud([nextItem]);
-      if (uploaded) {
-        const saved = savedItems.find(savedItem => savedItem.link === nextItem.link);
-        if (saved) saved.pendingSync = false;
-        persistActive();
-        announce(note ? '메모와 함께 계정에 저장했어요.' : '기사를 계정에 저장했어요.');
-      } else {
-        announce('이 기기에는 저장했지만 계정 동기화에 실패했어요.');
-      }
-    }
+    closeOverlay('note');
+    pendingArticle = null;
+    await loadSaved();
+    showStatus(note ? '기사와 메모를 저장했어요.' : '기사를 저장했어요.');
   }
 
-  async function removeSaved(url) {
-    savedItems = savedItems.filter(item => item.link !== url);
-    if (!persistActive()) {
-      announce('이 브라우저에서는 저장 기능을 사용할 수 없어요.');
+  async function removeSaved(link) {
+    if (!supabaseClient || !currentUser || !link) return;
+    const { error } = await supabaseClient
+      .from(siteConfig.table)
+      .delete()
+      .eq('user_id', currentUser.id)
+      .eq('article_url', link);
+    if (error) {
+      console.error('saved article delete failed', error);
+      showStatus('삭제하지 못했어요.');
       return;
     }
+    closeOverlay('preview');
+    await loadSaved();
+    showStatus('저장함에서 삭제했어요.');
+  }
 
-    if (activeNoteUrl === url && isOpen(noteDialog)) closeNoteDialog(false);
-    if (activePreviewUrl === url && isOpen(previewDialog)) closePreview(false);
-    updateSavedIndicators();
-    renderSaved();
+  function renderSavedList() {
+    const list = $('#savedList');
+    const empty = $('#savedEmpty');
+    if (!list || !empty) return;
+    list.textContent = '';
+    const items = Array.from(savedMap.values());
+    empty.hidden = items.length > 0;
+    items.forEach((item) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'saved-item';
+      button.addEventListener('click', () => openPreview(item));
 
-    if (currentUser && supabaseClient) {
-      const { error } = await supabaseClient
-        .from('saved_articles')
-        .delete()
-        .eq('user_id', currentUser.id)
-        .eq('article_url', url);
-      if (error) {
-        console.error('SNAAC saved article delete failed:', error);
-        announce('기기에서는 삭제했지만 계정 동기화에 실패했어요.');
-        return;
+      const thumb = document.createElement('span');
+      thumb.className = 'saved-item-thumb';
+      thumb.style.setProperty('--fa', item.fallbackA || '#3D5A6C');
+      thumb.style.setProperty('--fb', item.fallbackB || '#8AA7B7');
+      if (item.image) {
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onerror = () => img.remove();
+        thumb.appendChild(img);
       }
+
+      const body = document.createElement('span');
+      body.className = 'saved-item-body';
+      const source = document.createElement('span');
+      source.className = 'saved-item-source';
+      source.textContent = [item.section, item.source].filter(Boolean).join(' · ');
+      const title = document.createElement('span');
+      title.className = 'saved-item-title';
+      title.textContent = item.title;
+      body.append(source, title);
+      if (item.note) {
+        const note = document.createElement('span');
+        note.className = 'saved-item-note';
+        note.textContent = item.note;
+        body.appendChild(note);
+      }
+      button.append(thumb, body);
+      list.appendChild(button);
+    });
+  }
+
+  function openSavedDrawer() {
+    if (!requireAuth('drawer')) return;
+    renderSavedList();
+    openOverlay('saved');
+  }
+
+  function openPreview(item) {
+    if (!item) return;
+    activePreview = item;
+    const thumb = $('#previewThumb');
+    thumb.textContent = '';
+    thumb.style.setProperty('--fa', item.fallbackA || '#3D5A6C');
+    thumb.style.setProperty('--fb', item.fallbackB || '#8AA7B7');
+    if (item.image) {
+      const img = document.createElement('img');
+      img.src = item.image;
+      img.alt = '';
+      img.onerror = () => img.remove();
+      thumb.appendChild(img);
     }
-    announce('저장함에서 삭제했어요.');
+    $('#previewSection').textContent = item.section || '';
+    $('#previewSource').textContent = item.source || '';
+    $('#previewCategory').textContent = item.category || '';
+    $('#previewTitle').textContent = item.title || '';
+    $('#previewSummary').textContent = item.summary || '';
+    $('#previewTakeaway').textContent = item.takeaway || '';
+    const note = $('#previewNote');
+    note.textContent = item.note ? `저장 메모\n${item.note}` : '저장 메모가 없습니다.';
+    const link = $('#previewOriginal');
+    link.href = item.link || '#';
+    closeOverlay('saved');
+    openOverlay('preview');
   }
 
   function setAuthMode(mode) {
-    authMode = mode === 'signup' ? 'signup' : 'login';
-    document.querySelectorAll('[data-auth-mode]').forEach(button => {
-      const active = button.dataset.authMode === authMode;
-      button.classList.toggle('is-active', active);
-      button.setAttribute('aria-selected', String(active));
+    authMode = mode;
+    $$('.auth-tab').forEach((tab) => {
+      const active = tab.dataset.authMode === mode;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
     });
-    if (authSubmit) authSubmit.textContent = authMode === 'signup' ? '회원가입' : '로그인';
-    if (authPassword) authPassword.autocomplete = authMode === 'signup' ? 'new-password' : 'current-password';
-    if (authMessage) {
-      authMessage.textContent = '';
-      authMessage.classList.remove('is-error');
+    $('#authSubmit').textContent = mode === 'signup' ? '회원가입' : '로그인';
+    $('#authPassword').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+    $('#authMessage').textContent = '';
+  }
+
+  function renderAuthState() {
+    const signedOut = $('#authSignedOut');
+    const signedIn = $('#authSignedIn');
+    const setup = $('#authSetup');
+    if (!authEnabled) {
+      signedOut.hidden = true;
+      signedIn.hidden = true;
+      setup.hidden = false;
+    } else if (currentUser) {
+      signedOut.hidden = true;
+      setup.hidden = true;
+      signedIn.hidden = false;
+      $('#accountEmail').textContent = currentUser.email || '로그인 계정';
+    } else {
+      setup.hidden = true;
+      signedIn.hidden = true;
+      signedOut.hidden = false;
     }
+    $$('[data-account-label]').forEach((node) => {
+      node.textContent = currentUser ? '계정' : '로그인';
+    });
   }
 
-  function updateAuthDialogView() {
-    if (!authGuestView || !authUserView || !authSetupView) return;
-    authSetupView.hidden = authEnabled;
-    authGuestView.hidden = !authEnabled || Boolean(currentUser);
-    authUserView.hidden = !authEnabled || !currentUser;
-    if (accountEmail) accountEmail.textContent = currentUser && currentUser.email || '';
-  }
-
-  function openAuthDialog() {
-    if (!authDialog) return;
-    authTrigger = document.activeElement;
-    updateAuthDialogView();
-    setAuthMode(authMode);
-    authDialog.hidden = false;
-    syncBodyLock();
-    window.setTimeout(() => {
-      if (currentUser) {
-        const logout = authDialog.querySelector('[data-logout]');
-        if (logout) logout.focus();
-      } else if (authEnabled && authEmail) {
-        authEmail.focus();
-      } else {
-        const closeButton = authDialog.querySelector('.close-button');
-        if (closeButton) closeButton.focus();
-      }
-    }, 40);
-  }
-
-  function closeAuthDialog(restoreFocus = true, preserveIntent = false) {
-    if (!authDialog) return;
-    authDialog.hidden = true;
-    if (!preserveIntent && !currentUser) {
-      pendingSaveUrl = '';
-      pendingOpenSaved = false;
-      setAuthIntent('');
-    }
-    syncBodyLock();
-    if (restoreFocus && authTrigger && typeof authTrigger.focus === 'function') authTrigger.focus();
-  }
-
-  function setAuthMessage(message, isError = false) {
-    if (!authMessage) return;
-    authMessage.textContent = message;
-    authMessage.classList.toggle('is-error', isError);
-  }
-
-  async function handleAuthSubmit(event) {
+  async function submitAuth(event) {
     event.preventDefault();
-    if (!supabaseClient || !authEmail || !authPassword || !authSubmit) return;
-    const email = authEmail.value.trim();
-    const password = authPassword.value;
-    if (!email || !password) {
-      setAuthMessage('이메일과 비밀번호를 모두 입력해 주세요.', true);
-      return;
-    }
-    if (password.length < 8) {
-      setAuthMessage('비밀번호는 8자 이상으로 입력해 주세요.', true);
-      return;
-    }
+    if (!supabaseClient) return;
+    const email = ($('#authEmail').value || '').trim();
+    const password = $('#authPassword').value || '';
+    const message = $('#authMessage');
+    message.textContent = authMode === 'signup' ? '계정을 만들고 있어요…' : '로그인하고 있어요…';
 
-    authSubmit.disabled = true;
-    setAuthMessage(authMode === 'signup' ? '계정을 만들고 있어요…' : '로그인하고 있어요…');
     try {
       if (authMode === 'signup') {
-        const redirectTo = authConfig.redirectUrl || new URL(authConfig.homeHref || './', window.location.href).href;
         const { data, error } = await supabaseClient.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: redirectTo },
+          options: { emailRedirectTo: window.location.href.split('#')[0] },
         });
         if (error) throw error;
-        if (data && data.session) {
-          setAuthMessage('회원가입과 로그인이 완료됐어요.');
-          closeAuthDialog(true, true);
-        } else {
-          setAuthMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인해 주세요.');
+        if (!data.session) {
+          message.textContent = '가입 확인 메일을 보냈어요. 이메일 인증 후 로그인해 주세요.';
+          return;
         }
       } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        setAuthMessage('로그인했어요. 저장함을 동기화합니다.');
-        closeAuthDialog(true, true);
       }
+      message.textContent = '';
+      closeOverlay('auth');
     } catch (error) {
-      console.error('SNAAC auth error:', error);
-      setAuthMessage(error && error.message ? error.message : '로그인 처리 중 오류가 발생했어요.', true);
-    } finally {
-      authSubmit.disabled = false;
+      console.error('auth error', error);
+      message.textContent = error?.message || '로그인 처리 중 오류가 발생했어요.';
     }
   }
 
-  async function handleSignOut() {
+  async function signOut() {
     if (!supabaseClient) return;
-    const { error } = await supabaseClient.auth.signOut();
-    if (error) {
-      announce('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.');
-      return;
-    }
-    closeAuthDialog();
+    await supabaseClient.auth.signOut();
+    closeOverlay('auth');
+    showStatus('로그아웃했어요.');
   }
 
   async function applySession(session) {
-    const nextUser = session && session.user || null;
-    const previousId = currentUser && currentUser.id || '';
-    const nextId = nextUser && nextUser.id || '';
-    currentUser = nextUser;
-    updateAuthDialogView();
-    updateAuthIndicators();
-
-    if (nextUser) {
-      if (nextId !== previousId || !savedItems.length) await syncSavedFromCloud();
-      const saveUrl = pendingSaveUrl;
-      const shouldOpenSaved = pendingOpenSaved;
-      pendingSaveUrl = '';
-      pendingOpenSaved = false;
-      setAuthIntent('');
-      if (saveUrl) window.setTimeout(() => openNoteDialog(saveUrl), 20);
-      else if (shouldOpenSaved) window.setTimeout(() => openDrawer(), 20);
-    } else {
-      savedItems = [];
-      updateSavedIndicators();
-      renderSaved();
+    currentUser = session?.user || null;
+    renderAuthState();
+    await loadSaved();
+    if (currentUser && pendingArticle) {
+      const article = pendingArticle;
+      setTimeout(() => openNote(article), 100);
     }
   }
 
-  async function initSupabase() {
-    updateAuthDialogView();
-    updateAuthIndicators();
-    if (!authEnabled) return;
-    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-      console.error('Supabase library did not load.');
-      return;
-    }
-
+  async function initAuth() {
+    renderAuthState();
+    if (!authEnabled || !window.supabase) return;
     supabaseClient = window.supabase.createClient(authConfig.url, authConfig.publishableKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     });
-
-    const { data, error } = await supabaseClient.auth.getSession();
-    if (error) console.error('Supabase session error:', error);
-    await applySession(data && data.session || null);
-
+    const { data } = await supabaseClient.auth.getSession();
+    await applySession(data?.session || null);
     supabaseClient.auth.onAuthStateChange((_event, session) => {
-      window.setTimeout(() => { void applySession(session); }, 0);
+      setTimeout(() => applySession(session), 0);
     });
   }
 
-  document.addEventListener('click', event => {
-    const saveButton = event.target.closest('.save-button');
-    if (saveButton) {
-      openNoteDialog(saveButton.dataset.url);
-      return;
-    }
-
-    const previewButton = event.target.closest('[data-preview-url]');
-    if (previewButton) {
-      openPreview(previewButton.dataset.previewUrl);
-      return;
-    }
-
-    const editNoteButton = event.target.closest('[data-edit-note-url]');
-    if (editNoteButton) {
-      openNoteDialog(editNoteButton.dataset.editNoteUrl);
-      return;
-    }
-
-    const saveNoteButton = event.target.closest('[data-save-note]');
-    if (saveNoteButton) {
-      void saveWithNote();
-      return;
-    }
-
-    const closeNoteButton = event.target.closest('[data-close-note]');
-    if (closeNoteButton) {
-      closeNoteDialog();
-      return;
-    }
-
-    const openSavedButton = event.target.closest('[data-open-saved]');
-    if (openSavedButton) {
-      openDrawer();
-      return;
-    }
-
-    const closeSavedButton = event.target.closest('[data-close-saved]');
-    if (closeSavedButton) {
-      closeDrawer();
-      return;
-    }
-
-    const removeButton = event.target.closest('[data-remove-url]');
-    if (removeButton) {
-      void removeSaved(removeButton.dataset.removeUrl);
-      return;
-    }
-
-    const closePreviewButton = event.target.closest('[data-close-preview]');
-    if (closePreviewButton) {
-      closePreview();
-      return;
-    }
-
-    const previewEditButtonTarget = event.target.closest('[data-preview-edit-url]');
-    if (previewEditButtonTarget) {
-      openNoteDialog(previewEditButtonTarget.dataset.previewEditUrl);
-      return;
-    }
-
-    const previewDeleteButtonTarget = event.target.closest('[data-preview-delete-url]');
-    if (previewDeleteButtonTarget) {
-      void removeSaved(previewDeleteButtonTarget.dataset.previewDeleteUrl);
-      return;
-    }
-
-    const openAuthButton = event.target.closest('[data-open-auth]');
-    if (openAuthButton) {
-      pendingSaveUrl = '';
-      pendingOpenSaved = false;
-      setAuthIntent('');
-      openAuthDialog();
-      return;
-    }
-
-    const closeAuthButton = event.target.closest('[data-close-auth]');
-    if (closeAuthButton) {
-      closeAuthDialog();
-      return;
-    }
-
-    const authTab = event.target.closest('[data-auth-mode]');
-    if (authTab) {
-      setAuthMode(authTab.dataset.authMode);
-      return;
-    }
-
-    const logoutButton = event.target.closest('[data-logout]');
-    if (logoutButton) void handleSignOut();
-  });
-
-  if (noteInput) {
-    noteInput.addEventListener('input', updateNoteCount);
-    noteInput.addEventListener('keydown', event => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-        event.preventDefault();
-        void saveWithNote();
-      }
+  $$('[data-save-link]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const article = getArticle(button.dataset.saveLink || '');
+      if (!article) return;
+      if (!requireAuth('save', article)) return;
+      openNote(article);
     });
-  }
-
-  if (authForm) authForm.addEventListener('submit', event => { void handleAuthSubmit(event); });
-
-  document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape') return;
-    if (isOpen(authDialog)) closeAuthDialog();
-    else if (isOpen(noteDialog)) closeNoteDialog();
-    else if (isOpen(previewDialog)) closePreview();
-    else if (isOpen(drawer)) closeDrawer();
   });
-
-  window.addEventListener('storage', () => {
-    savedItems = readStorage(activeStorageKey());
-    updateSavedIndicators();
-    renderSaved();
-    if (activePreviewUrl) {
-      const item = itemForUrl(activePreviewUrl);
-      if (item) renderPreview(item);
-      else closePreview(false);
+  $$('[data-open-saved]').forEach((button) => button.addEventListener('click', openSavedDrawer));
+  $$('[data-open-auth]').forEach((button) => button.addEventListener('click', () => {
+    renderAuthState();
+    openOverlay('auth');
+  }));
+  $$('[data-close-overlay]').forEach((button) => button.addEventListener('click', () => closeOverlay(button.dataset.closeOverlay)));
+  $$('.overlay').forEach((overlay) => overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeOverlay(overlay.dataset.overlay);
+  }));
+  $$('.auth-tab').forEach((tab) => tab.addEventListener('click', () => setAuthMode(tab.dataset.authMode || 'signin')));
+  $('#authForm')?.addEventListener('submit', submitAuth);
+  $('#logoutButton')?.addEventListener('click', signOut);
+  $('#noteSave')?.addEventListener('click', savePendingArticle);
+  $('#noteCancel')?.addEventListener('click', () => { pendingArticle = null; closeOverlay('note'); });
+  $('#previewEdit')?.addEventListener('click', () => { closeOverlay('preview'); openNote(activePreview); });
+  $('#previewDelete')?.addEventListener('click', () => removeSaved(activePreview?.link || ''));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAll();
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && overlays.note?.classList.contains('open')) {
+      savePendingArticle();
     }
   });
 
-  setAuthMode('login');
-  updateSavedIndicators();
-  renderSaved();
-  void initSupabase();
-})();</script>
+  setAuthMode('signin');
+  updateSaveButtons();
+  initAuth();
+})();
+</script>
 </body>
 </html>
