@@ -87,7 +87,7 @@ jobs:
       - name: 브리핑 생성
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.4-mini' }}
           ENABLE_WEB_DISCOVERY: "1"
           MIN_QUALITY_SCORE: ${{ vars.MIN_QUALITY_SCORE || '72' }}
           MIN_PICKS_TO_PUBLISH: "3"
