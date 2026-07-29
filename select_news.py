@@ -1,4 +1,4 @@
-"""OpenAI API로 오늘의 스타트업 콘텐츠 5개를 선별하고 요약합니다.
+"""OpenAI API로 오늘의 스타트업 콘텐츠 4~5개를 선별하고 요약합니다.
 
 핵심 변경점
 - 투자 유치 단신 우선이 아니라 '읽고 얻어갈 것이 있는가'를 최우선 평가
@@ -38,9 +38,11 @@ ENABLE_WEB_DISCOVERY = (os.environ.get("ENABLE_WEB_DISCOVERY") or "1").lower() n
 }
 MAX_CANDIDATES = 60
 MAX_PER_SOURCE_IN_FINAL = 2
-MIN_FINAL_PICKS = 3
+MIN_FINAL_PICKS = 4
 MAX_FINAL_PICKS = 5
+MAX_MODEL_PICKS = 8
 MIN_QUALITY_SCORE = int((os.environ.get("MIN_QUALITY_SCORE") or "72").strip() or "72")
+MIN_SUPPLEMENT_QUALITY_SCORE = int((os.environ.get("MIN_SUPPLEMENT_QUALITY_SCORE") or "60").strip() or "60")
 OPENAI_MAX_ATTEMPTS = int((os.environ.get("OPENAI_MAX_ATTEMPTS") or "3").strip() or "3")
 
 # 유료 구독을 요구하는 대표 도메인은 후보/웹 검색 단계부터 제외합니다.
@@ -183,7 +185,7 @@ SNAAC 커뮤니티의 편집장입니다. 목표는 '투자 소식 5개'가 아�
 반드시 지킬 편집 규칙:
 - 단순히 '어느 회사가 얼마를 투자받았다'로 끝나는 투자 유치 단신은 최대 1개.
 - 투자 기사를 고르더라도 사업 모델, 시장 변화, 창업자 판단 등 배울 맥락이 있어야 함.
-- 5개 안에 최소 3개 이상의 서로 다른 카테고리를 포함.
+- 최종 발행 4~5개가 한 종류에 치우치지 않도록 가능한 한 서로 다른 카테고리를 섞을 것.
 - 같은 매체/채널은 최대 2개. 사실상 같은 사건의 중복 보도는 1개만 선택.
 - 한국 스타트업 생태계와 직접 연결된 콘텐츠를 최소 3개 포함.
 - 해외 콘텐츠는 최대 2개이며, 국내 독자에게 옮겨 적용할 명확한 이유가 있어야 함.
@@ -194,14 +196,15 @@ SNAAC 커뮤니티의 편집장입니다. 목표는 '투자 소식 5개'가 아�
 - 일부 문단만 공개하고 나머지를 구독으로 잠근 기사, 프리미엄 콘텐츠, 유료 뉴스레터는 제외.
 - 공개 웹 검색 결과는 최근 7일 이내를 우선하되, 실행 가치가 매우 높은 심층 글은
   최근 14일까지 허용.
-- 각 후보를 0~100점으로 평가하고, 72점 미만은 절대 선택하지 말 것.
-- 억지로 5개를 채우지 말 것. 기준을 통과한 콘텐츠가 3개면 3개, 4개면 4개만 반환.
-- 3개 미만이면 있는 만큼만 반환하며, 시스템은 기존 회차를 유지할 수 있음.
+- 각 후보를 0~100점으로 평가할 것. 원칙적으로 72점 이상을 우선한다.
+- 72점 이상 후보가 4개 미만이면, 공개 원문·관련성·신뢰도를 충족한 60점 이상 후보 중 가장 나은 항목을 보완 후보로 포함해 최소 4개를 만들 것.
+- 60점 미만, 단순 홍보, 사실상 중복, 구독 장벽이 있는 콘텐츠는 보완용으로도 선택하지 말 것.
+- 시스템이 최종 4~5개를 안정적으로 구성할 수 있도록 우선순위가 높은 후보 5~8개를 반환할 것.
 
 작성 규칙:
 - summary: '무슨 내용인지 + 핵심 맥락'을 한국어 1~2문장, 120자 이내로 작성.
 - takeaway: 독자가 왜 읽어야 하는지 또는 무엇을 생각해볼지 70자 이내로 작성.
-- quality_score: 위 평가 기준을 종합한 0~100 정수. 72점 이상인 항목만 반환.
+- quality_score: 위 평가 기준을 종합한 0~100 정수. 기본 후보는 72점 이상, 최소 수량 보완 후보는 60점 이상.
 - quality_reason: 선택한 핵심 이유를 60자 이내로 작성.
 - 원문의 주장을 과장하거나 원문에 없는 사실을 만들지 말 것.
 - link는 입력 후보의 URL 또는 웹 검색에서 실제 확인한 원문 URL만 사용할 것.
@@ -213,8 +216,8 @@ OUTPUT_SCHEMA = {
     "properties": {
         "picks": {
             "type": "array",
-            "minItems": 1,
-            "maxItems": 5,
+            "minItems": 5,
+            "maxItems": 8,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -458,7 +461,7 @@ def _is_free_to_read(url: str) -> bool:
         _FREE_ACCESS_CACHE[normalized] = result
         return result
     except requests.RequestException as exc:
-        # 신규 도메인은 원문 공개 여부를 직접 확인하지 못하면 최종 5개에서 제외합니다.
+        # 신규 도메인은 원문 공개 여부를 직접 확인하지 못하면 최종 후보에서 제외합니다.
         print(f"[무료 원문 확인 실패 → 제외] {url}: {exc}")
         _FREE_ACCESS_CACHE[normalized] = False
         return False
@@ -568,14 +571,39 @@ def _enforce_editorial_limits(picks: list[dict]) -> list[dict]:
             continue
         add_pick(pick)
 
-    if len(selected) >= MIN_FINAL_PICKS and len(selected_categories) < 3:
+    if len(selected_categories) < 2:
         print(
-            f"[품질 보류] 카테고리가 {len(selected_categories)}개뿐이라 "
-            "최소 3개 관점을 충족하지 못했습니다."
+            f"[편집 경고] 최종 후보의 카테고리가 {len(selected_categories)}개로 적지만 "
+            "최소 4개 발행 원칙을 우선합니다."
         )
-        return []
 
     return selected
+
+
+def _ensure_minimum_picks(selected: list[dict], ranked_candidates: list[dict]) -> list[dict]:
+    """엄격한 출처·투자 단신 제한으로 4개 미만이 되면 안전한 보완 후보를 추가합니다.
+
+    여기 들어오는 후보는 URL·중복·구독 장벽 검사와 최소 60점 기준을 이미 통과했습니다.
+    따라서 최종 수량만 보완하되 같은 링크는 절대 중복하지 않습니다.
+    """
+    if len(selected) >= MIN_FINAL_PICKS:
+        return selected[:MAX_FINAL_PICKS]
+
+    selected_links = {normalize_link(item.get("link", "")) for item in selected}
+    for pick in ranked_candidates:
+        if len(selected) >= MIN_FINAL_PICKS:
+            break
+        link_key = normalize_link(pick.get("link", ""))
+        if not link_key or link_key in selected_links:
+            continue
+        selected.append(pick)
+        selected_links.add(link_key)
+        print(
+            f"[최소 수량 보완] {pick.get('quality_score', 0)}점 / "
+            f"{pick.get('source', '기타')}: {pick.get('title', '')}"
+        )
+
+    return selected[:MAX_FINAL_PICKS]
 
 
 def _validate_picks(
@@ -591,9 +619,9 @@ def _validate_picks(
 
     for raw_pick in raw_picks:
         pick = _clean_pick(raw_pick)
-        if pick["quality_score"] < MIN_QUALITY_SCORE:
+        if pick["quality_score"] < MIN_SUPPLEMENT_QUALITY_SCORE:
             print(
-                f"[품질 제외] {pick['quality_score']}점 < {MIN_QUALITY_SCORE}점: "
+                f"[품질 제외] {pick['quality_score']}점 < {MIN_SUPPLEMENT_QUALITY_SCORE}점: "
                 f"{pick.get('title', '')}"
             )
             continue
@@ -638,8 +666,68 @@ def _validate_picks(
 
         seen_links.add(link_key)
         validated.append(pick)
-        if len(validated) >= MAX_FINAL_PICKS:
+        if len(validated) >= MAX_MODEL_PICKS:
             break
+
+    return validated
+
+
+def _supplement_from_ranked_candidates(
+    validated: list[dict],
+    candidates: list[dict],
+    excluded_links: set[str],
+) -> list[dict]:
+    """모델 선별 후 4건이 남지 않으면 상위 RSS 후보로 안전하게 보완합니다.
+
+    모델이 반환한 링크가 페이월·중복 검사에서 탈락해도 브리핑이 3건으로 줄지
+    않도록 하는 마지막 안전장치입니다. 후보는 공개 원문 검사, 최근 중복 제외,
+    최소 요약 길이를 모두 통과해야 하며 60점 보완 후보로 표시됩니다.
+    """
+    if len(validated) >= MIN_FINAL_PICKS:
+        return validated
+
+    seen_links = {normalize_link(item.get("link", "")) for item in validated}
+    content_type_map = {
+        "news": "기사",
+        "interview": "인터뷰",
+        "video": "영상",
+        "linkedin": "링크드인",
+        "insight": "칼럼·리포트",
+    }
+
+    for candidate in candidates:
+        if len(validated) >= MAX_MODEL_PICKS:
+            break
+        link = str(candidate.get("link", "")).strip()
+        link_key = normalize_link(link)
+        if not link_key or link_key in seen_links or link_key in excluded_links:
+            continue
+        if not _is_safe_http_url(link) or not _is_free_to_read(link):
+            continue
+
+        title = strip_html(str(candidate.get("title", "")))[:240]
+        summary = strip_html(str(candidate.get("summary", "")))[:180]
+        if not title or len(summary) < 20:
+            continue
+
+        category = _infer_category(candidate)
+        raw_type = str(candidate.get("content_type", "news")).lower()
+        pick = {
+            "title": title,
+            "link": link,
+            "source": strip_html(str(candidate.get("source", "기타")))[:80] or "기타",
+            "published": strip_html(str(candidate.get("published", "unknown")))[:40] or "unknown",
+            "category": category,
+            "content_type": content_type_map.get(raw_type, "기타"),
+            "summary": summary,
+            "takeaway": "원문에서 이번 변화가 스타트업과 창업가에게 주는 의미를 확인해보세요.",
+            "quality_score": MIN_SUPPLEMENT_QUALITY_SCORE,
+            "quality_reason": "최소 4건 구성을 위한 상위 공개 RSS 후보",
+            "thumbnail": str(candidate.get("thumbnail", "")).strip(),
+        }
+        validated.append(pick)
+        seen_links.add(link_key)
+        print(f"[RSS 보완 후보] {pick['source']}: {pick['title']}")
 
     return validated
 
@@ -662,8 +750,8 @@ def _request_openai(
 단, 유료 구독이나 멤버십 결제 없이 핵심 원문 전체를 확인할 수 있는 공개 콘텐츠만 고르세요.
 
 검색 시 특정 유명인만 반복하지 말고, 실제 내용의 밀도와 커뮤니티 유용성을 평가하세요.
-최종적으로 품질 점수 72점 이상인 콘텐츠만 3~5개 고르세요.
-좋은 콘텐츠가 부족하면 5개를 억지로 채우지 말고 3개 또는 4개만 반환하세요.
+최종 발행 4~5개를 만들 수 있도록 우선순위 후보 5~8개를 반환하세요.
+72점 이상을 우선하되 부족하면 60점 이상 중 가장 나은 공개 콘텐츠를 보완 후보로 포함하세요.
 아래 '최근 소개 URL'에 있는 링크는 웹 검색 결과에 나오더라도 다시 선택하지 마세요.
 
 최근 소개 URL JSON:
@@ -674,7 +762,7 @@ RSS/Atom 후보 JSON:
 
     payload: dict = {
         "model": MODEL,
-        "max_output_tokens": 3500,
+        "max_output_tokens": 4500,
         "input": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
@@ -778,7 +866,7 @@ def select_top5(
     articles: list[dict],
     excluded_links: set[str] | None = None,
 ) -> list[dict]:
-    """후보를 평가해 다양성 있는 3~5개 콘텐츠와 요약을 반환합니다."""
+    """후보를 평가해 최종 4~5개 콘텐츠와 요약을 반환합니다."""
     excluded_links = {
         normalize_link(link) for link in (excluded_links or set()) if link
     }
@@ -824,14 +912,27 @@ def select_top5(
     text = _extract_output_text(data)
     parsed = json.loads(text)
     raw_picks = parsed.get("picks", [])
-    picks = _validate_picks(
+    validated = _validate_picks(
         raw_picks,
         candidates,
         web_source_urls,
         web_enabled,
         excluded_links,
     )
-    picks = _enforce_editorial_limits(picks)[:MAX_FINAL_PICKS]
+    validated = _supplement_from_ranked_candidates(
+        validated,
+        candidates,
+        excluded_links,
+    )
+    validated.sort(
+        key=lambda item: (
+            item.get("quality_score", 0) >= MIN_QUALITY_SCORE,
+            item.get("quality_score", 0),
+        ),
+        reverse=True,
+    )
+    picks = _enforce_editorial_limits(validated)[:MAX_FINAL_PICKS]
+    picks = _ensure_minimum_picks(picks, validated)
 
     if len(picks) < MIN_FINAL_PICKS:
         print(
@@ -840,9 +941,12 @@ def select_top5(
         )
         return []
 
+    supplement_count = sum(
+        1 for pick in picks if pick.get("quality_score", 0) < MIN_QUALITY_SCORE
+    )
     print(
         f"[선별 완료] {len(picks)}건 "
-        f"(품질 기준: {MIN_QUALITY_SCORE}점, 모델: {MODEL}, "
-        f"웹 탐색: {'사용' if web_enabled else '미사용'})"
+        f"(기본 기준: {MIN_QUALITY_SCORE}점, 보완 후보: {supplement_count}건, "
+        f"모델: {MODEL}, 웹 탐색: {'사용' if web_enabled else '미사용'})"
     )
     return picks

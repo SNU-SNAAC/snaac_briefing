@@ -10,8 +10,8 @@
 주요 기능
 - 마지막 업데이트 시각과 오늘자 지연 경고
 - 로그인 필수 저장함, 메모, 계정 간 동기화
-- 비밀번호 재설정, 인증 메일 재발송, 회원 탈퇴
-- 기사 오류·페이월 신고, 익명 이용 통계, 오늘의 피드백
+- 이메일·비밀번호 로그인, 비밀번호 재설정, 회원 탈퇴
+- 기사 오류·페이월 신고, 익명 이용 통계, 간단한 오늘의 피드백
 - 모바일 접근성, 이미지 실패 폴백, 단순 날짜형 아카이브 검색
 """
 
@@ -40,17 +40,13 @@ SUPABASE_PUBLISHABLE_KEY = (
     or os.environ.get("SUPABASE_ANON_KEY", "")
 ).strip()
 SUPABASE_REDIRECT_URL = os.environ.get("SUPABASE_REDIRECT_URL", "").strip()
-TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "").strip()
+# 로그인·회원가입은 이메일과 비밀번호만 사용합니다.
+TURNSTILE_SITE_KEY = ""
 DELETE_ACCOUNT_FUNCTION = os.environ.get("DELETE_ACCOUNT_FUNCTION", "delete-account").strip()
 PRIVACY_CONTACT_EMAIL = os.environ.get("PRIVACY_CONTACT_EMAIL", "").strip()
 SITE_URL = os.environ.get("SITE_URL", "").strip()
 ABOUT_URL = os.environ.get("ABOUT_URL", "https://www.snaac.co.kr").strip()
 AUTH_ENABLED = bool(SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY)
-PREFERENCE_CATEGORIES = [
-    "생태계 업데이트", "창업가 인터뷰", "VC·창업가 관점",
-    "제품·성장 인사이트", "기술·시장 트렌드", "정책·기회",
-]
-
 SOURCE_ASSET = Path(__file__).resolve().parent / "assets" / "snaac-logo.png"
 LOGO_ASSET_NAME = "snaac-logo.png"
 
@@ -124,7 +120,6 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .intro>p{font-size:15px;color:#4f4f4f;margin:0;word-break:keep-all}
 .editorial-rule{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
 .editorial-rule span{font-size:11.5px;font-weight:700;border:1px solid #d2d2d2;background:#fff;border-radius:999px;padding:5px 9px;color:#555}
-.editorial-rule .free-access-note{background:#171717;color:#fff;border-color:#171717}
 .cards{display:grid;gap:18px}
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.035)}
 .thumb{position:relative;display:block;aspect-ratio:16/8.6;overflow:hidden;background:linear-gradient(135deg,var(--fallback),var(--fallback-2));text-decoration:none}
@@ -154,13 +149,14 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .save-button,.report-button{border:1px solid #cfcfcf;background:#fff;color:#222;gap:6px}
 .save-button.is-saved{background:#e9e9e9;border-color:#949494}
 .report-button{width:44px;padding:0;color:#666}
-.feedback{margin-top:30px;border:1px solid var(--line);border-radius:16px;background:#fff;padding:17px}
-.feedback h2{font-size:16px;margin:0 0 3px}
-.feedback p{font-size:13px;color:#666;margin:0}
-.feedback-actions{display:flex;gap:8px;margin-top:13px}
-.feedback-button{flex:1;min-height:44px;border:1px solid #cfcfcf;background:#fff;border-radius:11px;font-weight:800}
+.feedback{margin-top:22px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:11px 1px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.feedback-copy{min-width:0;flex:1}
+.feedback h2{font-size:12.5px;margin:0;font-weight:800}
+.feedback p{font-size:11px;color:#777;margin:2px 0 0}
+.feedback-actions{display:flex;gap:6px;margin:0}
+.feedback-button{min-height:34px;border:1px solid #cfcfcf;background:#fff;border-radius:999px;font-size:11px;font-weight:800;padding:6px 10px;white-space:nowrap}
 .feedback-button.is-selected{background:#171717;color:#fff;border-color:#171717}
-.feedback-thanks{font-size:13px;font-weight:700;margin-top:10px;color:var(--success)}
+.feedback-thanks{width:100%;font-size:11px;font-weight:700;margin:0;color:var(--success)}
 .archive-section,.about-snaac-section{margin-top:34px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
 .section-head h2{font-size:16px;margin:0}
@@ -221,19 +217,12 @@ footer{margin-top:36px;border-top:1px solid var(--line);padding:22px 0 0;text-al
 .auth-message{min-height:20px;font-size:12px;color:var(--success);margin:8px 0}.auth-message.is-error{color:var(--danger)}.auth-help{font-size:11.5px;color:#777;margin:8px 0 0}
 .auth-link-row{display:flex;justify-content:space-between;gap:10px;margin-top:9px}.text-button{border:0;background:none;text-decoration:underline;color:#555;font-size:12px;padding:4px 0}
 .account-card{background:#f2f2f2;border-radius:13px;padding:14px}.account-eyebrow{font-size:9px;letter-spacing:.14em;font-weight:900;color:#777;margin:0}.account-email{font-size:15px;font-weight:800;word-break:break-all;margin:5px 0}.account-copy{font-size:12px;color:#666;margin:0}.account-actions{display:grid;gap:8px;margin-top:12px}.account-action{min-height:43px;border:1px solid #ccc;background:#fff;border-radius:10px;font-weight:800}.account-action.is-danger{color:var(--danger);border-color:#d9a5a1}
-.captcha-wrap{min-height:1px;margin-top:10px}.captcha-note{font-size:10.5px;color:#777;margin:4px 0 0}
 .report-options{display:grid;gap:8px;margin:10px 0}.report-option{display:flex;align-items:flex-start;gap:9px;border:1px solid #d2d2d2;border-radius:11px;padding:10px;font-size:13px}.report-option input{margin-top:3px}
 .privacy-copy h3{font-size:15px;margin:17px 0 5px}.privacy-copy p,.privacy-copy li{font-size:12.5px;color:#555}.privacy-copy ul{padding-left:20px}.privacy-copy a{word-break:break-all}.privacy-copy .account-action{width:100%;margin-top:8px}
 .archive-hero{padding:27px 0 20px;border-bottom:2px solid #111}.archive-hero h1{font:700 clamp(40px,13vw,64px)/1 GmarketSans,sans-serif;margin:4px 0 8px}.archive-hero p{font-size:13.5px;color:#666;margin:0}
 .archive-tools{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 82%,transparent);padding:14px 0 10px}.archive-search{background:#fff}.archive-page-list{padding-top:4px}.archive-month-label{font-size:11px;letter-spacing:.12em;color:#777;font-weight:900;margin:20px 0 8px}.archive-no-result{padding:25px;border:1px dashed #bbb;background:#fff;border-radius:13px;text-align:center;color:#777;font-size:13px}
-.discovery-controls{margin:0 0 14px;border:1px solid var(--line);background:#fff;border-radius:15px;padding:13px}
-.discovery-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.discovery-head h2{font-size:14px;margin:0}.preference-open{border:0;background:none;text-decoration:underline;color:#555;font-size:11.5px;padding:6px 0}
-.category-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 5px;scrollbar-width:none}.category-filters::-webkit-scrollbar{display:none}.category-filter{flex:0 0 auto;min-height:38px;border:1px solid #ccc;background:#fff;border-radius:999px;padding:8px 11px;font-size:11.5px;font-weight:800}.category-filter.is-active{background:#171717;color:#fff;border-color:#171717}
-.personalization-status{font-size:11px;color:#6c6c6c;margin:6px 0 0}.cards-empty{border:1px dashed #bbb;background:#fff;border-radius:14px;padding:22px;text-align:center;color:#6c6c6c;font-size:13px;margin-bottom:16px}
-.card.is-preferred{border-color:#999}.interest-badge{display:inline-flex;align-items:center;border-radius:999px;background:#171717;color:#fff;padding:3px 7px;font-size:9.5px;font-weight:900}
 .saved-tools{display:grid;gap:9px;margin-bottom:12px}.saved-search{width:100%;border:1px solid #c9c9c9;border-radius:11px;background:#fff;min-height:44px;padding:10px 12px}.saved-search-status{font-size:11px;color:#777;margin:0}.saved-tags,.preview-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.saved-tag,.preview-tag{display:inline-flex;border:1px solid #d0d0d0;background:#f7f7f7;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:750;color:#555}
 .tag-input{width:100%;border:1px solid #c9c9c9;border-radius:11px;background:#fff;min-height:46px;padding:11px 12px;color:#111}.tag-hint{font-size:11px;color:#777;margin:5px 0 0}
-.preferences-grid{display:grid;gap:8px;margin-top:10px}.preference-option{display:flex;align-items:center;gap:9px;border:1px solid #d1d1d1;border-radius:11px;padding:10px 11px;font-size:13px}.preference-option input{width:18px;height:18px}.preference-message{font-size:11.5px;color:#666;margin:9px 0 0}
 .weekly-best{margin-top:28px;padding-top:21px;border-top:1px solid var(--line)}.weekly-best-list{display:grid;gap:8px}.weekly-best-item{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:13px;padding:11px;text-decoration:none}.weekly-rank{font:700 18px/1 GmarketSans,sans-serif}.weekly-copy{min-width:0}.weekly-title{display:block;font-size:13px;font-weight:850;line-height:1.4}.weekly-meta{display:block;font-size:10.5px;color:#777;margin-top:3px}.weekly-arrow{font-size:17px}.weekly-best-note{font-size:11px;color:#777;margin:8px 0 0}
 .status-pill{display:inline-flex;border-radius:999px;padding:3px 8px;background:#efefef;font-size:10.5px;font-weight:800;color:#555}
 @media(max-width:390px){.wrap{padding-left:14px;padding-right:14px}.topline{gap:5px}.utility-button{font-size:11.5px;padding:7px 5px}.stamp{width:66px;height:66px;font-size:9px}.stamp strong{font-size:14px}.card-actions{grid-template-columns:1fr auto auto}.source{max-width:125px}.saved-preview-trigger{grid-template-columns:82px 1fr}}
@@ -249,7 +238,6 @@ JS = r"""
   const USER_STORAGE_PREFIX = 'snaac-saved-articles-user-v1:';
   const SESSION_KEY = 'snaac-anonymous-session-v1';
   const ANALYTICS_OPTOUT_KEY = 'snaac-analytics-optout-v1';
-  const PREFERENCES_KEY = 'snaac-preferred-categories-v1';
   const dataElement = document.getElementById('briefingData');
   const configElement = document.getElementById('pageConfig');
   const authConfigElement = document.getElementById('authConfig');
@@ -269,13 +257,7 @@ JS = r"""
   let pendingOpenSaved = false;
   let storageAvailable = true;
   let syncBusy = false;
-  let captchaToken = '';
-  let captchaWidgetId = null;
-  let deleteCaptchaToken = '';
-  let deleteCaptchaWidgetId = null;
   let recoveryMode = false;
-  let preferredCategories = [];
-  let activeCardFilter = 'all';
   let savedSearchQuery = '';
   const lastFocused = new WeakMap();
   const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
@@ -289,8 +271,7 @@ JS = r"""
   const reportDialog = byId('reportDialog');
   const privacyDialog = byId('privacyDialog');
   const deleteDialog = byId('deleteDialog');
-  const preferencesDialog = byId('preferencesDialog');
-  const allOverlays = [drawer, noteDialog, previewDialog, authDialog, reportDialog, privacyDialog, deleteDialog, preferencesDialog];
+  const allOverlays = [drawer, noteDialog, previewDialog, authDialog, reportDialog, privacyDialog, deleteDialog];
 
   function announce(message) {
     if (!liveRegion) return;
@@ -408,112 +389,6 @@ JS = r"""
     }
   }
 
-
-  function readPreferences() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(PREFERENCES_KEY) || '[]');
-      return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [];
-    } catch (error) { return []; }
-  }
-
-  function writePreferences(values) {
-    try { localStorage.setItem(PREFERENCES_KEY, JSON.stringify(values)); return true; }
-    catch (error) { return false; }
-  }
-
-  function updatePreferenceForm() {
-    document.querySelectorAll('[data-preference-category]').forEach(input => {
-      input.checked = preferredCategories.includes(input.value);
-    });
-    const message = byId('preferenceMessage');
-    if (message) message.textContent = preferredCategories.length
-      ? `${preferredCategories.length}개 관심 분야를 우선 표시합니다.`
-      : '선택하지 않으면 편집 순서 그대로 표시합니다.';
-  }
-
-  function updateCardIndexes(cards) {
-    cards.forEach((card, index) => {
-      const node = card.querySelector('.card-index');
-      if (node) node.textContent = `${String(index + 1).padStart(2,'0')}/${String(cards.length).padStart(2,'0')}`;
-    });
-  }
-
-  function applyPersonalization() {
-    const container = document.querySelector('.cards');
-    if (!container) return;
-    const cards = Array.from(container.querySelectorAll('.card'));
-    cards.sort((a,b) => {
-      const aPreferred = preferredCategories.includes(a.dataset.category) ? 0 : 1;
-      const bPreferred = preferredCategories.includes(b.dataset.category) ? 0 : 1;
-      return aPreferred - bPreferred || Number(a.dataset.originalIndex || 0) - Number(b.dataset.originalIndex || 0);
-    });
-    cards.forEach(card => {
-      const preferred = preferredCategories.includes(card.dataset.category);
-      card.classList.toggle('is-preferred', preferred);
-      const meta = card.querySelector('.meta-left');
-      meta?.querySelector('.interest-badge')?.remove();
-      if (preferred && meta) meta.prepend(createElement('span','interest-badge','내 관심'));
-      container.append(card);
-    });
-    updateCardIndexes(cards);
-    const status = byId('personalizationStatus');
-    if (status) status.textContent = preferredCategories.length
-      ? `내 관심 분야 ${preferredCategories.join(' · ')}를 먼저 보여드려요.`
-      : '관심 분야를 설정하면 해당 카드가 먼저 표시됩니다.';
-    filterCards(activeCardFilter);
-  }
-
-  function filterCards(value = 'all') {
-    activeCardFilter = value || 'all';
-    let visible = 0;
-    document.querySelectorAll('.cards .card').forEach(card => {
-      const show = activeCardFilter === 'all' || card.dataset.category === activeCardFilter;
-      card.hidden = !show;
-      if (show) visible += 1;
-    });
-    document.querySelectorAll('[data-card-filter]').forEach(button => {
-      const active = button.dataset.cardFilter === activeCardFilter;
-      button.classList.toggle('is-active', active);
-      button.setAttribute('aria-pressed', String(active));
-    });
-    const empty = byId('cardsNoResult');
-    if (empty) empty.hidden = visible > 0;
-  }
-
-  async function savePreferences() {
-    preferredCategories = Array.from(document.querySelectorAll('[data-preference-category]:checked')).map(input => input.value);
-    writePreferences(preferredCategories);
-    applyPersonalization();
-    updatePreferenceForm();
-    if (supabaseClient && currentUser) {
-      const {error} = await supabaseClient.from('user_preferences').upsert({
-        user_id: currentUser.id,
-        preferred_categories: preferredCategories,
-        updated_at: new Date().toISOString(),
-      }, {onConflict:'user_id'});
-      if (error) console.debug('preferences sync skipped', error.message);
-    }
-    closeOverlay(preferencesDialog);
-    announce('관심 분야 설정을 저장했어요.');
-    void trackEvent('preferences_updated', null, {count: preferredCategories.length});
-  }
-
-  async function syncPreferencesFromCloud() {
-    preferredCategories = readPreferences();
-    if (!supabaseClient || !currentUser) { applyPersonalization(); return; }
-    try {
-      const query = supabaseClient.from('user_preferences').select('preferred_categories').eq('user_id', currentUser.id);
-      const {data,error} = typeof query.maybeSingle === 'function' ? await query.maybeSingle() : {data:null,error:null};
-      if (error) throw error;
-      if (data?.preferred_categories) {
-        preferredCategories = Array.from(new Set((Array.isArray(data.preferred_categories) ? data.preferred_categories : []).map(String).filter(Boolean))).slice(0,6);
-        writePreferences(preferredCategories);
-      } else if (preferredCategories.length) {
-        await supabaseClient.from('user_preferences').upsert({user_id:currentUser.id,preferred_categories:preferredCategories},{onConflict:'user_id'});
-      }
-    } catch (error) { console.debug('preferences sync skipped'); }
-    applyPersonalization();
-  }
 
   function activeStorageKey() {
     return currentUser ? `${USER_STORAGE_PREFIX}${currentUser.id}` : GUEST_STORAGE_KEY;
@@ -902,35 +777,11 @@ JS = r"""
     document.querySelectorAll('[data-auth-mode]').forEach(button=>{const active=button.dataset.authMode===authMode;button.classList.toggle('is-active',active);button.setAttribute('aria-selected',String(active));});
     byId('authSubmit').textContent=authMode==='signup'?'회원가입':'로그인';
     byId('authPassword').autocomplete=authMode==='signup'?'new-password':'current-password';
-    setAuthMessage(''); resetCaptcha();
+    setAuthMessage('');
   }
 
   function setAuthMessage(message,error=false){const node=byId('authMessage');node.textContent=message;node.classList.toggle('is-error',error);}
   function redirectUrl(){return authConfig.redirectUrl || new URL(authConfig.homeHref || './',window.location.href).href;}
-
-  function renderCaptcha(attempt = 0) {
-    if (!authConfig.turnstileSiteKey || captchaWidgetId !== null) return;
-    if (!window.turnstile) {
-      if (attempt < 20) window.setTimeout(() => renderCaptcha(attempt + 1), 250);
-      return;
-    }
-    const container=byId('captchaWidget'); if(!container)return;
-    captchaWidgetId=window.turnstile.render(container,{sitekey:authConfig.turnstileSiteKey,theme:'light',callback:token=>{captchaToken=token;},'expired-callback':()=>{captchaToken='';},'error-callback':()=>{captchaToken='';}});
-  }
-
-  function resetCaptcha(){captchaToken='';if(captchaWidgetId!==null&&window.turnstile){try{window.turnstile.reset(captchaWidgetId);}catch(error){}}}
-  function requireCaptcha(){if(authConfig.turnstileSiteKey&&!captchaToken){setAuthMessage('로봇 확인을 완료해 주세요.',true);return false;}return true;}
-
-  function renderDeleteCaptcha(attempt = 0) {
-    if (!authConfig.turnstileSiteKey || deleteCaptchaWidgetId !== null) return;
-    if (!window.turnstile) {
-      if (attempt < 20) window.setTimeout(() => renderDeleteCaptcha(attempt + 1), 250);
-      return;
-    }
-    const container=byId('deleteCaptchaWidget'); if(!container)return;
-    deleteCaptchaWidgetId=window.turnstile.render(container,{sitekey:authConfig.turnstileSiteKey,theme:'light',callback:token=>{deleteCaptchaToken=token;},'expired-callback':()=>{deleteCaptchaToken='';},'error-callback':()=>{deleteCaptchaToken='';}});
-  }
-  function resetDeleteCaptcha(){deleteCaptchaToken='';if(deleteCaptchaWidgetId!==null&&window.turnstile){try{window.turnstile.reset(deleteCaptchaWidgetId);}catch(error){}}}
 
   function updateAuthView() {
     byId('authSetupView').hidden=authEnabled;
@@ -940,39 +791,36 @@ JS = r"""
     byId('accountEmail').textContent=currentUser?.email || '';
   }
 
-  function openAuthDialog(){updateAuthView();openOverlay(authDialog);window.setTimeout(renderCaptcha,120);}
+  function openAuthDialog(){updateAuthView();openOverlay(authDialog);}
 
   async function handleAuthSubmit(event){
-    event.preventDefault(); if(!supabaseClient||!requireCaptcha())return;
+    event.preventDefault(); if(!supabaseClient)return;
     const email=byId('authEmail').value.trim(); const password=byId('authPassword').value;
     if(!email||!password){setAuthMessage('이메일과 비밀번호를 모두 입력해 주세요.',true);return;}
     if(password.length<8){setAuthMessage('비밀번호는 8자 이상이어야 합니다.',true);return;}
     const button=byId('authSubmit');button.disabled=true;
     try{
       if(authMode==='signup'){
-        const {data,error}=await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:redirectUrl(),captchaToken:captchaToken||undefined}});if(error)throw error;
-        setAuthMessage(data?.session?'회원가입과 로그인이 완료됐어요.':'확인 메일을 보냈어요. 메일의 링크를 눌러 주세요.');
-        if(data?.session)closeOverlay(authDialog,true);
+        const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)throw error;
+        if(!data?.session){
+          setAuthMessage('회원가입은 완료됐지만 바로 로그인되지 않았어요. 운영자에게 알려주세요.',true);
+          return;
+        }
+        setAuthMessage('회원가입과 로그인이 완료됐어요.');
+        closeOverlay(authDialog,true);
         void trackEvent('auth_signup');
       }else{
-        const {error}=await supabaseClient.auth.signInWithPassword({email,password,options:{captchaToken:captchaToken||undefined}});if(error)throw error;
+        const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;
         setAuthMessage('로그인했어요. 저장함을 동기화합니다.');closeOverlay(authDialog,true);void trackEvent('auth_login');
       }
-    }catch(error){setAuthMessage(error?.message||'인증 처리 중 오류가 발생했어요.',true);}finally{button.disabled=false;resetCaptcha();}
+    }catch(error){setAuthMessage(error?.message||'로그인 처리 중 오류가 발생했어요.',true);}finally{button.disabled=false;}
   }
 
   async function requestPasswordReset(){
-    if(!supabaseClient||!requireCaptcha())return; const email=byId('authEmail').value.trim();
+    if(!supabaseClient)return; const email=byId('authEmail').value.trim();
     if(!email){setAuthMessage('비밀번호를 재설정할 이메일을 입력해 주세요.',true);return;}
-    try{const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl(),captchaToken:captchaToken||undefined});if(error)throw error;setAuthMessage('비밀번호 재설정 메일을 보냈어요. 메일의 링크를 눌러 주세요.');void trackEvent('password_reset_requested');}
-    catch(error){setAuthMessage(error?.message||'재설정 메일을 보내지 못했어요.',true);}finally{resetCaptcha();}
-  }
-
-  async function resendConfirmation(){
-    if(!supabaseClient||!requireCaptcha())return; const email=byId('authEmail').value.trim();
-    if(!email){setAuthMessage('인증 메일을 받을 이메일을 입력해 주세요.',true);return;}
-    try{const {error}=await supabaseClient.auth.resend({type:'signup',email,options:{emailRedirectTo:redirectUrl(),captchaToken:captchaToken||undefined}});if(error)throw error;setAuthMessage('인증 메일을 다시 보냈어요.');}
-    catch(error){setAuthMessage(error?.message||'인증 메일을 다시 보내지 못했어요.',true);}finally{resetCaptcha();}
+    try{const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl()});if(error)throw error;setAuthMessage('비밀번호 재설정 메일을 보냈어요. 메일의 링크를 눌러 주세요.');void trackEvent('password_reset_requested');}
+    catch(error){setAuthMessage(error?.message||'재설정 메일을 보내지 못했어요.',true);}
   }
 
   async function updatePassword(event){
@@ -988,7 +836,7 @@ JS = r"""
 
   async function applySession(session){
     const previous=currentUser?.id||''; currentUser=session?.user||null; updateAuthView(); updateAuthIndicators();
-    if(currentUser){await syncPreferencesFromCloud();if(previous!==currentUser.id||!savedItems.length)await syncSavedFromCloud();const saveUrl=pendingSaveUrl;const openSaved=pendingOpenSaved;pendingSaveUrl='';pendingOpenSaved=false;if(saveUrl)window.setTimeout(()=>openNote(saveUrl),30);else if(openSaved)window.setTimeout(openDrawer,30);}
+    if(currentUser){if(previous!==currentUser.id||!savedItems.length)await syncSavedFromCloud();const saveUrl=pendingSaveUrl;const openSaved=pendingOpenSaved;pendingSaveUrl='';pendingOpenSaved=false;if(saveUrl)window.setTimeout(()=>openNote(saveUrl),30);else if(openSaved)window.setTimeout(openDrawer,30);}
     else{savedItems=[];updateSavedIndicators();renderSaved();}
   }
 
@@ -1055,10 +903,9 @@ JS = r"""
     const password=byId('deleteConfirmPassword').value;
     if(typed!==expected){byId('deleteMessage').textContent='로그인한 이메일 주소를 정확히 입력해 주세요.';return;}
     if(!password){byId('deleteMessage').textContent='현재 비밀번호를 입력해 주세요.';return;}
-    if(authConfig.turnstileSiteKey&&!deleteCaptchaToken){byId('deleteMessage').textContent='로봇 확인을 완료해 주세요.';return;}
     byId('deleteAccountButton').disabled=true;byId('deleteMessage').textContent='본인 확인 중…';
     try{
-      const {error:reauthError}=await supabaseClient.auth.signInWithPassword({email:expected,password,options:{captchaToken:deleteCaptchaToken||undefined}});
+      const {error:reauthError}=await supabaseClient.auth.signInWithPassword({email:expected,password});
       if(reauthError){byId('deleteMessage').textContent='비밀번호가 맞지 않아요.';return;}
       byId('deleteMessage').textContent='계정을 삭제하고 있어요…';
       const {error}=await supabaseClient.functions.invoke(authConfig.deleteAccountFunction||'delete-account',{body:{confirm:true}});if(error)throw error;
@@ -1067,7 +914,7 @@ JS = r"""
       const {error:requestError}=await supabaseClient.from('account_deletion_requests').insert({user_id:currentUser.id,email:currentUser.email||'',status:'requested'});
       const alreadyRequested = requestError && requestError.code === '23505';
       byId('deleteMessage').textContent=(!requestError || alreadyRequested)?'자동 삭제에 실패해 탈퇴 요청을 접수했어요. 운영팀이 확인할게요.':'자동 삭제에 실패했어요. 운영팀에 문의해 주세요.';
-    }finally{byId('deleteAccountButton').disabled=false;resetDeleteCaptcha();}
+    }finally{byId('deleteAccountButton').disabled=false;}
   }
 
   function filterArchive(){const query=byId('archiveSearch')?.value.trim().toLowerCase()||'';let visible=0;document.querySelectorAll('[data-archive-search]').forEach(row=>{const show=!query||row.dataset.archiveSearch.includes(query);row.hidden=!show;if(show)visible+=1;});const empty=byId('archiveNoResult');if(empty)empty.hidden=visible>0;}
@@ -1083,15 +930,11 @@ JS = r"""
     const mode=event.target.closest('[data-auth-mode]');if(mode){setAuthMode(mode.dataset.authMode);return;}
     if(event.target.closest('[data-logout]')){void handleSignOut();return;}
     if(event.target.closest('[data-forgot-password]')){void requestPasswordReset();return;}
-    if(event.target.closest('[data-resend-confirmation]')){void resendConfirmation();return;}
     const report=event.target.closest('[data-report-url]');if(report){openReport(report.dataset.reportUrl);return;}
     const feedback=event.target.closest('[data-feedback]');if(feedback){void submitFeedback(feedback.dataset.feedback==='yes',feedback);return;}
     if(event.target.closest('[data-open-privacy]')){updateAnalyticsPreferenceUi();openOverlay(privacyDialog);return;}
-    if(event.target.closest('[data-open-preferences]')){updatePreferenceForm();openOverlay(preferencesDialog);return;}
-    if(event.target.closest('[data-save-preferences]')){void savePreferences();return;}
-    const cardFilter=event.target.closest('[data-card-filter]');if(cardFilter){filterCards(cardFilter.dataset.cardFilter);return;}
     if(event.target.closest('[data-toggle-analytics]')){toggleAnalyticsPreference();return;}
-    if(event.target.closest('[data-open-delete]')){byId('deleteConfirmEmail').value='';byId('deleteConfirmPassword').value='';byId('deleteMessage').textContent='';resetDeleteCaptcha();openOverlay(deleteDialog);window.setTimeout(()=>renderDeleteCaptcha(),100);return;}
+    if(event.target.closest('[data-open-delete]')){byId('deleteConfirmEmail').value='';byId('deleteConfirmPassword').value='';byId('deleteMessage').textContent='';openOverlay(deleteDialog);return;}
     if(event.target.closest('[data-delete-account]')){void deleteAccount();return;}
     const articleLink=event.target.closest('[data-article-link]');if(articleLink){void trackEvent('article_click',currentByUrl.get(articleLink.dataset.articleLink));}
     const archiveLink=event.target.closest('[data-archive-link]');if(archiveLink){void trackEvent('archive_open',null,{slug:archiveLink.dataset.archiveLink});return;}
@@ -1110,17 +953,39 @@ JS = r"""
   byId('authForm')?.addEventListener('submit',event=>void handleAuthSubmit(event));
   byId('recoveryForm')?.addEventListener('submit',event=>void updatePassword(event));
   byId('reportForm')?.addEventListener('submit',event=>void submitReport(event));
-  byId('archiveSearch')?.addEventListener('input',filterArchive);
+  const archiveSearch=byId('archiveSearch');
+  let archiveSearchUserTyped=false;
+  function clearArchiveAutofill(){
+    if(!archiveSearch||archiveSearchUserTyped)return;
+    if(archiveSearch.value){archiveSearch.value='';filterArchive();}
+  }
+  function activateArchiveSearch(event){
+    if(!archiveSearch||!archiveSearch.hasAttribute('readonly'))return;
+    if(event?.type==='pointerdown')event.preventDefault();
+    archiveSearch.removeAttribute('readonly');
+    archiveSearch.value='';
+    window.setTimeout(()=>archiveSearch.focus({preventScroll:true}),0);
+  }
+  archiveSearch?.addEventListener('pointerdown',activateArchiveSearch);
+  archiveSearch?.addEventListener('keydown',event=>{
+    activateArchiveSearch(event);
+    archiveSearchUserTyped=true;
+  });
+  archiveSearch?.addEventListener('input',event=>{
+    if(event.isTrusted)archiveSearchUserTyped=true;
+    filterArchive();
+  });
+  archiveSearch?.addEventListener('focus',()=>{
+    [0,100,300].forEach(delay=>window.setTimeout(clearArchiveAutofill,delay));
+  });
   byId('previewReadLink')?.addEventListener('click',()=>void trackEvent('article_click',itemForUrl(activePreviewUrl),{from:'saved_preview'}));
 
   window.addEventListener('storage',()=>{savedItems=readStorage(activeStorageKey());updateSavedIndicators();renderSaved();});
-  window.addEventListener('load',()=>window.setTimeout(renderCaptcha,150));
-
-  if (!authConfig.turnstileSiteKey) {
-    const note=byId('captchaNote'); if(note) note.hidden=true;
-    const deleteNote=byId('deleteCaptchaNote'); if(deleteNote) deleteNote.hidden=true;
-  }
-  preferredCategories=readPreferences();updateFreshness();updateAnalyticsPreferenceUi();setAuthMode('login');updateSavedIndicators();renderSaved();applyPersonalization();void initSupabase();
+  window.addEventListener('pageshow',()=>{
+    archiveSearchUserTyped=false;
+    [0,120,500,1000].forEach(delay=>window.setTimeout(clearArchiveAutofill,delay));
+  });
+  updateFreshness();updateAnalyticsPreferenceUi();setAuthMode('login');updateSavedIndicators();renderSaved();void initSupabase();
 })();
 """
 
@@ -1313,7 +1178,7 @@ def _card(index: int, total: int, pick: dict) -> str:
     <div class="card-meta"><div class="meta-left"><span class="category">{category}</span><span class="source">{source}</span></div><span class="card-index">{index:02d}/{total:02d}</span></div>
     <a class="title-link" href="{link}" target="_blank" rel="noopener noreferrer" data-article-link="{link}"><h2>{title}</h2></a>
     <p class="summary">{summary}</p>
-    <div class="article-facts"><span>{published}</span><span>{content_type}</span><span>공개 원문 확인</span></div>
+    <div class="article-facts"><span>{published}</span><span>{content_type}</span></div>
     <div class="takeaway"><span class="takeaway-label">WHY IT MATTERS</span><p>{takeaway}</p></div>
     <div class="card-actions">
       <a class="read-link" href="{link}" target="_blank" rel="noopener noreferrer" data-article-link="{link}">원문 읽기</a>
@@ -1430,10 +1295,6 @@ def _freshness_html() -> str:
 
 
 def _overlays_html() -> str:
-    preference_options = "".join(
-        f'<label class="preference-option"><input type="checkbox" value="{html.escape(category, quote=True)}" data-preference-category>{html.escape(category)}</label>'
-        for category in PREFERENCE_CATEGORIES
-    )
     if PRIVACY_CONTACT_EMAIL:
         safe_email = html.escape(PRIVACY_CONTACT_EMAIL)
         contact = f'<a href="mailto:{html.escape(PRIVACY_CONTACT_EMAIL, quote=True)}">{safe_email}</a>'
@@ -1449,18 +1310,16 @@ def _overlays_html() -> str:
 <div class="overlay" id="previewDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="previewDialog" aria-label="상세 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="previewDialogTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="previewDialogTitle">저장한 아티클</h2><p id="previewFacts"></p></div><button class="close-button" type="button" data-close-overlay="previewDialog" aria-label="닫기">×</button></div><article class="preview-card"><div class="preview-thumb noimg" id="previewThumb" data-initial="S"><span class="media-label" id="previewMediaLabel">기사</span></div><div class="preview-body"><div class="card-meta"><div class="meta-left"><span class="category" id="previewCategory">생태계 업데이트</span><span class="source" id="previewSource">SNAAC</span></div></div><h3 id="previewTitle">저장한 기사</h3><p class="preview-summary" id="previewSummary"></p><div class="takeaway"><span class="takeaway-label">WHY IT MATTERS</span><p id="previewTakeaway"></p></div><div class="preview-note" id="previewNoteWrap" hidden><strong>MY NOTE</strong><span id="previewNote"></span></div><div class="preview-tags" id="previewTags" hidden></div><div class="preview-actions"><a class="preview-read" id="previewReadLink" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a><button class="preview-secondary" id="previewEditButton" type="button">메모 수정</button></div><button class="preview-delete" id="previewDeleteButton" type="button">저장함에서 삭제</button></div></article></section></div>
 
 <div class="overlay" id="authDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="authDialog" aria-label="계정 창 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="authTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="authTitle">SNAAC 계정</h2><p>저장함과 메모를 여러 기기에서 이어보세요.</p></div><button class="close-button" type="button" data-close-overlay="authDialog" aria-label="닫기">×</button></div>
-<div id="authGuestView"><p class="auth-intent" id="authIntent" hidden></p><div class="auth-tabs" role="tablist"><button class="auth-tab is-active" type="button" data-auth-mode="login" aria-selected="true">로그인</button><button class="auth-tab" type="button" data-auth-mode="signup" aria-selected="false">회원가입</button></div><form id="authForm"><label class="form-label" for="authEmail">이메일</label><input class="form-input" id="authEmail" type="email" autocomplete="email" required placeholder="name@example.com"><label class="form-label" for="authPassword">비밀번호</label><input class="form-input" id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상"><div class="captcha-wrap" id="captchaWidget"></div><p class="captcha-note" id="captchaNote">보안 설정이 켜진 경우 로봇 확인이 표시됩니다.</p><button class="primary-button" id="authSubmit" type="submit" style="width:100%;margin-top:12px">로그인</button><p class="auth-message" id="authMessage" aria-live="polite"></p><div class="auth-link-row"><button class="text-button" type="button" data-forgot-password>비밀번호를 잊었나요?</button><button class="text-button" type="button" data-resend-confirmation>인증 메일 다시 받기</button></div></form></div>
+<div id="authGuestView"><p class="auth-intent" id="authIntent" hidden></p><div class="auth-tabs" role="tablist"><button class="auth-tab is-active" type="button" data-auth-mode="login" aria-selected="true">로그인</button><button class="auth-tab" type="button" data-auth-mode="signup" aria-selected="false">회원가입</button></div><form id="authForm" autocomplete="on"><label class="form-label" for="authEmail">이메일</label><input class="form-input" id="authEmail" name="email" type="email" autocomplete="email" required placeholder="name@example.com"><label class="form-label" for="authPassword">비밀번호</label><input class="form-input" id="authPassword" name="password" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상"><button class="primary-button" id="authSubmit" type="submit" style="width:100%;margin-top:12px">로그인</button><p class="auth-message" id="authMessage" aria-live="polite"></p><div class="auth-link-row"><button class="text-button" type="button" data-forgot-password>비밀번호를 잊었나요?</button></div></form></div>
 <div id="authRecoveryView" hidden><form id="recoveryForm"><h3>새 비밀번호 설정</h3><label class="form-label" for="newPassword">새 비밀번호</label><input class="form-input" id="newPassword" type="password" minlength="8" autocomplete="new-password" required><label class="form-label" for="newPasswordConfirm">새 비밀번호 확인</label><input class="form-input" id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required><button class="primary-button" type="submit" style="width:100%;margin-top:13px">비밀번호 변경</button><p class="auth-message is-error" id="recoveryMessage" aria-live="polite"></p></form></div>
-<div id="authUserView" hidden><div class="account-card"><p class="account-eyebrow">SIGNED IN AS</p><p class="account-email" id="accountEmail"></p><p class="account-copy">저장한 기사와 메모, 관심 분야가 이 계정에 동기화됩니다.</p></div><div class="account-actions"><button class="account-action" type="button" data-open-preferences>관심 분야 설정</button><button class="account-action" type="button" data-open-privacy>개인정보 안내</button><button class="account-action" type="button" data-logout>로그아웃</button><button class="account-action is-danger" type="button" data-open-delete>회원 탈퇴</button></div></div>
+<div id="authUserView" hidden><div class="account-card"><p class="account-eyebrow">SIGNED IN AS</p><p class="account-email" id="accountEmail"></p><p class="account-copy">저장한 기사와 메모, 태그가 이 계정에 동기화됩니다.</p></div><div class="account-actions"><button class="account-action" type="button" data-open-privacy>개인정보 안내</button><button class="account-action" type="button" data-logout>로그아웃</button><button class="account-action is-danger" type="button" data-open-delete>회원 탈퇴</button></div></div>
 <div id="authSetupView" hidden><div class="account-card"><p class="account-email">로그인 연결 전이에요</p><p class="account-copy">Supabase 공개 설정을 연결한 뒤 사용할 수 있습니다.</p></div></div></section></div>
 
 <div class="overlay" id="reportDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="reportDialog" aria-label="신고 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="reportTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="reportTitle">원문 문제 알리기</h2><p id="reportArticleTitle"></p></div><button class="close-button" type="button" data-close-overlay="reportDialog" aria-label="닫기">×</button></div><form id="reportForm"><div class="report-options"><label class="report-option"><input type="radio" name="reason" value="broken_link">원문이 열리지 않아요</label><label class="report-option"><input type="radio" name="reason" value="paywall">구독이나 로그인이 필요해요</label><label class="report-option"><input type="radio" name="reason" value="summary_mismatch">요약이 원문과 달라요</label><label class="report-option"><input type="radio" name="reason" value="other">기타 문제</label></div><label class="form-label" for="reportDetail">추가 설명 · 선택</label><textarea class="form-textarea" id="reportDetail" maxlength="500"></textarea><button class="primary-button" type="submit" style="width:100%;margin-top:12px">운영팀에 알리기</button><p class="auth-message" id="reportMessage" aria-live="polite"></p></form></section></div>
 
-<div class="overlay" id="privacyDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="privacyDialog" aria-label="개인정보 안내 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="privacyTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="privacyTitle">개인정보 및 이용 안내</h2><p>수집 범위를 최소화해 운영합니다.</p></div><button class="close-button" type="button" data-close-overlay="privacyDialog" aria-label="닫기">×</button></div><div class="privacy-copy"><h3>계정과 저장함</h3><p>회원가입 시 이메일 주소와 Supabase가 발급한 사용자 식별자가 저장됩니다. 저장한 기사, 메모, 태그, 관심 분야와 저장 시각은 계정별로 분리됩니다. 비밀번호는 SNAAC이 직접 보관하지 않습니다.</p><h3>서비스 개선 통계</h3><p>페이지 방문, 원문 클릭, 저장, 피드백 같은 최소 이용 통계를 사용할 수 있습니다. 무작위 브라우저 식별값으로 전체 이용 흐름만 집계하며, 기사 열람 이력을 개인 프로필로 만들지 않습니다. 주간 베스트는 최소 3개 브라우저의 반응이 모인 기사만 집계해 표시합니다.</p><p id="analyticsPreferenceStatus">현재 개인을 식별하지 않는 최소 이용 통계를 사용합니다.</p><button class="account-action" id="analyticsPreferenceButton" type="button" data-toggle-analytics>익명 통계 끄기</button><h3>보관과 삭제</h3><p>계정과 저장함은 회원 탈퇴 시 삭제됩니다. 익명 이용 통계와 피드백은 원칙적으로 90일 이내 보관하도록 운영자가 정기 정리하며, 해결된 기사 신고도 같은 기준으로 정리합니다. 미해결 신고는 확인이 끝날 때까지 보관할 수 있습니다.</p><h3>문의</h3><p>{contact}</p></div></section></div>
+<div class="overlay" id="privacyDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="privacyDialog" aria-label="개인정보 안내 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="privacyTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="privacyTitle">개인정보 및 이용 안내</h2><p>수집 범위를 최소화해 운영합니다.</p></div><button class="close-button" type="button" data-close-overlay="privacyDialog" aria-label="닫기">×</button></div><div class="privacy-copy"><h3>계정과 저장함</h3><p>회원가입 시 이메일 주소와 Supabase가 발급한 사용자 식별자가 저장됩니다. 저장한 기사, 메모, 태그와 저장 시각은 계정별로 분리됩니다. 비밀번호는 SNAAC이 직접 보관하지 않습니다.</p><h3>서비스 개선 통계</h3><p>페이지 방문, 원문 클릭, 저장, 피드백 같은 최소 이용 통계를 사용할 수 있습니다. 무작위 브라우저 식별값으로 전체 이용 흐름만 집계하며, 기사 열람 이력을 개인 프로필로 만들지 않습니다. 주간 베스트는 최소 3개 브라우저의 반응이 모인 기사만 집계해 표시합니다.</p><p id="analyticsPreferenceStatus">현재 개인을 식별하지 않는 최소 이용 통계를 사용합니다.</p><button class="account-action" id="analyticsPreferenceButton" type="button" data-toggle-analytics>익명 통계 끄기</button><h3>보관과 삭제</h3><p>계정과 저장함은 회원 탈퇴 시 삭제됩니다. 익명 이용 통계와 피드백은 원칙적으로 90일 이내 보관하도록 운영자가 정기 정리하며, 해결된 기사 신고도 같은 기준으로 정리합니다. 미해결 신고는 확인이 끝날 때까지 보관할 수 있습니다.</p><h3>문의</h3><p>{contact}</p></div></section></div>
 
-<div class="overlay" id="deleteDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="deleteDialog" aria-label="회원 탈퇴 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="deleteTitle">회원 탈퇴</h2><p>계정과 저장한 기사·메모가 삭제되며 되돌릴 수 없습니다.</p></div><button class="close-button" type="button" data-close-overlay="deleteDialog" aria-label="닫기">×</button></div><label class="form-label" for="deleteConfirmEmail">로그인 이메일</label><input class="form-input" id="deleteConfirmEmail" type="email" autocomplete="email"><label class="form-label" for="deleteConfirmPassword">현재 비밀번호</label><input class="form-input" id="deleteConfirmPassword" type="password" autocomplete="current-password"><div class="captcha-wrap" id="deleteCaptchaWidget"></div><p class="captcha-note" id="deleteCaptchaNote">보안 설정이 켜진 경우 로봇 확인이 표시됩니다.</p><p class="form-help">안전을 위해 탈퇴 직전에 비밀번호로 한 번 더 본인을 확인합니다.</p><button class="danger-button" id="deleteAccountButton" type="button" data-delete-account>계정과 저장 데이터 삭제</button><p class="auth-message is-error" id="deleteMessage" aria-live="polite"></p></section></div>
-
-<div class="overlay" id="preferencesDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="preferencesDialog" aria-label="관심 분야 설정 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="preferencesTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="preferencesTitle">관심 분야 설정</h2><p>선택한 관점의 기사를 오늘 카드에서 먼저 보여드려요.</p></div><button class="close-button" type="button" data-close-overlay="preferencesDialog" aria-label="닫기">×</button></div><div class="preferences-grid">{preference_options}</div><p class="preference-message" id="preferenceMessage"></p><button class="primary-button" type="button" data-save-preferences style="width:100%;margin-top:12px">관심 분야 저장</button></section></div>
+<div class="overlay" id="deleteDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="deleteDialog" aria-label="회원 탈퇴 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="deleteTitle">회원 탈퇴</h2><p>계정과 저장한 기사·메모가 삭제되며 되돌릴 수 없습니다.</p></div><button class="close-button" type="button" data-close-overlay="deleteDialog" aria-label="닫기">×</button></div><label class="form-label" for="deleteConfirmEmail">로그인 이메일</label><input class="form-input" id="deleteConfirmEmail" type="email" autocomplete="off"><label class="form-label" for="deleteConfirmPassword">현재 비밀번호</label><input class="form-input" id="deleteConfirmPassword" type="password" autocomplete="current-password"><p class="form-help">안전을 위해 탈퇴 직전에 비밀번호로 한 번 더 본인을 확인합니다.</p><button class="danger-button" id="deleteAccountButton" type="button" data-delete-account>계정과 저장 데이터 삭제</button><p class="auth-message is-error" id="deleteMessage" aria-live="polite"></p></section></div>
 
 <p class="sr-only" id="liveStatus" aria-live="polite"></p>
 """
@@ -1472,7 +1331,6 @@ def _auth_config(context: str) -> dict:
         "publishableKey": SUPABASE_PUBLISHABLE_KEY if AUTH_ENABLED else "",
         "redirectUrl": SUPABASE_REDIRECT_URL,
         "homeHref": "./" if context == "home" else "../",
-        "turnstileSiteKey": TURNSTILE_SITE_KEY,
         "deleteAccountFunction": DELETE_ACCOUNT_FUNCTION or "delete-account",
     }
 
@@ -1481,21 +1339,8 @@ def _scripts() -> str:
     scripts = []
     if AUTH_ENABLED:
         scripts.append('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>')
-    if TURNSTILE_SITE_KEY:
-        scripts.append('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>')
     return "\n".join(scripts)
 
-
-def _discovery_controls(picks: list[dict], context: str) -> str:
-    if context != "home":
-        return ""
-    categories = list(dict.fromkeys(str(pick.get("category", "생태계 업데이트")) for pick in picks))
-    buttons = ['<button class="category-filter is-active" type="button" data-card-filter="all" aria-pressed="true">전체</button>']
-    buttons.extend(
-        f'<button class="category-filter" type="button" data-card-filter="{html.escape(category, quote=True)}" aria-pressed="false">{html.escape(category)}</button>'
-        for category in categories
-    )
-    return f"""<section class="discovery-controls" aria-labelledby="discoveryTitle"><div class="discovery-head"><h2 id="discoveryTitle">오늘의 관점</h2><button class="preference-open" type="button" data-open-preferences>관심 분야 설정</button></div><div class="category-filters" role="group" aria-label="기사 카테고리 필터">{''.join(buttons)}</div><p class="personalization-status" id="personalizationStatus">관심 분야를 설정하면 해당 카드가 먼저 표시됩니다.</p></section>"""
 
 
 def _weekly_best_html(context: str) -> str:
@@ -1508,7 +1353,7 @@ def _feedback_html(context: str) -> str:
     if context != "home":
         return ""
     return """
-<section class="feedback" aria-labelledby="feedbackTitle"><h2 id="feedbackTitle">오늘 브리핑이 유용했나요?</h2><p>한 번의 선택이 다음 큐레이션을 더 좋게 만듭니다.</p><div class="feedback-actions"><button class="feedback-button" type="button" data-feedback="yes">👍 유용했어요</button><button class="feedback-button" type="button" data-feedback="no">아쉬웠어요</button></div><p class="feedback-thanks" id="feedbackThanks" hidden>피드백 고마워요!</p></section>"""
+<section class="feedback" aria-labelledby="feedbackTitle"><div class="feedback-copy"><h2 id="feedbackTitle">오늘 브리핑, 어땠나요?</h2><p>한 번만 눌러 알려주세요.</p></div><div class="feedback-actions"><button class="feedback-button" type="button" data-feedback="yes">👍 유용해요</button><button class="feedback-button" type="button" data-feedback="no">아쉬워요</button></div><p class="feedback-thanks" id="feedbackThanks" hidden>피드백 고마워요!</p></section>"""
 
 
 def _page_html(picks: list[dict], now: datetime, context: str, generated_at: datetime) -> str:
@@ -1538,18 +1383,18 @@ def _page_html(picks: list[dict], now: datetime, context: str, generated_at: dat
 <html lang="ko" data-snaac-ui="6">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2">
-<title>SNAAC 모닝 브리핑 · {html.escape(date_label)}</title><meta name="description" content="SNAAC이 고른 오늘의 무료 스타트업 업데이트와 인사이트 {total}가지"><meta property="og:title" content="SNAAC 모닝 브리핑 · {now.month}/{now.day}"><meta property="og:description" content="무료로 확인할 수 있는 스타트업 업데이트와 창업가·VC 인사이트">
+<title>SNAAC 모닝 브리핑 · {html.escape(date_label)}</title><meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트와 인사이트 {total}가지"><meta property="og:title" content="SNAAC 모닝 브리핑 · {now.month}/{now.day}"><meta property="og:description" content="스타트업 업데이트와 창업가·VC 인사이트">
 <link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style>
 </head><body><div class="wrap"><header class="masthead">{_header_html(context)}<div class="date-lockup"><p class="kicker">Daily startup journal</p><h1 class="date-big">{date_big}</h1><div class="date-sub">{html.escape(date_label)}</div><div class="stamp">DAILY<strong>AM 9</strong>DROP</div></div></header>{_freshness_html()}
-<section class="intro"><p>단순 투자 단신보다 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 관점을 골랐어요. 품질 기준을 통과한 콘텐츠만 소개해 매일 기사 수가 달라질 수 있습니다.</p><div class="editorial-rule"><span class="free-access-note">무료 원문만</span><span>품질 기준 통과</span><span>중복 최소화</span><span>인터뷰·영상 포함</span></div></section>
-{_discovery_controls(picks, context)}<main class="cards">{cards}</main><p class="cards-empty" id="cardsNoResult" hidden>이 카테고리에는 오늘 소개할 기사가 없어요.</p>{_feedback_html(context)}{_weekly_best_html(context)}{_archive_section(slug, context)}{_about_snaac_section()}<footer>매일 아침 자동 업데이트 · SNAAC Community Team<br>원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button><a class="footer-link" href="{html.escape(ABOUT_URL, quote=True)}" target="_blank" rel="noopener noreferrer">SNAAC 홈페이지</a></div></footer></div>
+<section class="intro"><p>단순 투자 단신보다 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 인사이트를 골랐어요. 매일 4~5개의 콘텐츠를 소개합니다.</p><div class="editorial-rule"><span>핵심 업데이트</span><span>중복 최소화</span><span>인터뷰·영상 포함</span></div></section>
+<main class="cards">{cards}</main>{_feedback_html(context)}{_weekly_best_html(context)}{_archive_section(slug, context)}{_about_snaac_section()}<footer>매일 아침 자동 업데이트 · SNAAC Community Team<br>원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button><a class="footer-link" href="{html.escape(ABOUT_URL, quote=True)}" target="_blank" rel="noopener noreferrer">SNAAC 홈페이지</a></div></footer></div>
 {_overlays_html()}<script id="briefingData" type="application/json">{_safe_json_for_script(storage_data)}</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script>{_scripts()}<script>{JS}</script></body></html>"""
 
 
 def _archive_index_html(entries: list[dict], generated_at: datetime) -> str:
     context = "archive"
     page_config = {"briefingDate": "", "briefingLabel": "지난 브리핑", "generatedAt": generated_at.isoformat(), "context": "archive-index", "siteUrl": SITE_URL}
-    return f"""<!DOCTYPE html><html lang="ko" data-snaac-ui="6"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2"><title>SNAAC 지난 브리핑</title><meta name="description" content="SNAAC 모닝 브리핑 지난 회차 검색"><link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style></head><body><div class="wrap"><header class="masthead">{_header_html(context)}</header><header class="archive-hero"><p class="kicker">SNAAC morning archive</p><h1>지난 브리핑</h1><p>날짜, 기사 제목, 매체 이름으로 과거 큐레이션을 찾아보세요.</p></header><div class="archive-tools"><label class="sr-only" for="archiveSearch">지난 브리핑 검색</label><input class="archive-search" id="archiveSearch" type="search" placeholder="예: AI 에이전트, EO, 조직문화"></div><main class="archive-page-list"><div class="archive-list">{_archive_rows(entries, searchable=True)}</div><p class="archive-no-result" id="archiveNoResult" hidden>검색 결과가 없어요.</p></main>{_about_snaac_section()}<footer>아카이브 열람에는 OpenAI 토큰이 사용되지 않습니다.<div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button></div></footer></div>{_overlays_html()}<script id="briefingData" type="application/json">[]</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script>{_scripts()}<script>{JS}</script></body></html>"""
+    return f"""<!DOCTYPE html><html lang="ko" data-snaac-ui="6"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2"><title>SNAAC 지난 브리핑</title><meta name="description" content="SNAAC 모닝 브리핑 지난 회차 검색"><link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style></head><body><div class="wrap"><header class="masthead">{_header_html(context)}</header><header class="archive-hero"><p class="kicker">SNAAC morning archive</p><h1>지난 브리핑</h1><p>날짜, 기사 제목, 매체 이름으로 과거 큐레이션을 찾아보세요.</p></header><div class="archive-tools" role="search"><label class="sr-only" for="archiveSearch">지난 브리핑 검색</label><input class="archive-search" id="archiveSearch" type="search" value="" placeholder="예: AI 에이전트, EO, 조직문화" autocomplete="off" aria-autocomplete="none" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="search" data-1p-ignore="true" data-lpignore="true" data-form-type="other" readonly></div><main class="archive-page-list"><div class="archive-list">{_archive_rows(entries, searchable=True)}</div><p class="archive-no-result" id="archiveNoResult" hidden>검색 결과가 없어요.</p></main>{_about_snaac_section()}<footer><div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button></div></footer></div>{_overlays_html()}<script id="briefingData" type="application/json">[]</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script>{_scripts()}<script>{JS}</script></body></html>"""
 
 
 def _existing_image_hints(html_path: Path) -> dict[str, str]:

@@ -23,11 +23,24 @@ REQUIRED_MARKERS = (
     'data-open-auth',
     'data-report-url',
     'data-open-privacy',
-    'data-open-preferences',
     'id="noteTagsInput"',
     'id="savedSearch"',
     'id="weeklyBest"',
+)
+
+ARCHIVE_REQUIRED_MARKERS = (
     'id="archiveSearch"',
+    'aria-autocomplete="none"',
+    'autocomplete="off"',
+    'readonly',
+)
+
+FORBIDDEN_MARKERS = (
+    '무료 원문만',
+    '오늘의 관점',
+    'data-open-preferences',
+    'data-resend-confirmation',
+    'OpenAI 토큰',
 )
 
 
@@ -99,16 +112,25 @@ def main() -> None:
         print(f"[생성 결과 검사] 품질 보류 상태 — 기존 페이지 유지 확인: {hold_path.read_text(encoding='utf-8').strip()}")
         return
 
-    missing = [marker for marker in REQUIRED_MARKERS[:-1] if marker not in index_html]
-    if REQUIRED_MARKERS[-1] not in archive_html:
-        missing.append(REQUIRED_MARKERS[-1])
+    missing = [marker for marker in REQUIRED_MARKERS if marker not in index_html]
+    missing.extend(
+        marker for marker in ARCHIVE_REQUIRED_MARKERS if marker not in archive_html
+    )
     if missing:
         fail("핵심 UI 마커 누락: " + ", ".join(missing))
 
+    forbidden = [
+        marker
+        for marker in FORBIDDEN_MARKERS
+        if marker in index_html or marker in archive_html
+    ]
+    if forbidden:
+        fail("삭제 대상 UI 문구·기능이 남아 있습니다: " + ", ".join(forbidden))
+
     items = extract_json(index_html, "briefingData")
     page_config = extract_json(index_html, "pageConfig")
-    if not isinstance(items, list) or not (3 <= len(items) <= 5):
-        fail(f"기사 수가 3~5개가 아닙니다: {len(items) if isinstance(items, list) else '목록 아님'}")
+    if not isinstance(items, list) or not (4 <= len(items) <= 5):
+        fail(f"기사 수가 4~5개가 아닙니다: {len(items) if isinstance(items, list) else '목록 아님'}")
     if not isinstance(page_config, dict) or not page_config.get("generatedAt"):
         fail("pageConfig.generatedAt이 없습니다.")
 
@@ -120,7 +142,7 @@ def main() -> None:
                 fail(f"{index}번 기사에 {key} 값이 없습니다.")
 
     check_inline_javascript(index_html)
-    print(f"[생성 결과 검사 완료] {len(items)}개 기사 · v6 UI · 관심 분야·태그·주간 베스트 · 아카이브 검색 · JavaScript 정상")
+    print(f"[생성 결과 검사 완료] {len(items)}개 기사 · 라이트 UI · 저장 태그·주간 베스트 · 아카이브 검색 · JavaScript 정상")
 
 
 if __name__ == "__main__":

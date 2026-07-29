@@ -3,7 +3,7 @@
 파이프라인:
   1. 뉴스·인터뷰·인사이트·영상 수집
   2. 최근 브리핑과 중복 제거
-  3. OpenAI가 품질 기준을 통과한 3~5개를 선별·요약
+  3. OpenAI가 오늘의 콘텐츠 4~5개를 선별·요약
   4. 오늘 페이지 + 날짜별 아카이브 + 아카이브 인덱스 생성
   5. (선택) 팀장 카톡으로 배포 완료 알림
 
@@ -28,7 +28,7 @@ KST = timezone(timedelta(hours=9))
 PRODUCTION_ARCHIVE_DIR = Path("docs/archive")
 OUTPUT_DIR = Path(os.environ.get("BRIEFING_OUTPUT_DIR", "docs")).resolve()
 RECENT_DUPLICATE_DAYS = 21
-MIN_PICKS_TO_PUBLISH = int(os.environ.get("MIN_PICKS_TO_PUBLISH", "3"))
+MIN_PICKS_TO_PUBLISH = int(os.environ.get("MIN_PICKS_TO_PUBLISH", "4"))
 QUALITY_HOLD_FILE = Path("briefing_quality_hold.txt")
 
 
