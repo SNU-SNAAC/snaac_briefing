@@ -901,12 +901,57 @@ footer{margin-top:36px;border-top:1px solid var(--line);padding:22px 0 0;text-al
     else{savedItems=[];updateSavedIndicators();renderSaved();}
   }
 
+  function persistentAuthStorage(){
+    try{
+      const key='snaac-auth-storage-check';
+      window.localStorage.setItem(key,'1');
+      window.localStorage.removeItem(key);
+      return window.localStorage;
+    }catch(error){
+      console.warn('로그인 상태를 브라우저에 저장할 수 없습니다.',error);
+      return undefined;
+    }
+  }
+
+  async function restoreSession(){
+    if(!supabaseClient)return;
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error){console.warn('저장된 로그인 상태를 불러오지 못했습니다.',error);return;}
+    await applySession(data?.session||null);
+  }
+
   async function initSupabase(){
     updateAuthView();updateAuthIndicators();if(!authEnabled)return;
     if(!window.supabase?.createClient){console.error('Supabase library failed to load');return;}
-    supabaseClient=window.supabase.createClient(authConfig.url,authConfig.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    const {data}=await supabaseClient.auth.getSession();await applySession(data?.session||null);
-    supabaseClient.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;openAuthDialog();updateAuthView();}window.setTimeout(()=>void applySession(session),0);});
+
+    const authOptions={
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true
+    };
+    const storage=persistentAuthStorage();
+    if(storage)authOptions.storage=storage;
+
+    supabaseClient=window.supabase.createClient(
+      authConfig.url,
+      authConfig.publishableKey,
+      {auth:authOptions}
+    );
+
+    await restoreSession();
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+      if(event==='PASSWORD_RECOVERY'){
+        recoveryMode=true;
+        openAuthDialog();
+        updateAuthView();
+      }
+      window.setTimeout(()=>void applySession(session),0);
+    });
+
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible')window.setTimeout(()=>void restoreSession(),0);
+    });
+
     void loadWeeklyBest();
     void trackEvent('page_view');
   }
