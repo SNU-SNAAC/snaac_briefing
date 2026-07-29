@@ -2,53 +2,350 @@ name: SNAAC 모닝 브리핑
 
 on:
   schedule:
-    # UTC 23:30 = 한국시간(KST) 오전 08:30
-    - cron: "30 23 * * *"
-  workflow_dispatch: {}
+    # UTC 23:15 = 한국시간(KST) 오전 08:15
+    # 09:00 오픈채팅 알림 전에 생성·검사·Pages 배포 시간을 확보합니다.
+    - cron: "15 23 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "실행 모드"
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - deploy
 
 permissions:
+  actions: read
   contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: snaac-morning-briefing
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
+    name: 브리핑 생성·검사
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+    timeout-minutes: 35
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+      publish_ready: ${{ steps.publish-state.outputs.ready }}
 
-      - uses: actions/setup-python@v6
+    steps:
+      - name: 저장소 불러오기
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 실행 모드 결정
+        id: mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            MODE="deploy"
+          else
+            MODE="${{ inputs.mode }}"
+          fi
+
+          rm -f briefing_quality_hold.txt
+
+          if [[ "$MODE" == "preview" ]]; then
+            OUTPUT_DIR="_preview"
+            rm -rf "$OUTPUT_DIR"
+            if [[ -d docs ]]; then
+              cp -a docs "$OUTPUT_DIR"
+            else
+              mkdir -p "$OUTPUT_DIR"
+            fi
+          else
+            OUTPUT_DIR="docs"
+          fi
+
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "BRIEFING_MODE=$MODE" >> "$GITHUB_ENV"
+          echo "BRIEFING_OUTPUT_DIR=$OUTPUT_DIR" >> "$GITHUB_ENV"
+          echo "실행 모드: $MODE / 출력 폴더: $OUTPUT_DIR"
+
+      - name: Python 준비
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: 의존성 설치
         run: pip install -r requirements.txt
 
+      - name: Python 문법 검사
+        run: python -m py_compile collect.py select_news.py main.py page.py smoke_check.py kakao.py get_kakao_token.py
+
       - name: 브리핑 생성
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # 로그인 기능용 공개 설정입니다. service_role/secret key는 절대 넣지 마세요.
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          ENABLE_WEB_DISCOVERY: "1"
+          MIN_QUALITY_SCORE: ${{ vars.MIN_QUALITY_SCORE || '72' }}
+          MIN_PICKS_TO_PUBLISH: "3"
+
+          # Supabase의 브라우저 공개 설정입니다. service_role/secret key는 넣지 마세요.
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          # 아래 둘은 선택사항입니다.
+          SUPABASE_REDIRECT_URL: ${{ vars.SUPABASE_REDIRECT_URL }}
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+          DELETE_ACCOUNT_FUNCTION: ${{ vars.DELETE_ACCOUNT_FUNCTION || 'delete-account' }}
+
+          SITE_URL: ${{ vars.SITE_URL }}
+          PRIVACY_CONTACT_EMAIL: ${{ vars.PRIVACY_CONTACT_EMAIL }}
+          ABOUT_URL: "https://www.snaac.co.kr"
+
+          # 선택사항: 운영자 개인 카카오 배포 확인 알림
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: python main.py
 
-      - name: GitHub Pages에 배포 (docs/ 커밋)
+      - name: 생성 결과 검사
+        run: python smoke_check.py "$BRIEFING_OUTPUT_DIR"
+
+      - name: 실제 배포 가능 여부 결정
+        id: publish-state
+        shell: bash
         run: |
-          git config user.name "snaac-briefing-bot"
-          git config user.email "actions@github.com"
-          git add docs/
-          if git diff --cached --quiet; then
-            echo "변경 사항 없음 - 커밋 생략"
+          set -euo pipefail
+          READY="false"
+          if [[ "$BRIEFING_MODE" == "deploy" && ! -f briefing_quality_hold.txt ]]; then
+            READY="true"
+          fi
+          echo "ready=$READY" >> "$GITHUB_OUTPUT"
+          echo "Pages 실제 배포 가능: $READY"
+
+      - name: 품질 보류 알림 Issue 생성 또는 갱신
+        if: env.BRIEFING_MODE == 'deploy' && hashFiles('briefing_quality_hold.txt') != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="[자동 알림] SNAAC 브리핑 품질 보류"
+          REASON="$(cat briefing_quality_hold.txt)"
+          BODY=$(cat <<EOF
+          오늘 회차는 품질 기준을 충족하지 못해 기존 브리핑을 유지했습니다.
+
+          - 이유: ${REASON}
+          - 실행 모드: ${BRIEFING_MODE:-확인 불가}
+          - 실행 링크: ${RUN_URL}
+          - 발생 시각(KST): $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S')
+
+          페이지의 마지막 업데이트 시각과 원문 후보를 확인해 주세요.
+          EOF
+          )
+
+          NUMBER=$(gh issue list --repo "$REPO" --state open \
+            --search '"[자동 알림] SNAAC 브리핑 품질 보류" in:title' \
+            --json number --jq '.[0].number // empty')
+
+          if [[ -n "$NUMBER" ]]; then
+            gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
           else
-            git commit -m "브리핑 업데이트 $(TZ=Asia/Seoul date +%Y-%m-%d)"
-            git push
+            gh issue create --repo "$REPO" --title "$TITLE" --body "$BODY"
           fi
 
-      - name: 리프레시 토큰 자동 갱신
-        if: hashFiles('new_refresh_token.txt') != ''
+      - name: 미리보기 결과 업로드
+        if: env.BRIEFING_MODE == 'preview'
+        uses: actions/upload-artifact@v6
+        with:
+          name: snaac-briefing-preview-${{ github.run_number }}
+          path: ${{ env.BRIEFING_OUTPUT_DIR }}
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: 운영 페이지와 아카이브를 저장소에 기록
+        if: env.BRIEFING_MODE == 'deploy'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "snaac-briefing-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          GENERATED_DIR="$(mktemp -d)"
+          cp -a docs "$GENERATED_DIR/docs"
+
+          for attempt in 1 2 3; do
+            echo "브리핑 업로드 시도 ${attempt}/3"
+            git fetch origin main
+            git reset --hard origin/main
+
+            rm -rf docs
+            cp -a "$GENERATED_DIR/docs" docs
+            git add docs/
+
+            if git diff --cached --quiet; then
+              echo "변경 사항 없음 - 커밋 생략"
+              exit 0
+            fi
+
+            git commit -m "브리핑 업데이트 $(TZ=Asia/Seoul date +%Y-%m-%d)"
+            if git push origin HEAD:main; then
+              echo "브리핑 커밋 완료"
+              exit 0
+            fi
+
+            echo "원격 main 변경 감지 - 최신 상태 위에서 다시 시도합니다."
+            sleep $((attempt * 5))
+          done
+
+          echo "3회 재시도 후에도 push에 실패했습니다."
+          exit 1
+
+      - name: GitHub Pages 설정 확인
+        if: steps.publish-state.outputs.ready == 'true'
+        uses: actions/configure-pages@v6
+
+      - name: GitHub Pages 배포 파일 업로드
+        if: steps.publish-state.outputs.ready == 'true'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./docs
+          include-hidden-files: true
+
+      - name: 카카오 리프레시 토큰 자동 갱신
+        if: env.BRIEFING_MODE == 'deploy' && hashFiles('new_refresh_token.txt') != ''
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh secret set KAKAO_REFRESH_TOKEN --body "$(cat new_refresh_token.txt)" --repo ${{ github.repository }}
-          echo "리프레시 토큰 갱신 완료"
+          gh secret set KAKAO_REFRESH_TOKEN \
+            --body "$(cat new_refresh_token.txt)" \
+            --repo "${{ github.repository }}"
+          echo "카카오 리프레시 토큰 갱신 완료"
+
+      - name: 생성 작업 요약
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## SNAAC 모닝 브리핑 생성"
+            echo "- 실행 모드: ${BRIEFING_MODE:-확인 불가}"
+            echo "- 출력 폴더: ${BRIEFING_OUTPUT_DIR:-확인 불가}"
+            echo "- Pages 배포 준비: ${{ steps.publish-state.outputs.ready || 'false' }}"
+            echo "- 워크플로 실행: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 생성 실패 알림 Issue 생성 또는 갱신
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="[자동 알림] SNAAC 브리핑 생성 실패"
+          BODY=$(cat <<EOF
+          오늘 SNAAC 모닝 브리핑 자동화의 생성·검사 단계가 실패했습니다.
+
+          - 실행 모드: ${BRIEFING_MODE:-확인 불가}
+          - 실행 링크: ${RUN_URL}
+          - 발생 시각(KST): $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S')
+
+          로그의 빨간 단계와 마지막 오류 문구를 확인해 주세요.
+          EOF
+          )
+
+          NUMBER=$(gh issue list --repo "$REPO" --state open \
+            --search '"[자동 알림] SNAAC 브리핑 생성 실패" in:title' \
+            --json number --jq '.[0].number // empty')
+
+          if [[ -n "$NUMBER" ]]; then
+            gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
+          else
+            gh issue create --repo "$REPO" --title "$TITLE" --body "$BODY" --label "bug" \
+              || gh issue create --repo "$REPO" --title "$TITLE" --body "$BODY"
+          fi
+
+  deploy-pages:
+    name: GitHub Pages 실제 배포
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.publish_ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: GitHub Pages에 배포
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: 정상 배포 후 기존 경고 Issue 닫기
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for TITLE in \
+            "[자동 알림] SNAAC 브리핑 생성 실패" \
+            "[자동 알림] SNAAC 브리핑 품질 보류"; do
+            gh issue list --repo "$REPO" --state open \
+              --search "\"${TITLE}\" in:title" \
+              --json number --jq '.[].number' | while read -r NUMBER; do
+                [[ -z "$NUMBER" ]] && continue
+                gh issue comment "$NUMBER" --repo "$REPO" \
+                  --body "정상 회차가 다시 배포되어 이 알림을 닫습니다.\n\n- 정상 실행: ${RUN_URL}"
+                gh issue close "$NUMBER" --repo "$REPO"
+              done
+          done
+
+      - name: 배포 결과 요약
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## GitHub Pages 실제 배포"
+            echo "- 상태: ${{ job.status }}"
+            echo "- 공개 주소: ${{ steps.deployment.outputs.page_url || '확인 불가' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pages 배포 실패 알림 Issue 생성 또는 갱신
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="[자동 알림] SNAAC 브리핑 생성 실패"
+          BODY=$(cat <<EOF
+          브리핑 파일 생성은 끝났지만 GitHub Pages 실제 배포 단계가 실패했습니다.
+
+          - 실행 링크: ${RUN_URL}
+          - 발생 시각(KST): $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S')
+
+          GitHub Settings → Pages의 Source가 GitHub Actions인지 확인하고 배포 로그를 확인해 주세요.
+          EOF
+          )
+
+          NUMBER=$(gh issue list --repo "$REPO" --state open \
+            --search '"[자동 알림] SNAAC 브리핑 생성 실패" in:title' \
+            --json number --jq '.[0].number // empty')
+
+          if [[ -n "$NUMBER" ]]; then
+            gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
+          else
+            gh issue create --repo "$REPO" --title "$TITLE" --body "$BODY" --label "bug" \
+              || gh issue create --repo "$REPO" --title "$TITLE" --body "$BODY"
+          fi
