@@ -26,10 +26,11 @@ from collect import normalize_link, strip_html
 KST = timezone(timedelta(hours=9))
 OPENAI_API_URL = "https://api.openai.com/v1/responses"
 
-# 기존 저장소의 모델을 기본값으로 유지해 갑작스러운 호환성 문제를 줄였습니다.
-# GitHub Actions 환경변수 OPENAI_MODEL로 언제든 교체할 수 있습니다.
-MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.4-mini")
-ENABLE_WEB_DISCOVERY = os.environ.get("ENABLE_WEB_DISCOVERY", "1").lower() not in {
+# GitHub Actions에서 미등록 Variable은 빈 문자열로 전달될 수 있습니다.
+# 빈 문자열을 모델명으로 보내면 Responses API가 400 Bad Request를 반환하므로,
+# strip() 후 값이 없으면 검증된 기본 모델로 확실히 대체합니다.
+MODEL = (os.environ.get("OPENAI_MODEL") or "").strip() or "gpt-5.4-mini"
+ENABLE_WEB_DISCOVERY = (os.environ.get("ENABLE_WEB_DISCOVERY") or "1").lower() not in {
     "0",
     "false",
     "no",
@@ -39,8 +40,8 @@ MAX_CANDIDATES = 60
 MAX_PER_SOURCE_IN_FINAL = 2
 MIN_FINAL_PICKS = 3
 MAX_FINAL_PICKS = 5
-MIN_QUALITY_SCORE = int(os.environ.get("MIN_QUALITY_SCORE", "72"))
-OPENAI_MAX_ATTEMPTS = int(os.environ.get("OPENAI_MAX_ATTEMPTS", "3"))
+MIN_QUALITY_SCORE = int((os.environ.get("MIN_QUALITY_SCORE") or "72").strip() or "72")
+OPENAI_MAX_ATTEMPTS = int((os.environ.get("OPENAI_MAX_ATTEMPTS") or "3").strip() or "3")
 
 # 유료 구독을 요구하는 대표 도메인은 후보/웹 검색 단계부터 제외합니다.
 # 유료 잠금 비중이 높은 플랫폼은 도메인 단계에서 막고, 그 밖의 신규 도메인은 페이지 문구를 검사합니다.
@@ -728,6 +729,16 @@ RSS/Atom 후보 JSON:
                 json=payload,
                 timeout=180,
             )
+            if response.status_code >= 400:
+                # GitHub Actions 로그에서 다음 오류의 원인을 바로 확인할 수 있도록
+                # OpenAI가 반환한 안전한 오류 본문을 출력합니다. API 키는 응답 본문에 없습니다.
+                error_body = (response.text or "").strip()
+                print(
+                    f"[OpenAI API 오류] status={response.status_code} "
+                    f"model={MODEL!r} web={web_enabled} "
+                    f"body={error_body[:1800]}"
+                )
+
             if response.status_code == 429:
                 body = response.text.lower()
                 # 잔액/결제 한도 문제는 기다려도 해결되지 않으므로 즉시 중단합니다.
