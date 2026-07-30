@@ -26,6 +26,30 @@ REQUIRED_MARKERS = (
     'id="noteTagsInput"',
     'id="savedSearch"',
     'id="weeklyBest"',
+    'id="posthogConfig"',
+    'data-snaac-posthog="configured"',
+    'autocapture: false',
+    'capture_pageview: true',
+    'capture_pageleave: true',
+    'disable_session_recording: true',
+    'rageclick: false',
+    'advanced_disable_flags: true',
+    "person_profiles: 'identified_only'",
+    "persistence: 'localStorage'",
+    'respect_dnt: true',
+    'mask_all_text: true',
+    'mask_all_element_attributes: true',
+    'before_send: beforeSend',
+    'article_impression',
+    'engaged_30s',
+    'scroll_depth_reached',
+    'meaningful_read',
+    'briefing_session_ended',
+    'posthog.identify',
+    'posthog.reset',
+    'opt_out_capturing',
+    'opt_in_capturing',
+    'ph-no-capture',
 )
 
 ARCHIVE_REQUIRED_MARKERS = (
@@ -36,6 +60,8 @@ ARCHIVE_REQUIRED_MARKERS = (
 )
 
 FORBIDDEN_MARKERS = (
+    'phx_',
+    'startSessionRecording()',
     '무료 원문만',
     '오늘의 관점',
     'data-open-preferences',
@@ -129,6 +155,22 @@ def main() -> None:
 
     items = extract_json(index_html, "briefingData")
     page_config = extract_json(index_html, "pageConfig")
+    posthog_config = extract_json(index_html, "posthogConfig")
+    if not isinstance(posthog_config, dict):
+        fail("posthogConfig가 객체가 아닙니다.")
+    if posthog_config.get("configured"):
+        token = str(posthog_config.get("token", ""))
+        host = str(posthog_config.get("host", ""))
+        if not token.startswith("phc_"):
+            fail("PostHog Project token이 phc_로 시작하지 않습니다.")
+        if token.startswith("phx_"):
+            fail("PostHog Personal API key(phx_)가 포함되어 있습니다.")
+        if not host.startswith("https://"):
+            fail("PostHog host가 올바른 HTTPS 주소가 아닙니다.")
+        if posthog_config.get("mode") == "preview" and posthog_config.get("enabled"):
+            fail("preview 모드에서 PostHog 이벤트 전송이 활성화되어 있습니다.")
+    else:
+        print("[생성 결과 검사] PostHog 미연결 상태 — GitHub Variables를 확인하세요.")
     if not isinstance(items, list) or not (4 <= len(items) <= 5):
         fail(f"기사 수가 4~5개가 아닙니다: {len(items) if isinstance(items, list) else '목록 아님'}")
     if not isinstance(page_config, dict) or not page_config.get("generatedAt"):
@@ -142,7 +184,11 @@ def main() -> None:
                 fail(f"{index}번 기사에 {key} 값이 없습니다.")
 
     check_inline_javascript(index_html)
-    print(f"[생성 결과 검사 완료] {len(items)}개 기사 · 라이트 UI · 저장 태그·주간 베스트 · 아카이브 검색 · JavaScript 정상")
+    posthog_state = "PostHog 연결" if posthog_config.get("configured") else "PostHog 설정 대기"
+    print(
+        f"[생성 결과 검사 완료] {len(items)}개 기사 · 라이트 UI · {posthog_state} · "
+        "노출·체류·스크롤·저장 퍼널 · JavaScript 정상"
+    )
 
 
 if __name__ == "__main__":
