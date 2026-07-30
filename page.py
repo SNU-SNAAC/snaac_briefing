@@ -49,23 +49,25 @@ ABOUT_URL = os.environ.get("ABOUT_URL", "https://www.snaac.co.kr").strip()
 AUTH_ENABLED = bool(SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY)
 
 BRIEFING_MODE = (os.environ.get("BRIEFING_MODE", "deploy") or "deploy").strip().lower()
-POSTHOG_ENABLED_REQUESTED = os.environ.get("POSTHOG_ENABLED", "0").strip().lower() in {
+MIXPANEL_ENABLED_REQUESTED = os.environ.get("MIXPANEL_ENABLED", "0").strip().lower() in {
     "1", "true", "yes", "on",
 }
-POSTHOG_PROJECT_TOKEN = os.environ.get("POSTHOG_PROJECT_TOKEN", "").strip()
-POSTHOG_HOST = os.environ.get("POSTHOG_HOST", "https://us.i.posthog.com").strip().rstrip("/")
-POSTHOG_CONFIGURED = bool(
-    POSTHOG_PROJECT_TOKEN.startswith("phc_")
-    and POSTHOG_HOST.startswith("https://")
+MIXPANEL_PROJECT_TOKEN = os.environ.get("MIXPANEL_PROJECT_TOKEN", "").strip()
+MIXPANEL_API_HOST = (
+    os.environ.get("MIXPANEL_API_HOST", "https://api.mixpanel.com")
+    .strip()
+    .rstrip("/")
+)
+MIXPANEL_CONFIGURED = bool(
+    MIXPANEL_PROJECT_TOKEN
+    and not any(character.isspace() for character in MIXPANEL_PROJECT_TOKEN)
+    and MIXPANEL_API_HOST.startswith("https://")
 )
 # Preview artifact를 열어도 운영 대시보드에 테스트 이벤트가 섞이지 않게 전송은 deploy에서만 켭니다.
-POSTHOG_ENABLED = bool(
-    POSTHOG_ENABLED_REQUESTED
-    and POSTHOG_CONFIGURED
+MIXPANEL_ENABLED = bool(
+    MIXPANEL_ENABLED_REQUESTED
+    and MIXPANEL_CONFIGURED
     and BRIEFING_MODE != "preview"
-)
-POSTHOG_UI_HOST = (
-    "https://eu.posthog.com" if "eu." in POSTHOG_HOST else "https://us.posthog.com"
 )
 
 SOURCE_ASSET = Path(__file__).resolve().parent / "assets" / "snaac-logo.png"
@@ -251,17 +253,19 @@ footer{margin-top:36px;border-top:1px solid var(--line);padding:22px 0 0;text-al
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
 """
 
-POSTHOG_BOOTSTRAP_JS = r"""
+MIXPANEL_BOOTSTRAP_JS = r"""
 (() => {
   'use strict';
 
-  const configElement = document.getElementById('posthogConfig');
+  const configElement = document.getElementById('mixpanelConfig');
   const config = configElement ? JSON.parse(configElement.textContent || '{}') : {};
   const INTERNAL_KEY = 'snaac-internal-analytics-v1';
   const ANALYTICS_OPTOUT_KEY = 'snaac-analytics-optout-v1';
-  const SENSITIVE_QUERY_KEYS = [
+  const ATTRIBUTION_KEY = 'snaac-mixpanel-attribution-v1';
+  const SENSITIVE_QUERY_KEYS = new Set([
     'access_token','refresh_token','provider_token','token','code','email','recovery','type','expires_in'
-  ];
+  ]);
+  const UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
 
   function readLocal(key) {
     try { return localStorage.getItem(key); }
@@ -273,6 +277,16 @@ POSTHOG_BOOTSTRAP_JS = r"""
       if (value === null) localStorage.removeItem(key);
       else localStorage.setItem(key, value);
     } catch (error) {}
+  }
+
+  function readSessionJson(key) {
+    try { return JSON.parse(sessionStorage.getItem(key) || '{}'); }
+    catch (error) { return {}; }
+  }
+
+  function writeSessionJson(key, value) {
+    try { sessionStorage.setItem(key, JSON.stringify(value)); }
+    catch (error) {}
   }
 
   function applyInternalModeFromUrl() {
@@ -288,79 +302,144 @@ POSTHOG_BOOTSTRAP_JS = r"""
     } catch (error) {}
   }
 
-  function sanitizeUrl(value) {
-    if (typeof value !== 'string' || !value) return value;
+  function sanitizedLocation() {
     try {
-      const url = new URL(value, window.location.origin);
+      const url = new URL(window.location.href);
       Array.from(url.searchParams.keys()).forEach(key => {
-        if (SENSITIVE_QUERY_KEYS.includes(key.toLowerCase())) url.searchParams.delete(key);
+        if (SENSITIVE_QUERY_KEYS.has(key.toLowerCase()) || key.toLowerCase() === 'internal') {
+          url.searchParams.delete(key);
+        }
       });
       url.hash = '';
-      return url.toString();
+      return url;
     } catch (error) {
-      return value.split('#')[0];
+      return null;
     }
   }
 
-  function beforeSend(event) {
-    if (!event || !event.properties) return event;
-    const properties = {...event.properties};
-    ['$current_url','$referrer','$initial_current_url','$initial_referrer'].forEach(key => {
-      if (properties[key]) properties[key] = sanitizeUrl(properties[key]);
-    });
-    Object.keys(properties).forEach(key => {
-      if (/url|referrer/i.test(key) && typeof properties[key] === 'string') {
-        properties[key] = sanitizeUrl(properties[key]);
-      }
-      const lower = key.toLowerCase();
-      if (['email','password','note','tags','access_token','refresh_token','provider_token'].some(value => lower.includes(value))) {
-        delete properties[key];
-      }
-    });
-    return {...event, properties};
+  function attributionProperties(url) {
+    const stored = readSessionJson(ATTRIBUTION_KEY);
+    const next = {...stored};
+    if (url) {
+      UTM_KEYS.forEach(key => {
+        const value = String(url.searchParams.get(key) || '').trim().slice(0, 200);
+        if (value) next[key] = value;
+      });
+    }
+    if (!next.referrer_domain && document.referrer) {
+      try { next.referrer_domain = new URL(document.referrer).hostname.slice(0, 200); }
+      catch (error) {}
+    }
+    if (!next.landing_path && url) next.landing_path = url.pathname.slice(0, 500);
+    writeSessionJson(ATTRIBUTION_KEY, next);
+    return next;
+  }
+
+  function dntEnabled() {
+    return navigator.doNotTrack === '1' || window.doNotTrack === '1';
   }
 
   applyInternalModeFromUrl();
   const internal = readLocal(INTERNAL_KEY) === '1';
   const optedOut = readLocal(ANALYTICS_OPTOUT_KEY) === '1';
+  const dnt = dntEnabled();
+  const locationUrl = sanitizedLocation();
+  const attribution = attributionProperties(locationUrl);
   window.__snaacInternalAnalytics = internal;
+  window.__snaacMixpanelAttribution = attribution;
+
+  const pageViewProperties = {
+    current_page_title: document.title,
+    current_domain: window.location.hostname,
+    current_url_path: locationUrl ? locationUrl.pathname : window.location.pathname,
+    current_url_protocol: window.location.protocol.replace(':',''),
+    current_url_search: locationUrl ? locationUrl.search : '',
+    page_url: locationUrl ? locationUrl.toString() : `${window.location.origin}${window.location.pathname}`,
+    ...attribution,
+  };
+  window.__snaacMixpanelPageViewProperties = pageViewProperties;
 
   // preview 모드에서는 config.enabled가 false라 SDK를 불러오지 않고 테스트 데이터도 전송하지 않습니다.
-  if (!config.enabled || !config.token || !config.host) return;
+  if (!config.enabled || !config.token || !config.apiHost) return;
 
-  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split('.');2===o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement('script')).type='text/javascript',p.crossOrigin='anonymous',p.async=!0,p.src=s.api_host.replace('.i.posthog.com','-assets.i.posthog.com')+'/static/array.js',(r=t.getElementsByTagName('script')[0]).parentNode.insertBefore(p,r);var u=e;void 0!==a?u=e[a]=[]:a='posthog',u.people=u.people||[],u.toString=function(t){var e='posthog';return'posthog'!==a&&(e+='.'+a),t||(e+=' (stub)'),e},u.people.toString=function(){return u.toString(1)+'.people (stub)'},o='init capture register register_once register_for_session unregister unregister_for_session identify reset set_config opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_distinct_id get_session_id'.split(' ');for(n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+  // Official Mixpanel browser loader. It queues calls until the SDK has loaded.
+  (function(f,b){
+    if(!b.__SV){
+      var e,g,i,h;
+      window.mixpanel=b;
+      b._i=[];
+      b.init=function(e,f,c){
+        function g(a,d){
+          var parts=d.split('.');
+          if(parts.length===2){a=a[parts[0]];d=parts[1];}
+          a[d]=function(){a.push([d].concat(Array.prototype.slice.call(arguments,0)));};
+        }
+        var instance=b;
+        if(typeof c!=='undefined') instance=b[c]=[];
+        else c='mixpanel';
+        instance.people=instance.people||[];
+        instance.toString=function(isPeople){
+          var name='mixpanel';
+          if(c!=='mixpanel') name+='.'+c;
+          if(!isPeople) name+=' (stub)';
+          return name;
+        };
+        instance.people.toString=function(){return instance.toString(1)+'.people (stub)';};
+        i='disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove'.split(' ');
+        for(h=0;h<i.length;h++) g(instance,i[h]);
+        var groupMethods='set set_once union unset remove delete'.split(' ');
+        instance.get_group=function(){
+          var group=[];
+          var descriptor=['get_group'].concat(Array.prototype.slice.call(arguments,0));
+          group.push=function(call){instance.push([descriptor,call]);};
+          for(var idx=0;idx<groupMethods.length;idx++){
+            (function(method){
+              group[method]=function(){
+                group.push([method].concat(Array.prototype.slice.call(arguments,0)));
+              };
+            })(groupMethods[idx]);
+          }
+          return group;
+        };
+        b._i.push([e,f,c]);
+      };
+      b.__SV=1.2;
+      e=f.createElement('script');
+      e.type='text/javascript';
+      e.async=true;
+      e.src='https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js';
+      g=f.getElementsByTagName('script')[0];
+      g.parentNode.insertBefore(e,g);
+    }
+  })(document,window.mixpanel||[]);
 
-  window.posthog.init(config.token, {
-    api_host: config.host,
-    ui_host: config.uiHost,
-    defaults: '2026-05-30',
-    autocapture: false,
-    capture_pageview: true,
-    capture_pageleave: true,
-    capture_dead_clicks: false,
-    capture_heatmaps: false,
-    capture_exceptions: false,
-    capture_performance: false,
-    rageclick: false,
-    disable_session_recording: true,
-    disable_surveys: true,
-    advanced_disable_flags: true,
-    person_profiles: 'identified_only',
+  window.mixpanel.init(config.token, {
+    api_host: config.apiHost,
     persistence: 'localStorage',
-    cross_subdomain_cookie: false,
-    respect_dnt: true,
-    mask_all_text: true,
-    mask_all_element_attributes: true,
-    opt_out_capturing_by_default: internal || optedOut,
-    opt_out_capturing_persistence_type: 'local_storage',
-    property_denylist: ['email','password','note','tags','access_token','refresh_token','provider_token'],
-    before_send: beforeSend,
-    loaded: instance => {
-      window.__snaacPosthogReady = true;
-      window.dispatchEvent(new CustomEvent('snaac:posthog-ready'));
-      if (internal || optedOut) instance.opt_out_capturing();
-    },
+    autocapture: false,
+    track_pageview: false,
+    record_sessions_percent: 0,
+    record_heatmap_data: false,
+    ip: false,
+    debug: false,
+    batch_requests: true,
+    opt_out_tracking_by_default: internal || optedOut || dnt,
+    property_blacklist: ['$current_url','$initial_referrer','$referrer'],
   });
+
+  window.mixpanel.register({
+    product_name: 'SNAAC Briefing',
+    analytics_schema_version: 'mixpanel-v1',
+  });
+
+  if (internal || optedOut || dnt) {
+    window.mixpanel.opt_out_tracking();
+  } else {
+    window.mixpanel.track('$mp_web_page_view', pageViewProperties, {send_immediately:true});
+  }
+
+  window.__snaacMixpanelReady = true;
+  window.dispatchEvent(new CustomEvent('snaac:mixpanel-ready'));
 })();
 """
 
@@ -376,11 +455,11 @@ JS = r"""
   const dataElement = document.getElementById('briefingData');
   const configElement = document.getElementById('pageConfig');
   const authConfigElement = document.getElementById('authConfig');
-  const posthogConfigElement = document.getElementById('posthogConfig');
+  const mixpanelConfigElement = document.getElementById('mixpanelConfig');
   const currentItems = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
   const pageConfig = configElement ? JSON.parse(configElement.textContent || '{}') : {};
   const authConfig = authConfigElement ? JSON.parse(authConfigElement.textContent || '{}') : {};
-  const posthogConfig = posthogConfigElement ? JSON.parse(posthogConfigElement.textContent || '{}') : {};
+  const mixpanelConfig = mixpanelConfigElement ? JSON.parse(mixpanelConfigElement.textContent || '{}') : {};
   const currentByUrl = new Map(currentItems.map(item => [item.link, normalizeItem(item)]));
 
   let currentUser = null;
@@ -406,7 +485,7 @@ JS = r"""
   let lastActivityAt = Date.now();
   const lastFocused = new WeakMap();
   const authEnabled = Boolean(authConfig.url && authConfig.publishableKey);
-  const posthogEnabled = Boolean(posthogConfig.enabled && window.posthog);
+  const mixpanelEnabled = Boolean(mixpanelConfig.enabled && window.mixpanel);
   const meaningfulSessionKey = `snaac-meaningful-read:${pageConfig.briefingDate || 'archive'}:${pageConfig.context || 'home'}`;
   let meaningfulReadSent = (() => {
     try { return sessionStorage.getItem(meaningfulSessionKey) === '1'; }
@@ -527,8 +606,13 @@ JS = r"""
     }
   }
 
+  function browserDoNotTrackEnabled() {
+    const value = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+    return value === '1' || value === 'yes';
+  }
+
   function analyticsOptedOut() {
-    return userAnalyticsOptedOut() || internalAnalyticsMode();
+    return userAnalyticsOptedOut() || internalAnalyticsMode() || browserDoNotTrackEnabled();
   }
 
   function updateAnalyticsPreferenceUi() {
@@ -536,18 +620,23 @@ JS = r"""
     const status = byId('analyticsPreferenceStatus');
     if (!button || !status) return;
     const internal = internalAnalyticsMode();
+    const dnt = browserDoNotTrackEnabled();
     const optedOut = userAnalyticsOptedOut();
-    button.disabled = internal;
-    button.textContent = internal ? '운영자 제외 모드 적용 중' : (optedOut ? '익명 통계 다시 허용' : '익명 통계 끄기');
+    button.disabled = internal || dnt;
+    button.textContent = internal
+      ? '운영자 제외 모드 적용 중'
+      : (dnt ? '브라우저 추적 방지 적용 중' : (optedOut ? '익명 통계 다시 허용' : '익명 통계 끄기'));
     status.textContent = internal
       ? '현재 브라우저는 운영자 제외 모드라 이용 통계를 보내지 않습니다.'
-      : (optedOut ? '현재 익명 이용 통계를 보내지 않습니다.' : '현재 개인을 식별하지 않는 최소 이용 통계를 사용합니다.');
+      : (dnt
+          ? '브라우저의 Do Not Track 설정에 따라 이용 통계를 보내지 않습니다.'
+          : (optedOut ? '현재 익명 이용 통계를 보내지 않습니다.' : '현재 개인을 식별하지 않는 최소 이용 통계를 사용합니다.'));
   }
 
-  function syncPostHogConsent(allowExplicitOptIn = false) {
-    if (!posthogEnabled || !window.posthog) return;
-    if (analyticsOptedOut()) window.posthog.opt_out_capturing();
-    else if (allowExplicitOptIn) window.posthog.opt_in_capturing();
+  function syncMixpanelConsent(allowExplicitOptIn = false) {
+    if (!mixpanelEnabled || !window.mixpanel) return;
+    if (analyticsOptedOut()) window.mixpanel.opt_out_tracking();
+    else if (allowExplicitOptIn) window.mixpanel.opt_in_tracking();
   }
 
   function toggleAnalyticsPreference() {
@@ -555,15 +644,20 @@ JS = r"""
       announce('운영자 제외 모드에서는 통계를 켤 수 없어요. 주소에 ?internal=0을 붙여 해제할 수 있습니다.');
       return;
     }
+    if (browserDoNotTrackEnabled()) {
+      announce('브라우저의 Do Not Track 설정이 켜져 있어 이용 통계를 보낼 수 없어요.');
+      return;
+    }
     try {
       const nextOptOut = !userAnalyticsOptedOut();
       localStorage.setItem(ANALYTICS_OPTOUT_KEY, nextOptOut ? '1' : '0');
       if (nextOptOut) localStorage.removeItem(SESSION_KEY);
-      syncPostHogConsent(!nextOptOut);
+      syncMixpanelConsent(!nextOptOut);
       updateAnalyticsPreferenceUi();
       if (!nextOptOut) {
-        capturePostHogEvent('analytics_opted_in', null, {source:'privacy_control'});
-        capturePostHogEvent('briefing_viewed', null, initialBriefingProperties({consent_restored:true}));
+        captureMixpanelEvent('analytics_opted_in', null, {source:'privacy_control'});
+        captureMixpanelPageView({consent_restored:true});
+        captureMixpanelEvent('briefing_viewed', null, initialBriefingProperties({consent_restored:true}));
       }
       announce(nextOptOut ? '익명 이용 통계를 껐어요.' : '익명 이용 통계를 다시 허용했어요.');
     } catch (error) {
@@ -601,6 +695,7 @@ JS = r"""
       article_source: article?.source || '',
       article_category: article?.category || '',
       content_type: article?.contentType || '',
+      ...(window.__snaacMixpanelAttribution || {}),
       ...metadata,
     };
   }
@@ -617,29 +712,38 @@ JS = r"""
     };
   }
 
-  function capturePostHogEvent(eventName, article = null, metadata = {}, captureOptions = undefined) {
-    if (!posthogEnabled || !window.posthog || analyticsOptedOut()) return;
-    window.posthog.capture(eventName, articleProperties(article, metadata), captureOptions);
+  function captureMixpanelEvent(eventName, article = null, metadata = {}, captureOptions = undefined) {
+    if (!mixpanelEnabled || !window.mixpanel || analyticsOptedOut()) return;
+    window.mixpanel.track(eventName, articleProperties(article, metadata), captureOptions);
   }
 
-  function identifyPostHogUser(user) {
-    if (!posthogEnabled || !window.posthog || analyticsOptedOut() || !user?.id) return;
-    window.posthog.identify(user.id, {is_authenticated:true});
-    window.posthog.register({is_logged_in:true});
+  function captureMixpanelPageView(extra = {}) {
+    if (!mixpanelEnabled || !window.mixpanel || analyticsOptedOut()) return;
+    const properties = {
+      ...(window.__snaacMixpanelPageViewProperties || {}),
+      ...extra,
+    };
+    window.mixpanel.track('$mp_web_page_view', properties, {send_immediately:true});
   }
 
-  function resetPostHogUser() {
-    if (!posthogEnabled || !window.posthog) return;
-    window.posthog.reset();
-    window.posthog.register({is_logged_in:false});
-    syncPostHogConsent();
+  function identifyMixpanelUser(user) {
+    if (!mixpanelEnabled || !window.mixpanel || analyticsOptedOut() || !user?.id) return;
+    window.mixpanel.identify(user.id);
+    window.mixpanel.register({is_logged_in:true});
+  }
+
+  function resetMixpanelUser() {
+    if (!mixpanelEnabled || !window.mixpanel) return;
+    window.mixpanel.reset();
+    window.mixpanel.register({is_logged_in:false});
+    syncMixpanelConsent();
   }
 
   function markMeaningfulRead(trigger, article = null, metadata = {}) {
     if (meaningfulReadSent || analyticsOptedOut() || !currentItems.length) return;
     meaningfulReadSent = true;
     try { sessionStorage.setItem(meaningfulSessionKey, '1'); } catch (error) {}
-    capturePostHogEvent('meaningful_read', article, {
+    captureMixpanelEvent('meaningful_read', article, {
       trigger,
       active_seconds: activeSeconds,
       max_scroll_depth: maxScrollDepth,
@@ -654,12 +758,12 @@ JS = r"""
     maxScrollDepth = Math.max(maxScrollDepth, depth);
     if (depth >= 50 && !reachedScroll50) {
       reachedScroll50 = true;
-      capturePostHogEvent('scroll_depth_reached', null, {depth:50});
+      captureMixpanelEvent('scroll_depth_reached', null, {depth:50});
       if (engaged30Sent) markMeaningfulRead('engaged_30s_and_scroll_50');
     }
     if (depth >= 90 && !reachedScroll90) {
       reachedScroll90 = true;
-      capturePostHogEvent('scroll_depth_reached', null, {depth:90});
+      captureMixpanelEvent('scroll_depth_reached', null, {depth:90});
     }
   }
 
@@ -679,7 +783,7 @@ JS = r"""
             if (seen.has(card)) return;
             seen.add(card);
             const item = currentByUrl.get(card.dataset.articleUrl || '');
-            capturePostHogEvent('article_impression', item, {
+            captureMixpanelEvent('article_impression', item, {
               position: Number(card.dataset.articlePosition || 0),
               visibility_threshold: 0.5,
               visible_ms: 1000,
@@ -699,11 +803,11 @@ JS = r"""
   function sendSessionEnd() {
     if (sessionEndSent || analyticsOptedOut()) return;
     sessionEndSent = true;
-    capturePostHogEvent('briefing_session_ended', null, {
+    captureMixpanelEvent('briefing_session_ended', null, {
       active_seconds: activeSeconds,
       max_scroll_depth: maxScrollDepth,
       engaged_30s: engaged30Sent,
-    }, {transport:'sendBeacon',send_instantly:true});
+    }, {send_immediately:true});
   }
 
   function setupEngagementAnalytics() {
@@ -721,7 +825,7 @@ JS = r"""
       activeSeconds += 1;
       if (activeSeconds >= 30 && !engaged30Sent) {
         engaged30Sent = true;
-        capturePostHogEvent('engaged_30s', null, {active_seconds:activeSeconds});
+        captureMixpanelEvent('engaged_30s', null, {active_seconds:activeSeconds});
         if (reachedScroll50) markMeaningfulRead('engaged_30s_and_scroll_50');
       }
     }, 1000);
@@ -730,8 +834,8 @@ JS = r"""
   }
 
   function initializeProductAnalytics() {
-    syncPostHogConsent();
-    capturePostHogEvent('briefing_viewed', null, initialBriefingProperties());
+    syncMixpanelConsent();
+    captureMixpanelEvent('briefing_viewed', null, initialBriefingProperties());
     setupEngagementAnalytics();
   }
 
@@ -961,7 +1065,7 @@ JS = r"""
     });
   }
 
-  const POSTHOG_EVENT_MAP = {
+  const MIXPANEL_EVENT_MAP = {
     article_click:'article_opened',
     article_saved:'article_saved',
     article_unsaved:'article_unsaved',
@@ -978,10 +1082,10 @@ JS = r"""
     weekly_best_open:'weekly_best_opened',
   };
 
-  async function trackEvent(eventName, article = null, metadata = {}, posthogEventName = undefined) {
-    const mappedName = posthogEventName === undefined ? POSTHOG_EVENT_MAP[eventName] : posthogEventName;
+  async function trackEvent(eventName, article = null, metadata = {}, mixpanelEventName = undefined) {
+    const mappedName = mixpanelEventName === undefined ? MIXPANEL_EVENT_MAP[eventName] : mixpanelEventName;
     if (mappedName) {
-      capturePostHogEvent(mappedName, article, metadata);
+      captureMixpanelEvent(mappedName, article, metadata);
       if (mappedName === 'article_opened' || mappedName === 'article_saved') {
         markMeaningfulRead(mappedName, article, metadata);
       }
@@ -1207,14 +1311,14 @@ JS = r"""
   async function applySession(session){
     const previous=currentUser?.id||''; currentUser=session?.user||null; updateAuthView(); updateAuthIndicators();
     if(currentUser){
-      identifyPostHogUser(currentUser);
+      identifyMixpanelUser(currentUser);
       if(previous!==currentUser.id||!savedItems.length)await syncSavedFromCloud();
       const saveUrl=pendingSaveUrl;const openSaved=pendingOpenSaved;pendingSaveUrl='';pendingOpenSaved=false;
       if(saveUrl)window.setTimeout(()=>openNote(saveUrl),30);else if(openSaved)window.setTimeout(openDrawer,30);
     }
     else{
-      if(previous)resetPostHogUser();
-      else if(posthogEnabled && window.posthog && !analyticsOptedOut())window.posthog.register({is_logged_in:false});
+      if(previous)resetMixpanelUser();
+      else if(mixpanelEnabled && window.mixpanel && !analyticsOptedOut())window.mixpanel.register({is_logged_in:false});
       savedItems=[];updateSavedIndicators();renderSaved();
     }
   }
@@ -1333,7 +1437,7 @@ JS = r"""
       if(reauthError){byId('deleteMessage').textContent='비밀번호가 맞지 않아요.';return;}
       byId('deleteMessage').textContent='계정을 삭제하고 있어요…';
       const {error}=await supabaseClient.functions.invoke(authConfig.deleteAccountFunction||'delete-account',{body:{confirm:true}});if(error)throw error;
-      clearStorage(activeStorageKey());savedItems=[];resetPostHogUser();await supabaseClient.auth.signOut({scope:'local'});byId('deleteMessage').textContent='계정과 저장 데이터가 삭제됐어요.';window.setTimeout(()=>{closeOverlay(deleteDialog,false);closeOverlay(authDialog,false);},700);
+      clearStorage(activeStorageKey());savedItems=[];resetMixpanelUser();await supabaseClient.auth.signOut({scope:'local'});byId('deleteMessage').textContent='계정과 저장 데이터가 삭제됐어요.';window.setTimeout(()=>{closeOverlay(deleteDialog,false);closeOverlay(authDialog,false);},700);
     }catch(error){
       const {error:requestError}=await supabaseClient.from('account_deletion_requests').insert({user_id:currentUser.id,email:currentUser.email||'',status:'requested'});
       const alreadyRequested = requestError && requestError.code === '23505';
@@ -1344,7 +1448,7 @@ JS = r"""
   function filterArchive(){const query=byId('archiveSearch')?.value.trim().toLowerCase()||'';let visible=0;document.querySelectorAll('[data-archive-search]').forEach(row=>{const show=!query||row.dataset.archiveSearch.includes(query);row.hidden=!show;if(show)visible+=1;});const empty=byId('archiveNoResult');if(empty)empty.hidden=visible>0;}
 
   document.addEventListener('click',event=>{
-    const save=event.target.closest('.save-button');if(save){const item=currentByUrl.get(save.dataset.url);const position=articlePositionFromElement(save);capturePostHogEvent('save_clicked',item,{position,is_logged_in:Boolean(currentUser)});openNote(save.dataset.url);return;}
+    const save=event.target.closest('.save-button');if(save){const item=currentByUrl.get(save.dataset.url);const position=articlePositionFromElement(save);captureMixpanelEvent('save_clicked',item,{position,is_logged_in:Boolean(currentUser)});openNote(save.dataset.url);return;}
     const openSaved=event.target.closest('[data-open-saved]');if(openSaved){openDrawer();return;}
     const close=event.target.closest('[data-close-overlay]');if(close){closeOverlay(byId(close.dataset.closeOverlay));return;}
     const preview=event.target.closest('[data-preview-url]');if(preview){openPreview(preview.dataset.previewUrl);return;}
@@ -1403,7 +1507,7 @@ JS = r"""
     if(queryLength>=2){
       archiveSearchTimer=window.setTimeout(()=>{
         const resultCount=document.querySelectorAll('[data-archive-search]:not([hidden])').length;
-        capturePostHogEvent('archive_search_used',null,{query_length:queryLength,result_count:resultCount});
+        captureMixpanelEvent('archive_search_used',null,{query_length:queryLength,result_count:resultCount});
       },700);
     }
   });
@@ -1735,23 +1839,23 @@ def _overlays_html() -> str:
     return f"""
 <button class="floating-saved" type="button" data-open-saved>{_bookmark_icon()}<span>내 저장함</span><span class="count-badge" data-saved-count>0</span></button>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="savedDrawer" hidden><button class="overlay-backdrop" type="button" data-close-overlay="savedDrawer" aria-label="저장함 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="savedTitle">내 저장함</h2><p id="savedDrawerSubtitle">좋았던 아티클을 저장해보세요.</p></div><button class="close-button" type="button" data-close-overlay="savedDrawer" aria-label="닫기">×</button></div><div class="sync-strip"><div><p class="sync-title" id="syncTitle">계정 저장함</p><p class="sync-text" id="syncText">로그인 후 사용할 수 있어요.</p></div><button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button></div><div class="saved-tools"><label class="sr-only" for="savedSearch">저장함 검색</label><input class="saved-search" id="savedSearch" type="search" placeholder="제목, 메모, 태그로 검색"><p class="saved-search-status" id="savedSearchStatus"></p></div><div class="saved-list" id="savedList"></div></section></div>
+<div class="overlay mp-no-track mp-sensitive" id="savedDrawer" hidden><button class="overlay-backdrop" type="button" data-close-overlay="savedDrawer" aria-label="저장함 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="savedTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="savedTitle">내 저장함</h2><p id="savedDrawerSubtitle">좋았던 아티클을 저장해보세요.</p></div><button class="close-button" type="button" data-close-overlay="savedDrawer" aria-label="닫기">×</button></div><div class="sync-strip"><div><p class="sync-title" id="syncTitle">계정 저장함</p><p class="sync-text" id="syncText">로그인 후 사용할 수 있어요.</p></div><button class="sync-action" id="syncAction" type="button" data-open-auth>로그인</button></div><div class="saved-tools"><label class="sr-only" for="savedSearch">저장함 검색</label><input class="saved-search" id="savedSearch" type="search" placeholder="제목, 메모, 태그로 검색"><p class="saved-search-status" id="savedSearchStatus"></p></div><div class="saved-list" id="savedList"></div></section></div>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="noteDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="noteDialog" aria-label="메모 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="noteTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="noteTitle">스크랩 메모</h2><p id="noteArticleTitle"></p></div><button class="close-button" type="button" data-close-overlay="noteDialog" aria-label="닫기">×</button></div><label class="form-label" for="noteInput"><span>이 기사를 저장한 이유 · 선택</span><span><span id="noteCount">0</span>/500</span></label><textarea class="form-textarea" id="noteInput" maxlength="500" placeholder="예: 다음 기획 회의에서 리텐션 사례로 다시 보기"></textarea><label class="form-label" for="noteTagsInput">태그 · 선택</label><input class="tag-input" id="noteTagsInput" maxlength="120" placeholder="예: PMF, 조직, VC"><p class="tag-hint">쉼표로 구분해 최대 5개까지 저장할 수 있어요.</p><p class="form-help">메모와 태그를 비워둔 채 기사만 저장해도 됩니다.</p><div class="form-actions"><button class="secondary-button" type="button" data-close-overlay="noteDialog">취소</button><button class="primary-button" id="noteSaveButton" type="button">스크랩 저장</button></div></section></div>
+<div class="overlay mp-no-track mp-sensitive" id="noteDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="noteDialog" aria-label="메모 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="noteTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="noteTitle">스크랩 메모</h2><p id="noteArticleTitle"></p></div><button class="close-button" type="button" data-close-overlay="noteDialog" aria-label="닫기">×</button></div><label class="form-label" for="noteInput"><span>이 기사를 저장한 이유 · 선택</span><span><span id="noteCount">0</span>/500</span></label><textarea class="form-textarea" id="noteInput" maxlength="500" placeholder="예: 다음 기획 회의에서 리텐션 사례로 다시 보기"></textarea><label class="form-label" for="noteTagsInput">태그 · 선택</label><input class="tag-input" id="noteTagsInput" maxlength="120" placeholder="예: PMF, 조직, VC"><p class="tag-hint">쉼표로 구분해 최대 5개까지 저장할 수 있어요.</p><p class="form-help">메모와 태그를 비워둔 채 기사만 저장해도 됩니다.</p><div class="form-actions"><button class="secondary-button" type="button" data-close-overlay="noteDialog">취소</button><button class="primary-button" id="noteSaveButton" type="button">스크랩 저장</button></div></section></div>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="previewDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="previewDialog" aria-label="상세 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="previewDialogTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="previewDialogTitle">저장한 아티클</h2><p id="previewFacts"></p></div><button class="close-button" type="button" data-close-overlay="previewDialog" aria-label="닫기">×</button></div><article class="preview-card"><div class="preview-thumb noimg" id="previewThumb" data-initial="S"><span class="media-label" id="previewMediaLabel">기사</span></div><div class="preview-body"><div class="card-meta"><div class="meta-left"><span class="category" id="previewCategory">생태계 업데이트</span><span class="source" id="previewSource">SNAAC</span></div></div><h3 id="previewTitle">저장한 기사</h3><p class="preview-summary" id="previewSummary"></p><div class="takeaway"><span class="takeaway-label">WHY IT MATTERS</span><p id="previewTakeaway"></p></div><div class="preview-note" id="previewNoteWrap" hidden><strong>MY NOTE</strong><span id="previewNote"></span></div><div class="preview-tags" id="previewTags" hidden></div><div class="preview-actions"><a class="preview-read" id="previewReadLink" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a><button class="preview-secondary" id="previewEditButton" type="button">메모 수정</button></div><button class="preview-delete" id="previewDeleteButton" type="button">저장함에서 삭제</button></div></article></section></div>
+<div class="overlay mp-no-track mp-sensitive" id="previewDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="previewDialog" aria-label="상세 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="previewDialogTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="previewDialogTitle">저장한 아티클</h2><p id="previewFacts"></p></div><button class="close-button" type="button" data-close-overlay="previewDialog" aria-label="닫기">×</button></div><article class="preview-card"><div class="preview-thumb noimg" id="previewThumb" data-initial="S"><span class="media-label" id="previewMediaLabel">기사</span></div><div class="preview-body"><div class="card-meta"><div class="meta-left"><span class="category" id="previewCategory">생태계 업데이트</span><span class="source" id="previewSource">SNAAC</span></div></div><h3 id="previewTitle">저장한 기사</h3><p class="preview-summary" id="previewSummary"></p><div class="takeaway"><span class="takeaway-label">WHY IT MATTERS</span><p id="previewTakeaway"></p></div><div class="preview-note" id="previewNoteWrap" hidden><strong>MY NOTE</strong><span id="previewNote"></span></div><div class="preview-tags" id="previewTags" hidden></div><div class="preview-actions"><a class="preview-read" id="previewReadLink" href="#" target="_blank" rel="noopener noreferrer">원문 읽기 ↗</a><button class="preview-secondary" id="previewEditButton" type="button">메모 수정</button></div><button class="preview-delete" id="previewDeleteButton" type="button">저장함에서 삭제</button></div></article></section></div>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="authDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="authDialog" aria-label="계정 창 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="authTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="authTitle">SNAAC 계정</h2><p>저장함과 메모를 여러 기기에서 이어보세요.</p></div><button class="close-button" type="button" data-close-overlay="authDialog" aria-label="닫기">×</button></div>
+<div class="overlay mp-no-track mp-sensitive" id="authDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="authDialog" aria-label="계정 창 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="authTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="authTitle">SNAAC 계정</h2><p>저장함과 메모를 여러 기기에서 이어보세요.</p></div><button class="close-button" type="button" data-close-overlay="authDialog" aria-label="닫기">×</button></div>
 <div id="authGuestView"><p class="auth-intent" id="authIntent" hidden></p><div class="auth-tabs" role="tablist"><button class="auth-tab is-active" type="button" data-auth-mode="login" aria-selected="true">로그인</button><button class="auth-tab" type="button" data-auth-mode="signup" aria-selected="false">회원가입</button></div><form id="authForm" autocomplete="on"><label class="form-label" for="authEmail">이메일</label><input class="form-input" id="authEmail" name="email" type="email" autocomplete="email" required placeholder="name@example.com"><label class="form-label" for="authPassword">비밀번호</label><input class="form-input" id="authPassword" name="password" type="password" minlength="8" autocomplete="current-password" required placeholder="8자 이상"><button class="primary-button" id="authSubmit" type="submit" style="width:100%;margin-top:12px">로그인</button><p class="auth-message" id="authMessage" aria-live="polite"></p><div class="auth-link-row"><button class="text-button" type="button" data-forgot-password>비밀번호를 잊었나요?</button></div></form></div>
 <div id="authRecoveryView" hidden><form id="recoveryForm"><h3>새 비밀번호 설정</h3><label class="form-label" for="newPassword">새 비밀번호</label><input class="form-input" id="newPassword" type="password" minlength="8" autocomplete="new-password" required><label class="form-label" for="newPasswordConfirm">새 비밀번호 확인</label><input class="form-input" id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required><button class="primary-button" type="submit" style="width:100%;margin-top:13px">비밀번호 변경</button><p class="auth-message is-error" id="recoveryMessage" aria-live="polite"></p></form></div>
 <div id="authUserView" hidden><div class="account-card"><p class="account-eyebrow">SIGNED IN AS</p><p class="account-email" id="accountEmail"></p><p class="account-copy">저장한 기사와 메모, 태그가 이 계정에 동기화됩니다.</p></div><div class="account-actions"><button class="account-action" type="button" data-open-privacy>개인정보 안내</button><button class="account-action" type="button" data-logout>로그아웃</button><button class="account-action is-danger" type="button" data-open-delete>회원 탈퇴</button></div></div>
 <div id="authSetupView" hidden><div class="account-card"><p class="account-email">로그인 연결 전이에요</p><p class="account-copy">Supabase 공개 설정을 연결한 뒤 사용할 수 있습니다.</p></div></div></section></div>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="reportDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="reportDialog" aria-label="신고 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="reportTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="reportTitle">원문 문제 알리기</h2><p id="reportArticleTitle"></p></div><button class="close-button" type="button" data-close-overlay="reportDialog" aria-label="닫기">×</button></div><form id="reportForm"><div class="report-options"><label class="report-option"><input type="radio" name="reason" value="broken_link">원문이 열리지 않아요</label><label class="report-option"><input type="radio" name="reason" value="paywall">구독이나 로그인이 필요해요</label><label class="report-option"><input type="radio" name="reason" value="summary_mismatch">요약이 원문과 달라요</label><label class="report-option"><input type="radio" name="reason" value="other">기타 문제</label></div><label class="form-label" for="reportDetail">추가 설명 · 선택</label><textarea class="form-textarea" id="reportDetail" maxlength="500"></textarea><button class="primary-button" type="submit" style="width:100%;margin-top:12px">운영팀에 알리기</button><p class="auth-message" id="reportMessage" aria-live="polite"></p></form></section></div>
+<div class="overlay mp-no-track mp-sensitive" id="reportDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="reportDialog" aria-label="신고 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="reportTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="reportTitle">원문 문제 알리기</h2><p id="reportArticleTitle"></p></div><button class="close-button" type="button" data-close-overlay="reportDialog" aria-label="닫기">×</button></div><form id="reportForm"><div class="report-options"><label class="report-option"><input type="radio" name="reason" value="broken_link">원문이 열리지 않아요</label><label class="report-option"><input type="radio" name="reason" value="paywall">구독이나 로그인이 필요해요</label><label class="report-option"><input type="radio" name="reason" value="summary_mismatch">요약이 원문과 달라요</label><label class="report-option"><input type="radio" name="reason" value="other">기타 문제</label></div><label class="form-label" for="reportDetail">추가 설명 · 선택</label><textarea class="form-textarea" id="reportDetail" maxlength="500"></textarea><button class="primary-button" type="submit" style="width:100%;margin-top:12px">운영팀에 알리기</button><p class="auth-message" id="reportMessage" aria-live="polite"></p></form></section></div>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="privacyDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="privacyDialog" aria-label="개인정보 안내 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="privacyTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="privacyTitle">개인정보 및 이용 안내</h2><p>수집 범위를 최소화해 운영합니다.</p></div><button class="close-button" type="button" data-close-overlay="privacyDialog" aria-label="닫기">×</button></div><div class="privacy-copy"><h3>계정과 저장함</h3><p>회원가입 시 이메일 주소와 Supabase가 발급한 사용자 식별자가 저장됩니다. 저장한 기사, 메모, 태그와 저장 시각은 계정별로 분리됩니다. 비밀번호는 SNAAC이 직접 보관하지 않습니다.</p><h3>서비스 개선 통계</h3><p>페이지 방문, 활성 체류 시간, 스크롤 깊이, 기사 카드 노출·클릭, 저장 퍼널과 피드백 같은 최소 이용 통계를 Supabase와 PostHog로 집계할 수 있습니다. 이메일, 비밀번호, 스크랩 메모와 태그 내용은 분석 도구로 보내지 않으며, PostHog에는 원본 IP를 저장하지 않도록 운영합니다. 주간 베스트는 최소 3개 브라우저의 반응이 모인 기사만 표시합니다.</p><p id="analyticsPreferenceStatus">현재 개인을 식별하지 않는 최소 이용 통계를 사용합니다.</p><button class="account-action" id="analyticsPreferenceButton" type="button" data-toggle-analytics>익명 통계 끄기</button><h3>보관과 삭제</h3><p>계정과 저장함은 회원 탈퇴 시 삭제됩니다. 익명 이용 통계와 피드백은 원칙적으로 90일 이내 보관하도록 운영자가 정기 정리하며, 해결된 기사 신고도 같은 기준으로 정리합니다. 미해결 신고는 확인이 끝날 때까지 보관할 수 있습니다.</p><h3>문의</h3><p>{contact}</p></div></section></div>
+<div class="overlay mp-no-track mp-sensitive" id="privacyDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="privacyDialog" aria-label="개인정보 안내 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="privacyTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="privacyTitle">개인정보 및 이용 안내</h2><p>수집 범위를 최소화해 운영합니다.</p></div><button class="close-button" type="button" data-close-overlay="privacyDialog" aria-label="닫기">×</button></div><div class="privacy-copy"><h3>계정과 저장함</h3><p>회원가입 시 이메일 주소와 Supabase가 발급한 사용자 식별자가 저장됩니다. 저장한 기사, 메모, 태그와 저장 시각은 계정별로 분리됩니다. 비밀번호는 SNAAC이 직접 보관하지 않습니다.</p><h3>서비스 개선 통계</h3><p>페이지 방문, 활성 체류 시간, 스크롤 깊이, 기사 카드 노출·클릭, 저장 퍼널과 피드백 같은 최소 이용 통계를 Supabase와 Mixpanel로 집계할 수 있습니다. 이메일, 비밀번호, 스크랩 메모와 태그 내용은 분석 도구로 보내지 않으며, Mixpanel의 IP 기반 위치 추정을 비활성화해 운영합니다. 주간 베스트는 최소 3개 브라우저의 반응이 모인 기사만 표시합니다.</p><p id="analyticsPreferenceStatus">현재 개인을 식별하지 않는 최소 이용 통계를 사용합니다.</p><button class="account-action" id="analyticsPreferenceButton" type="button" data-toggle-analytics>익명 통계 끄기</button><h3>보관과 삭제</h3><p>계정과 저장함은 회원 탈퇴 시 삭제됩니다. 익명 이용 통계와 피드백은 원칙적으로 90일 이내 보관하도록 운영자가 정기 정리하며, 해결된 기사 신고도 같은 기준으로 정리합니다. 미해결 신고는 확인이 끝날 때까지 보관할 수 있습니다.</p><h3>문의</h3><p>{contact}</p></div></section></div>
 
-<div class="overlay ph-no-capture ph-no-autocapture" id="deleteDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="deleteDialog" aria-label="회원 탈퇴 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="deleteTitle">회원 탈퇴</h2><p>계정과 저장한 기사·메모가 삭제되며 되돌릴 수 없습니다.</p></div><button class="close-button" type="button" data-close-overlay="deleteDialog" aria-label="닫기">×</button></div><label class="form-label" for="deleteConfirmEmail">로그인 이메일</label><input class="form-input" id="deleteConfirmEmail" type="email" autocomplete="off"><label class="form-label" for="deleteConfirmPassword">현재 비밀번호</label><input class="form-input" id="deleteConfirmPassword" type="password" autocomplete="current-password"><p class="form-help">안전을 위해 탈퇴 직전에 비밀번호로 한 번 더 본인을 확인합니다.</p><button class="danger-button" id="deleteAccountButton" type="button" data-delete-account>계정과 저장 데이터 삭제</button><p class="auth-message is-error" id="deleteMessage" aria-live="polite"></p></section></div>
+<div class="overlay mp-no-track mp-sensitive" id="deleteDialog" hidden><button class="overlay-backdrop" type="button" data-close-overlay="deleteDialog" aria-label="회원 탈퇴 닫기"></button><section class="panel" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="drawer-handle"></div><div class="panel-head"><div><h2 id="deleteTitle">회원 탈퇴</h2><p>계정과 저장한 기사·메모가 삭제되며 되돌릴 수 없습니다.</p></div><button class="close-button" type="button" data-close-overlay="deleteDialog" aria-label="닫기">×</button></div><label class="form-label" for="deleteConfirmEmail">로그인 이메일</label><input class="form-input" id="deleteConfirmEmail" type="email" autocomplete="off"><label class="form-label" for="deleteConfirmPassword">현재 비밀번호</label><input class="form-input" id="deleteConfirmPassword" type="password" autocomplete="current-password"><p class="form-help">안전을 위해 탈퇴 직전에 비밀번호로 한 번 더 본인을 확인합니다.</p><button class="danger-button" id="deleteAccountButton" type="button" data-delete-account>계정과 저장 데이터 삭제</button><p class="auth-message is-error" id="deleteMessage" aria-live="polite"></p></section></div>
 
 <p class="sr-only" id="liveStatus" aria-live="polite"></p>
 """
@@ -1767,13 +1871,12 @@ def _auth_config(context: str) -> dict:
     }
 
 
-def _posthog_config() -> dict:
+def _mixpanel_config() -> dict:
     return {
-        "configured": POSTHOG_CONFIGURED,
-        "enabled": POSTHOG_ENABLED,
-        "token": POSTHOG_PROJECT_TOKEN if POSTHOG_CONFIGURED else "",
-        "host": POSTHOG_HOST if POSTHOG_CONFIGURED else "",
-        "uiHost": POSTHOG_UI_HOST if POSTHOG_CONFIGURED else "",
+        "configured": MIXPANEL_CONFIGURED,
+        "enabled": MIXPANEL_ENABLED,
+        "token": MIXPANEL_PROJECT_TOKEN if MIXPANEL_CONFIGURED else "",
+        "apiHost": MIXPANEL_API_HOST if MIXPANEL_CONFIGURED else "",
         "mode": BRIEFING_MODE or "deploy",
     }
 
@@ -1782,8 +1885,8 @@ def _scripts() -> str:
     scripts = []
     if AUTH_ENABLED:
         scripts.append('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>')
-    if POSTHOG_CONFIGURED:
-        scripts.append(f'<script data-snaac-posthog="configured">{POSTHOG_BOOTSTRAP_JS}</script>')
+    if MIXPANEL_CONFIGURED:
+        scripts.append(f'<script data-snaac-mixpanel="configured">{MIXPANEL_BOOTSTRAP_JS}</script>')
     return "\n".join(scripts)
 
 
@@ -1833,13 +1936,13 @@ def _page_html(picks: list[dict], now: datetime, context: str, generated_at: dat
 </head><body><div class="wrap"><header class="masthead">{_header_html(context)}<div class="date-lockup"><p class="kicker">Daily startup journal</p><h1 class="date-big">{date_big}</h1><div class="date-sub">{html.escape(date_label)}</div><div class="stamp">DAILY<strong>AM 9</strong>DROP</div></div></header>{_freshness_html()}
 <section class="intro"><p>단순 투자 단신보다 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 인사이트를 골랐어요. 매일 4~5개의 콘텐츠를 소개합니다.</p><div class="editorial-rule"><span>핵심 업데이트</span><span>중복 최소화</span><span>인터뷰·영상 포함</span></div></section>
 <main class="cards">{cards}</main>{_feedback_html(context)}{_weekly_best_html(context)}{_archive_section(slug, context)}{_about_snaac_section()}<footer>매일 아침 자동 업데이트 · SNAAC Community Team<br>원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button><a class="footer-link" href="{html.escape(ABOUT_URL, quote=True)}" target="_blank" rel="noopener noreferrer">SNAAC 홈페이지</a></div></footer></div>
-{_overlays_html()}<script id="briefingData" type="application/json">{_safe_json_for_script(storage_data)}</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script><script id="posthogConfig" type="application/json">{_safe_json_for_script(_posthog_config())}</script>{_scripts()}<script>{JS}</script></body></html>"""
+{_overlays_html()}<script id="briefingData" type="application/json">{_safe_json_for_script(storage_data)}</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script><script id="mixpanelConfig" type="application/json">{_safe_json_for_script(_mixpanel_config())}</script>{_scripts()}<script>{JS}</script></body></html>"""
 
 
 def _archive_index_html(entries: list[dict], generated_at: datetime) -> str:
     context = "archive"
     page_config = {"briefingDate": "", "briefingLabel": "지난 브리핑", "generatedAt": generated_at.isoformat(), "context": "archive-index", "siteUrl": SITE_URL}
-    return f"""<!DOCTYPE html><html lang="ko" data-snaac-ui="6"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2"><title>SNAAC 지난 브리핑</title><meta name="description" content="SNAAC 모닝 브리핑 지난 회차 검색"><link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style></head><body><div class="wrap"><header class="masthead">{_header_html(context)}</header><header class="archive-hero"><p class="kicker">SNAAC morning archive</p><h1>지난 브리핑</h1><p>날짜, 기사 제목, 매체 이름으로 과거 큐레이션을 찾아보세요.</p></header><div class="archive-tools" role="search"><label class="sr-only" for="archiveSearch">지난 브리핑 검색</label><input class="archive-search" id="archiveSearch" type="search" value="" placeholder="예: AI 에이전트, EO, 조직문화" autocomplete="off" aria-autocomplete="none" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="search" data-1p-ignore="true" data-lpignore="true" data-form-type="other" readonly></div><main class="archive-page-list"><div class="archive-list">{_archive_rows(entries, searchable=True)}</div><p class="archive-no-result" id="archiveNoResult" hidden>검색 결과가 없어요.</p></main>{_about_snaac_section()}<footer><div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button></div></footer></div>{_overlays_html()}<script id="briefingData" type="application/json">[]</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script><script id="posthogConfig" type="application/json">{_safe_json_for_script(_posthog_config())}</script>{_scripts()}<script>{JS}</script></body></html>"""
+    return f"""<!DOCTYPE html><html lang="ko" data-snaac-ui="6"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2"><title>SNAAC 지난 브리핑</title><meta name="description" content="SNAAC 모닝 브리핑 지난 회차 검색"><link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style></head><body><div class="wrap"><header class="masthead">{_header_html(context)}</header><header class="archive-hero"><p class="kicker">SNAAC morning archive</p><h1>지난 브리핑</h1><p>날짜, 기사 제목, 매체 이름으로 과거 큐레이션을 찾아보세요.</p></header><div class="archive-tools" role="search"><label class="sr-only" for="archiveSearch">지난 브리핑 검색</label><input class="archive-search" id="archiveSearch" type="search" value="" placeholder="예: AI 에이전트, EO, 조직문화" autocomplete="off" aria-autocomplete="none" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="search" data-1p-ignore="true" data-lpignore="true" data-form-type="other" readonly></div><main class="archive-page-list"><div class="archive-list">{_archive_rows(entries, searchable=True)}</div><p class="archive-no-result" id="archiveNoResult" hidden>검색 결과가 없어요.</p></main>{_about_snaac_section()}<footer><div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button></div></footer></div>{_overlays_html()}<script id="briefingData" type="application/json">[]</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script><script id="mixpanelConfig" type="application/json">{_safe_json_for_script(_mixpanel_config())}</script>{_scripts()}<script>{JS}</script></body></html>"""
 
 
 def _existing_image_hints(html_path: Path) -> dict[str, str]:
@@ -1908,10 +2011,10 @@ def build_page(picks: list[dict], output_dir: str | Path | None = None) -> None:
     archive_dir.mkdir(parents=True, exist_ok=True)
     (DOCS_DIR / ".nojekyll").write_text("", encoding="utf-8")
     _write_logo_asset()
-    if POSTHOG_ENABLED_REQUESTED and not POSTHOG_CONFIGURED:
-        print("[경고] PostHog가 요청됐지만 Project Token 또는 Host 설정이 올바르지 않아 분석을 비활성화합니다.")
-    elif POSTHOG_CONFIGURED and BRIEFING_MODE == "preview":
-        print("[안내] preview 모드에서는 PostHog 이벤트 전송을 비활성화합니다.")
+    if MIXPANEL_ENABLED_REQUESTED and not MIXPANEL_CONFIGURED:
+        print("[경고] Mixpanel이 요청됐지만 Project Token 또는 API Host 설정이 올바르지 않아 분석을 비활성화합니다.")
+    elif MIXPANEL_CONFIGURED and BRIEFING_MODE == "preview":
+        print("[안내] preview 모드에서는 Mixpanel 이벤트 전송을 비활성화합니다.")
     prepared = _prepare_picks(picks, date_label, slug)
     (DOCS_DIR / "index.html").write_text(_page_html(prepared, now, "home", generated_at), encoding="utf-8")
     (archive_dir / f"{slug}.html").write_text(_page_html(prepared, now, "archive", generated_at), encoding="utf-8")
@@ -1923,5 +2026,5 @@ def build_page(picks: list[dict], output_dir: str | Path | None = None) -> None:
         f"[페이지 생성 완료] {DOCS_DIR}/index.html 외 아카이브 생성 "
         f"({len(prepared)}건, 과거 UI 갱신 {upgraded}건, "
         f"로그인 {'활성' if AUTH_ENABLED else '설정 대기'}, "
-        f"PostHog {'활성' if POSTHOG_ENABLED else ('미리보기 비활성' if POSTHOG_CONFIGURED and BRIEFING_MODE == 'preview' else '비활성')})"
+        f"Mixpanel {'활성' if MIXPANEL_ENABLED else ('미리보기 비활성' if MIXPANEL_CONFIGURED and BRIEFING_MODE == 'preview' else '비활성')})"
     )
