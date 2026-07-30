@@ -1,181 +1,251 @@
-# 개인 경제 모닝 브리핑
+SNAAC Briefing
 
-국내외 경제·주식·금리·환율·산업 흐름을 자동 수집하고, 무료로 끝까지 읽을 수 있는 원문 가운데 중요한 소식을 모바일 브리핑으로 발행하는 개인용 프로젝트입니다.
+SNAAC Briefing은 지난 하루 동안 공개된 스타트업 뉴스, 창업가·VC 인터뷰, 제품·성장 인사이트, 시장·정책 변화, 영상 콘텐츠를 자동 수집하고 OpenAI가 읽을 가치가 높은 4~5개를 선별·요약해 모바일 브리핑으로 배포하는 서비스입니다.
 
-## 기본 편집 원칙
+공개 페이지:
 
-- 하루 **8개 목표**: 국내 4개 + 글로벌 4개
-- 공개 후보가 부족할 때만 국내·글로벌 각 최소 3개, 총 6개까지 허용
-- 주식·시장 또는 환율·원자재 관련 항목 최소 2개
-- 시장, 거시경제, 금리·통화, 환율·원자재, 산업·기업, 정책·규제 중 최소 3개 분야
-- 같은 매체 최대 2개, 같은 사건의 중복 보도는 1개
-- 단순 종목 추천·급등주·매수 유도 콘텐츠 제외
-- 로그인·구독·결제 없이 확인 가능한 원문만 최종 후보로 사용
-- 최근 14일에 소개한 URL 중복 방지
+https://snu-snaac.github.io/snaac_briefing/
 
-사이트에는 모바일 카드, 날짜별 지난 회차, 이메일 회원가입·로그인, 로그인 필수 저장, 선택형 스크랩 메모, 저장 기사 내부 상세 카드가 포함됩니다.
+운영 흐름
 
-무료 원문 판별은 알려진 유료 도메인 차단과 실제 페이지 응답·페이월 문구 확인을 함께 사용합니다. 매체가 정책이나 HTML 구조를 바꾸면 완벽하지 않을 수 있으므로, 반복적으로 섞이는 사이트는 `settings.py`의 `PAYWALL_BLOCKED_DOMAINS`에 도메인을 추가하세요.
+매일 07:20 KST
+GitHub Actions 예약 실행
+→ 공개 RSS·Atom·YouTube 콘텐츠 수집
+→ 최근 21일 소개 URL 중복 제거
+→ OpenAI Responses API로 4~5개 선별·요약
+→ 무료로 열람 가능한 원문·정상 링크 확인
+→ 오늘 페이지와 날짜별 아카이브 생성
+→ Python·JavaScript·핵심 UI 검사
+→ GitHub Pages 배포
 
-OpenAI API가 429·크레딧 부족·일시 장애로 실패하면 **공개 RSS 후보만으로 폴백 브리핑을 생성**합니다. Action 전체가 실패해 사이트가 멈추는 대신 페이지를 계속 갱신하지만, 폴백 요약은 피드 문장을 사용하므로 AI 요약보다 거칠거나 영어일 수 있습니다.
+매일 09:00 KST
+카카오 오픈채팅봇이 고정 안내문과 브리핑 링크 자동 발송
 
-## 권장 저장소 이름
+GitHub의 예약 실행은 서버 상황에 따라 지연될 수 있어 오전 9시 발송보다 충분히 앞선 오전 7시 20분에 시작합니다.
 
-```text
-economy-briefing
-```
+주요 기능
 
-코드에는 GitHub 사용자 이름을 하드코딩하지 않았습니다. 다른 저장소 이름을 사용해도 작동합니다.
+매일 스타트업 콘텐츠 4~5개 큐레이션
 
-## 1. 개인 GitHub 저장소 만들기
+기사별 핵심 요약과 WHY IT MATTERS
 
-```text
-Repository name: economy-briefing
-Visibility: Public
-```
+유료 구독·로그인 장벽 및 오류 링크 필터
 
-다운로드한 ZIP 자체를 GitHub에 올리지 않습니다. ZIP을 압축 해제한 뒤 **폴더 안의 파일과 폴더 전체**를 새 저장소 최상단에 올립니다.
+원본 컬러 썸네일과 YouTube 공식 썸네일
 
-```text
-.github/workflows/daily-briefing.yml
-docs/
-collect.py
-main.py
-page.py
-select_news.py
-settings.py
-requirements.txt
-supabase_setup.sql
-README.md
-```
+마지막 업데이트 시각 및 업데이트 지연 안내
 
-## 2. GitHub Pages 켜기
+이메일·비밀번호 회원가입과 로그인
 
-이 프로젝트는 브리핑 생성과 Pages 배포를 같은 Action에서 끝냅니다.
+로그인 세션 자동 복원
 
-```text
-Settings
-→ Pages
-→ Build and deployment
-→ Source: GitHub Actions
-```
+로그인 필수 기사 저장
 
-별도의 Pages 템플릿 파일을 만들 필요는 없습니다. 공개 주소는 보통 다음 형식입니다.
+선택형 스크랩 메모와 태그
 
-```text
-https://내깃허브아이디.github.io/economy-briefing/
-```
+저장 기사 내부 상세 카드
 
-## 3. OpenAI API 연결
+날짜별 지난 브리핑과 아카이브 검색
 
-```text
-Settings
-→ Secrets and variables
-→ Actions
-→ Secrets
-→ New repository secret
-```
+간단한 브리핑 만족도 피드백
 
-등록할 Secret:
+원문 오류·페이월·요약 불일치 신고
 
-```text
+최소한의 익명 이용 통계
+
+최근 반응이 충분한 기사 기반 주간 인기 아티클
+
+수동 preview와 실제 deploy 분리
+
+자동화 실패·품질 보류 시 GitHub Issue 알림
+
+기사 선별 원칙
+
+단순 투자 유치 여부보다 아래 기준을 우선합니다.
+
+새로운 관점이나 실행 가능한 교훈이 있는가
+
+창업가·팀·제품·시장·VC를 이해하는 데 도움이 되는가
+
+단순 발표가 아니라 배경과 변화의 의미를 설명하는가
+
+신뢰할 수 있는 출처 또는 당사자 인터뷰인가
+
+SNAAC 커뮤니티에서 읽고 이야기할 가치가 있는가
+
+편집 규칙:
+
+최종 4~5개
+
+같은 출처 최대 2개
+
+맥락 없는 투자 유치 단신 최대 1개
+
+최근 21일 소개 URL 제외
+
+유료 구독·로그인 원문 제외
+
+단순 홍보·행사·협약성 콘텐츠 제외
+
+잘못된 링크나 반복 리디렉션 제외
+
+품질 기준을 통과한 기사가 4개 미만이면 기존 브리핑 유지
+
+저장소 구조
+
+.github/workflows/daily-briefing.yml  자동 실행·검사·Pages 배포
+collect.py                           RSS·Atom·YouTube 후보 수집
+select_news.py                       OpenAI 선별·요약·품질 검사
+main.py                              전체 파이프라인 실행
+page.py                              모바일 HTML·저장함·아카이브 생성
+link_utils.py                        기사 URL 정리·중복 판별
+repair_article_links.py              현재·과거 아카이브 URL 정리
+smoke_check.py                       배포 전 생성 결과 검사
+kakao.py                             선택형 운영자 개인 카카오 배포 확인 알림
+get_kakao_token.py                   개인 카카오 알림용 최초 토큰 발급 도구
+supabase_setup.sql                   로그인 저장함·통계·피드백·신고 DB 설정
+docs/                                GitHub Pages 배포 결과
+
+settings.py는 현재 실행 코드에서 사용하지 않습니다. 과거 경제 브리핑 프로젝트의 잔여 파일이므로 SNAAC 저장소에서는 삭제하는 것이 맞습니다.
+
+GitHub Actions 설정
+
+필수 Secrets
+
 OPENAI_API_KEY
-```
-
-ChatGPT 구독과 OpenAI API 크레딧은 별도입니다. 기본 모델은 `gpt-5.6-luna`이며, 다음 Actions Variable을 만들면 모델을 바꿀 수 있습니다.
-
-```text
-OPENAI_MODEL
-```
-
-OpenAI 웹 보완 탐색을 끄고 RSS 후보만 AI에 전달하려면 `.github/workflows/daily-briefing.yml`에서 다음 값을 `0`으로 바꿉니다.
-
-```yaml
-ENABLE_WEB_DISCOVERY: "0"
-```
-
-## 4. 로그인과 저장함 연결
-
-경제·정치 브리핑은 **Supabase 프로젝트 하나를 공유**할 수 있습니다. 로그인 계정은 공유되고 저장함은 서로 다른 테이블로 분리됩니다.
-
-두 서비스를 함께 운영할 때는 전체 묶음의 `supabase_setup_both.sql`을 한 번 실행합니다. 경제 서비스만 운영할 때는 이 폴더의 `supabase_setup.sql`을 실행합니다.
-
-```text
-Supabase Dashboard
-→ SQL Editor
-→ New query
-→ SQL 전체 붙여넣기
-→ Run
-```
-
-이메일 로그인 설정:
-
-```text
-Authentication
-→ Providers
-→ Email
-→ Allow new users to sign up: ON
-```
-
-처음 테스트할 때 `Confirm email`을 끄면 가입 직후 바로 로그인됩니다. 개인 계정 하나만 사용할 계획이라면 본인 계정을 만든 뒤 `Allow new users to sign up`을 다시 끄면 기존 계정만 로그인할 수 있습니다.
-
-이메일 인증을 켜는 경우 URL Configuration에 실제 Pages 주소를 등록합니다.
-
-```text
-https://내깃허브아이디.github.io/economy-briefing/**
-```
-
-Supabase의 `Project URL` 또는 `API URL`과 `Publishable key`를 복사해 GitHub Actions Secret으로 등록합니다.
-
-```text
 SUPABASE_URL
 SUPABASE_PUBLISHABLE_KEY
-```
 
-브라우저용 설정에는 `service_role`, Secret key, Database password를 절대 넣지 않습니다.
+권장 Variables
 
-## 5. 첫 실행
+SITE_URL=https://snu-snaac.github.io/snaac_briefing/
+SUPABASE_REDIRECT_URL=https://snu-snaac.github.io/snaac_briefing/
+PRIVACY_CONTACT_EMAIL=운영 문의 이메일
 
-```text
+선택 Variables
+
+OPENAI_MODEL                 기본값 gpt-5.4-mini
+MIN_QUALITY_SCORE            기본값 72
+MIN_SUPPLEMENT_QUALITY_SCORE 기본값 60
+DELETE_ACCOUNT_FUNCTION      기본값 delete-account
+
+선택 Secrets
+
+아래 값은 운영자 개인 카카오톡으로 배포 확인 알림을 보낼 때만 사용합니다. 오픈채팅방 오전 9시 자동 발송은 카카오 오픈채팅봇의 알림 기능이 담당합니다.
+
+KAKAO_REST_API_KEY
+KAKAO_REFRESH_TOKEN
+GH_PAT
+
+Supabase 설정
+
+Supabase SQL Editor에서 저장소의 supabase_setup.sql 전체를 실행합니다.
+
+현재 웹페이지가 사용하는 핵심 객체:
+
+테이블
+
+saved_articles
+briefing_events
+briefing_feedback
+article_reports
+account_deletion_requests
+
+뷰
+
+weekly_article_highlights
+daily_briefing_metrics
+article_engagement_metrics
+briefing_feedback_metrics
+
+user_preferences는 관심 분야·오늘의 관점 기능을 제거한 현재 라이트 버전에서는 사용하지 않습니다.
+
+Supabase 브라우저 코드에는 Publishable Key만 사용합니다. service_role, Secret Key, Database Password를 GitHub나 정적 HTML에 넣지 마세요.
+
+이메일 인증 없이 가입 직후 로그인하려면:
+
+Supabase Dashboard
+→ Authentication
+→ Sign In / Providers
+→ Email
+→ Allow new users to sign up: ON
+→ Confirm email: OFF
+
+수동 실행
+
 Actions
-→ 경제 모닝 브리핑
+→ SNAAC 모닝 브리핑
 → Run workflow
-→ Branch: main
-→ Run workflow
-```
 
-정상 로그에는 다음 문구가 나타납니다.
+preview
 
-```text
+실제 사이트와 아카이브를 변경하지 않음
+
+_preview 결과를 Artifact로 다운로드 가능
+
+UI나 코드 수정 후 먼저 사용
+
+deploy
+
+실제 docs/ 생성
+
+저장소에 아카이브 기록
+
+GitHub Pages 공개 배포
+
+예약 실행은 자동으로 deploy 모드입니다.
+
+정상 로그
+
 [수집 완료]
-[선별 완료] 또는 [RSS 폴백 완료]
+[선별 완료]
 [페이지 생성 완료]
-[완료]
-GitHub Pages 배포
-```
+[기사 링크 정리 완료]
+[생성 결과 검사 완료]
+GitHub Pages 실제 배포
 
-Action이 초록색으로 끝난 뒤에도 브라우저 캐시 때문에 이전 화면이 보이면 주소 끝에 `?v=1`을 붙이고, 다음 확인 때 숫자를 바꿉니다.
+운영 데이터 확인
 
-## 자동 실행 시각
+API 비용·토큰: OpenAI Usage
 
-```text
-매일 한국시간 오전 07:40
-```
+가입 계정: Supabase Authentication → Users
 
-정치 브리핑 08:05와 OpenAI 호출이 겹치지 않도록 시간을 분리했습니다. GitHub Actions 예약 실행은 서버 부하에 따라 몇 분 늦어질 수 있습니다.
+저장 기사: saved_articles
 
-`Run workflow`는 예약 시간을 기다리지 않고 즉시 실행하며, **실행 당시 한국 날짜**로 회차를 생성합니다.
+방문·클릭·저장 이벤트: briefing_events
 
-## 소개 카드 링크 변경
+만족도: briefing_feedback
 
-기본 `ABOUT THIS BRIEFING` 카드는 현재 GitHub 저장소로 연결됩니다. 다른 홈페이지로 연결하려면 다음 Actions Variable을 추가합니다.
+기사 신고: article_reports
 
-```text
-ABOUT_URL
-```
+자동화 상태: GitHub Actions와 Issues
 
-## 가장 자주 수정할 파일
+일별 집계 예시:
 
-- `settings.py`: 기사 수, 국내·글로벌 비율, RSS, 차단 도메인, 카테고리, 프롬프트, 사이트 문구
-- `page.py`: 모바일 화면, 로그인, 저장함, 날짜별 아카이브 UI
-- `.github/workflows/daily-briefing.yml`: 자동 실행 시각과 Pages 배포
+select *
+from public.daily_briefing_metrics
+order by briefing_date desc;
+
+기사별 반응 예시:
+
+select *
+from public.article_engagement_metrics
+order by briefing_date desc, clicks desc;
+
+카카오 오픈채팅 자동 발송
+
+방장이 모바일 카카오톡에서 다음 경로로 한 번 설정합니다.
+
+오픈채팅방
+→ 우측 상단 메뉴(≡)
+→ 챗봇 beta
+→ 오픈채팅봇
+→ 편집
+→ 알림
+→ 매일 오전 9시
+
+오픈채팅봇은 고정 문구와 고정 링크를 보내고, 링크가 가리키는 GitHub Pages 콘텐츠만 매일 갱신됩니다.
+
+비용 구조
+
+OpenAI API 비용은 GitHub Actions가 기사 후보를 선별·요약할 때만 발생합니다. 사용자가 브리핑 페이지, 저장함, 지난 회차, 원문 링크를 열 때는 OpenAI API가 호출되지 않습니다.
