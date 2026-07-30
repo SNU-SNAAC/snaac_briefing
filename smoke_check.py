@@ -26,30 +26,29 @@ REQUIRED_MARKERS = (
     'id="noteTagsInput"',
     'id="savedSearch"',
     'id="weeklyBest"',
-    'id="posthogConfig"',
-    'data-snaac-posthog="configured"',
+    'id="mixpanelConfig"',
+    'data-snaac-mixpanel="configured"',
+    'cdn.mxpnl.com/libs/mixpanel-2-latest.min.js',
     'autocapture: false',
-    'capture_pageview: true',
-    'capture_pageleave: true',
-    'disable_session_recording: true',
-    'rageclick: false',
-    'advanced_disable_flags: true',
-    "person_profiles: 'identified_only'",
+    'track_pageview: false',
+    'record_sessions_percent: 0',
+    'record_heatmap_data: false',
+    'ip: false',
     "persistence: 'localStorage'",
-    'respect_dnt: true',
-    'mask_all_text: true',
-    'mask_all_element_attributes: true',
-    'before_send: beforeSend',
+    'opt_out_tracking_by_default',
+    'property_blacklist',
+    '$mp_web_page_view',
     'article_impression',
     'engaged_30s',
     'scroll_depth_reached',
     'meaningful_read',
     'briefing_session_ended',
-    'posthog.identify',
-    'posthog.reset',
-    'opt_out_capturing',
-    'opt_in_capturing',
-    'ph-no-capture',
+    'mixpanel.identify',
+    'mixpanel.reset',
+    'opt_out_tracking',
+    'opt_in_tracking',
+    'mp-no-track',
+    'mp-sensitive',
 )
 
 ARCHIVE_REQUIRED_MARKERS = (
@@ -60,8 +59,12 @@ ARCHIVE_REQUIRED_MARKERS = (
 )
 
 FORBIDDEN_MARKERS = (
+    'posthog',
+    'POSTHOG_',
+    'phc_',
     'phx_',
-    'startSessionRecording()',
+    'autocapture: true',
+    'record_sessions_percent: 100',
     '무료 원문만',
     '오늘의 관점',
     'data-open-preferences',
@@ -155,22 +158,25 @@ def main() -> None:
 
     items = extract_json(index_html, "briefingData")
     page_config = extract_json(index_html, "pageConfig")
-    posthog_config = extract_json(index_html, "posthogConfig")
-    if not isinstance(posthog_config, dict):
-        fail("posthogConfig가 객체가 아닙니다.")
-    if posthog_config.get("configured"):
-        token = str(posthog_config.get("token", ""))
-        host = str(posthog_config.get("host", ""))
-        if not token.startswith("phc_"):
-            fail("PostHog Project token이 phc_로 시작하지 않습니다.")
-        if token.startswith("phx_"):
-            fail("PostHog Personal API key(phx_)가 포함되어 있습니다.")
-        if not host.startswith("https://"):
-            fail("PostHog host가 올바른 HTTPS 주소가 아닙니다.")
-        if posthog_config.get("mode") == "preview" and posthog_config.get("enabled"):
-            fail("preview 모드에서 PostHog 이벤트 전송이 활성화되어 있습니다.")
+    mixpanel_config = extract_json(index_html, "mixpanelConfig")
+    if not isinstance(mixpanel_config, dict):
+        fail("mixpanelConfig가 객체가 아닙니다.")
+    if mixpanel_config.get("configured"):
+        token = str(mixpanel_config.get("token", ""))
+        api_host = str(mixpanel_config.get("apiHost", ""))
+        if not token.strip() or any(character.isspace() for character in token):
+            fail("Mixpanel Project Token이 비어 있거나 공백을 포함합니다.")
+        allowed_hosts = {
+            "https://api.mixpanel.com",
+            "https://api-eu.mixpanel.com",
+            "https://api-in.mixpanel.com",
+        }
+        if api_host not in allowed_hosts:
+            fail("Mixpanel API Host가 프로젝트 리전에 맞는 공식 주소가 아닙니다.")
+        if mixpanel_config.get("mode") == "preview" and mixpanel_config.get("enabled"):
+            fail("preview 모드에서 Mixpanel 이벤트 전송이 활성화되어 있습니다.")
     else:
-        print("[생성 결과 검사] PostHog 미연결 상태 — GitHub Variables를 확인하세요.")
+        print("[생성 결과 검사] Mixpanel 미연결 상태 — GitHub Variables를 확인하세요.")
     if not isinstance(items, list) or not (4 <= len(items) <= 5):
         fail(f"기사 수가 4~5개가 아닙니다: {len(items) if isinstance(items, list) else '목록 아님'}")
     if not isinstance(page_config, dict) or not page_config.get("generatedAt"):
@@ -184,9 +190,9 @@ def main() -> None:
                 fail(f"{index}번 기사에 {key} 값이 없습니다.")
 
     check_inline_javascript(index_html)
-    posthog_state = "PostHog 연결" if posthog_config.get("configured") else "PostHog 설정 대기"
+    mixpanel_state = "Mixpanel 연결" if mixpanel_config.get("configured") else "Mixpanel 설정 대기"
     print(
-        f"[생성 결과 검사 완료] {len(items)}개 기사 · 라이트 UI · {posthog_state} · "
+        f"[생성 결과 검사 완료] {len(items)}개 기사 · 라이트 UI · {mixpanel_state} · "
         "노출·체류·스크롤·저장 퍼널 · JavaScript 정상"
     )
 
