@@ -1,4 +1,9 @@
+-- SNAAC Briefing 현재 라이트 버전용 Supabase 설정
 -- Supabase Dashboard > SQL Editor > New query에서 전체를 실행하세요.
+-- 기존 SNAAC 데이터는 삭제하지 않고 필요한 객체를 생성·보완하도록 작성했습니다.
+-- 브라우저에는 Publishable Key만 사용하며 service_role/secret key는 절대 넣지 않습니다.
+
+begin;
 
 create extension if not exists pgcrypto;
 
@@ -14,65 +19,383 @@ begin
 end;
 $$;
 
-create table if not exists public.saved_articles_economy (
-  id uuid primary key default gen_random_uuid(),
+-- 1) 계정별 저장 기사·메모·태그
+create table if not exists public.saved_articles (
   user_id uuid not null references auth.users(id) on delete cascade,
   article_url text not null,
   title text not null,
-  source text not null default '',
+  source text not null default '기타',
   summary text not null default '',
   takeaway text not null default '',
-  section text not null default '',
-  category text not null default '',
+  category text not null default '생태계 업데이트',
   content_type text not null default '기사',
-  image_url text not null default '',
+  published text not null default '',
   briefing_date text not null default '',
+  briefing_slug text not null default '',
+  thumbnail_url text not null default '',
+  fallback_a text not null default '#2d4a74',
+  fallback_b text not null default '#7699c8',
   note text not null default '',
-  fallback_a text not null default '#3D5A6C',
-  fallback_b text not null default '#8AA7B7',
+  tags text[] not null default '{}'::text[],
   saved_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint saved_articles_economy_user_article_unique unique (user_id, article_url)
+  primary key (user_id, article_url)
 );
 
-create index if not exists saved_articles_economy_user_saved_at_idx
-  on public.saved_articles_economy (user_id, saved_at desc);
+-- 예전 SNAAC 스키마에서 현재 버전으로 안전하게 보완합니다.
+alter table public.saved_articles add column if not exists source text not null default '기타';
+alter table public.saved_articles add column if not exists summary text not null default '';
+alter table public.saved_articles add column if not exists takeaway text not null default '';
+alter table public.saved_articles add column if not exists category text not null default '생태계 업데이트';
+alter table public.saved_articles add column if not exists content_type text not null default '기사';
+alter table public.saved_articles add column if not exists published text not null default '';
+alter table public.saved_articles add column if not exists briefing_date text not null default '';
+alter table public.saved_articles add column if not exists briefing_slug text not null default '';
+alter table public.saved_articles add column if not exists thumbnail_url text not null default '';
+alter table public.saved_articles add column if not exists fallback_a text not null default '#2d4a74';
+alter table public.saved_articles add column if not exists fallback_b text not null default '#7699c8';
+alter table public.saved_articles add column if not exists note text not null default '';
+alter table public.saved_articles add column if not exists tags text[] not null default '{}'::text[];
+alter table public.saved_articles add column if not exists saved_at timestamptz not null default now();
+alter table public.saved_articles add column if not exists updated_at timestamptz not null default now();
 
-alter table public.saved_articles_economy enable row level security;
+alter table public.saved_articles drop constraint if exists saved_articles_note_length_check;
+alter table public.saved_articles add constraint saved_articles_note_length_check
+check (char_length(note) <= 500) not valid;
 
-revoke all on table public.saved_articles_economy from anon;
-grant select, insert, update, delete on table public.saved_articles_economy to authenticated;
+alter table public.saved_articles drop constraint if exists saved_articles_tags_limit_check;
+alter table public.saved_articles add constraint saved_articles_tags_limit_check
+check (cardinality(tags) <= 5) not valid;
 
-drop policy if exists "read own saved articles" on public.saved_articles_economy;
-create policy "read own saved articles"
-  on public.saved_articles_economy
-  for select
-  to authenticated
-  using ((select auth.uid()) = user_id);
+alter table public.saved_articles enable row level security;
+revoke all on table public.saved_articles from anon;
+grant select, insert, update, delete on table public.saved_articles to authenticated;
 
-drop policy if exists "insert own saved articles" on public.saved_articles_economy;
-create policy "insert own saved articles"
-  on public.saved_articles_economy
-  for insert
-  to authenticated
-  with check ((select auth.uid()) = user_id);
+drop policy if exists "saved_articles_select_own" on public.saved_articles;
+create policy "saved_articles_select_own"
+on public.saved_articles for select to authenticated
+using ((select auth.uid()) = user_id);
 
-drop policy if exists "update own saved articles" on public.saved_articles_economy;
-create policy "update own saved articles"
-  on public.saved_articles_economy
-  for update
-  to authenticated
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+drop policy if exists "saved_articles_insert_own" on public.saved_articles;
+create policy "saved_articles_insert_own"
+on public.saved_articles for insert to authenticated
+with check ((select auth.uid()) = user_id);
 
-drop policy if exists "delete own saved articles" on public.saved_articles_economy;
-create policy "delete own saved articles"
-  on public.saved_articles_economy
-  for delete
-  to authenticated
-  using ((select auth.uid()) = user_id);
+drop policy if exists "saved_articles_update_own" on public.saved_articles;
+create policy "saved_articles_update_own"
+on public.saved_articles for update to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
 
-drop trigger if exists saved_articles_economy_set_updated_at on public.saved_articles_economy;
-create trigger saved_articles_economy_set_updated_at
-before update on public.saved_articles_economy
+drop policy if exists "saved_articles_delete_own" on public.saved_articles;
+create policy "saved_articles_delete_own"
+on public.saved_articles for delete to authenticated
+using ((select auth.uid()) = user_id);
+
+create index if not exists saved_articles_user_saved_at_idx
+on public.saved_articles (user_id, saved_at desc);
+
+drop trigger if exists saved_articles_set_updated_at on public.saved_articles;
+create trigger saved_articles_set_updated_at
+before update on public.saved_articles
 for each row execute function public.set_briefing_updated_at();
+
+-- 2) 개인 식별 정보와 직접 연결하지 않는 최소 이용 이벤트
+create table if not exists public.briefing_events (
+  id bigint generated by default as identity primary key,
+  created_at timestamptz not null default now(),
+  event_name text not null,
+  session_id text not null,
+  briefing_date text not null default '',
+  page_context text not null default 'home',
+  article_url text not null default '',
+  article_title text not null default '',
+  article_source text not null default '',
+  metadata jsonb not null default '{}'::jsonb
+);
+
+alter table public.briefing_events enable row level security;
+revoke all on table public.briefing_events from anon, authenticated;
+grant insert on table public.briefing_events to anon, authenticated;
+grant usage, select on sequence public.briefing_events_id_seq to anon, authenticated;
+
+drop policy if exists "briefing_events_insert_public" on public.briefing_events;
+create policy "briefing_events_insert_public"
+on public.briefing_events for insert to anon, authenticated
+with check (
+  char_length(event_name) between 1 and 80
+  and char_length(session_id) between 1 and 120
+  and char_length(briefing_date) <= 20
+  and char_length(page_context) <= 30
+  and char_length(article_url) <= 2000
+  and char_length(article_title) <= 500
+  and char_length(article_source) <= 160
+  and octet_length(metadata::text) <= 4096
+  and event_name in (
+    'page_view',
+    'article_click',
+    'article_saved',
+    'article_unsaved',
+    'saved_drawer_open',
+    'saved_detail_open',
+    'archive_open',
+    'save_login_prompt',
+    'saved_login_prompt',
+    'auth_login',
+    'auth_signup',
+    'password_reset_requested',
+    'briefing_feedback',
+    'article_reported',
+    'weekly_best_open'
+  )
+);
+
+create index if not exists briefing_events_date_event_idx
+on public.briefing_events (briefing_date, event_name, created_at desc);
+
+create index if not exists briefing_events_article_idx
+on public.briefing_events (article_url, event_name)
+where article_url <> '';
+
+-- 3) 오늘 브리핑 유용성 피드백
+create table if not exists public.briefing_feedback (
+  id bigint generated by default as identity primary key,
+  created_at timestamptz not null default now(),
+  session_id text not null,
+  briefing_date text not null default '',
+  page_context text not null default 'home',
+  helpful boolean not null
+);
+
+alter table public.briefing_feedback enable row level security;
+revoke all on table public.briefing_feedback from anon, authenticated;
+grant insert on table public.briefing_feedback to anon, authenticated;
+grant usage, select on sequence public.briefing_feedback_id_seq to anon, authenticated;
+
+drop policy if exists "briefing_feedback_insert_public" on public.briefing_feedback;
+create policy "briefing_feedback_insert_public"
+on public.briefing_feedback for insert to anon, authenticated
+with check (
+  char_length(session_id) between 1 and 120
+  and char_length(briefing_date) <= 20
+  and char_length(page_context) <= 30
+);
+
+delete from public.briefing_feedback older
+using public.briefing_feedback newer
+where older.id < newer.id
+  and older.session_id = newer.session_id
+  and older.briefing_date = newer.briefing_date
+  and older.page_context = newer.page_context;
+
+create unique index if not exists briefing_feedback_session_date_context_uidx
+on public.briefing_feedback (session_id, briefing_date, page_context);
+
+create index if not exists briefing_feedback_date_idx
+on public.briefing_feedback (briefing_date, helpful, created_at desc);
+
+-- 4) 원문 오류·페이월·요약 불일치 신고
+create table if not exists public.article_reports (
+  id bigint generated by default as identity primary key,
+  created_at timestamptz not null default now(),
+  session_id text not null,
+  user_id uuid references auth.users(id) on delete set null,
+  briefing_date text not null default '',
+  article_url text not null,
+  article_title text not null default '',
+  article_source text not null default '',
+  reason text not null,
+  detail text not null default '',
+  status text not null default 'open',
+  resolved_at timestamptz
+);
+
+alter table public.article_reports enable row level security;
+revoke all on table public.article_reports from anon, authenticated;
+grant insert on table public.article_reports to anon, authenticated;
+grant usage, select on sequence public.article_reports_id_seq to anon, authenticated;
+
+drop policy if exists "article_reports_insert_public" on public.article_reports;
+create policy "article_reports_insert_public"
+on public.article_reports for insert to anon, authenticated
+with check (
+  (user_id is null or user_id = (select auth.uid()))
+  and char_length(session_id) between 1 and 120
+  and char_length(briefing_date) <= 20
+  and char_length(article_url) between 1 and 2000
+  and char_length(article_title) <= 500
+  and char_length(article_source) <= 160
+  and reason in ('broken_link', 'paywall', 'summary_mismatch', 'other')
+  and char_length(detail) <= 500
+  and status in ('open', 'checking', 'resolved', 'dismissed')
+);
+
+delete from public.article_reports older
+using public.article_reports newer
+where older.id < newer.id
+  and older.session_id = newer.session_id
+  and older.briefing_date = newer.briefing_date
+  and older.article_url = newer.article_url
+  and older.reason = newer.reason;
+
+create unique index if not exists article_reports_session_article_reason_uidx
+on public.article_reports (session_id, briefing_date, article_url, reason);
+
+create index if not exists article_reports_status_idx
+on public.article_reports (status, created_at desc);
+
+-- 5) 자동 회원 탈퇴 실패 시 운영자 처리 대기열
+create table if not exists public.account_deletion_requests (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  email text not null default '',
+  status text not null default 'requested',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.account_deletion_requests enable row level security;
+revoke all on table public.account_deletion_requests from anon;
+grant select, insert on table public.account_deletion_requests to authenticated;
+
+drop policy if exists "account_deletion_requests_select_own" on public.account_deletion_requests;
+create policy "account_deletion_requests_select_own"
+on public.account_deletion_requests for select to authenticated
+using ((select auth.uid()) = user_id);
+
+drop policy if exists "account_deletion_requests_insert_own" on public.account_deletion_requests;
+create policy "account_deletion_requests_insert_own"
+on public.account_deletion_requests for insert to authenticated
+with check (
+  (select auth.uid()) = user_id
+  and status = 'requested'
+);
+
+drop trigger if exists account_deletion_requests_set_updated_at on public.account_deletion_requests;
+create trigger account_deletion_requests_set_updated_at
+before update on public.account_deletion_requests
+for each row execute function public.set_briefing_updated_at();
+
+-- 6) 운영자용 집계 뷰
+create or replace view public.daily_briefing_metrics
+with (security_invoker = false)
+as
+select
+  briefing_date,
+  count(*) filter (where event_name = 'page_view') as page_views,
+  count(distinct session_id) filter (where event_name = 'page_view') as approximate_visitors,
+  count(*) filter (where event_name = 'article_click') as article_clicks,
+  count(*) filter (where event_name = 'article_saved') as saves,
+  count(*) filter (where event_name = 'saved_drawer_open') as saved_drawer_opens,
+  count(*) filter (where event_name = 'archive_open') as archive_opens,
+  count(*) filter (where event_name = 'save_login_prompt') as save_login_prompts,
+  count(*) filter (where event_name = 'auth_signup') as auth_signups
+from public.briefing_events
+group by briefing_date;
+
+create or replace view public.article_engagement_metrics
+with (security_invoker = false)
+as
+select
+  briefing_date,
+  article_url,
+  max(article_title) as article_title,
+  max(article_source) as article_source,
+  count(*) filter (where event_name = 'article_click') as clicks,
+  count(*) filter (where event_name = 'article_saved') as saves,
+  count(*) filter (where event_name = 'article_reported') as reports
+from public.briefing_events
+where article_url <> ''
+group by briefing_date, article_url;
+
+create or replace view public.briefing_feedback_metrics
+with (security_invoker = false)
+as
+select
+  briefing_date,
+  count(*) as responses,
+  count(*) filter (where helpful) as helpful_count,
+  round(
+    100.0 * count(*) filter (where helpful) / nullif(count(*), 0),
+    1
+  ) as helpful_percent
+from public.briefing_feedback
+group by briefing_date;
+
+-- 최근 7일 동안 서로 다른 브라우저 3개 이상에서 반응한 기사만 공개합니다.
+create or replace view public.weekly_article_highlights
+with (security_invoker = false)
+as
+select
+  article_url,
+  max(article_title) as article_title,
+  max(article_source) as article_source,
+  max(briefing_date) as latest_briefing_date,
+  count(distinct session_id) as approximate_sessions,
+  count(*) filter (where event_name = 'article_click') as clicks,
+  count(*) filter (where event_name = 'article_saved') as saves,
+  (
+    count(*) filter (where event_name = 'article_click')
+    + 2 * count(*) filter (where event_name = 'article_saved')
+  )::bigint as engagement_score
+from public.briefing_events
+where created_at >= now() - interval '7 days'
+  and event_name in ('article_click', 'article_saved')
+  and article_url <> ''
+group by article_url
+having count(distinct session_id) >= 3;
+
+revoke all on public.daily_briefing_metrics from anon, authenticated;
+revoke all on public.article_engagement_metrics from anon, authenticated;
+revoke all on public.briefing_feedback_metrics from anon, authenticated;
+revoke all on public.weekly_article_highlights from anon, authenticated;
+grant select on public.weekly_article_highlights to anon, authenticated;
+
+-- 7) 운영 데이터 보관기간 정리 함수
+-- 운영자가 필요할 때만 SQL Editor에서 실행:
+-- select * from public.purge_old_briefing_operational_data(90);
+create or replace function public.purge_old_briefing_operational_data(
+  retention_days integer default 90
+)
+returns table(
+  events_deleted bigint,
+  feedback_deleted bigint,
+  reports_deleted bigint
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted_events bigint := 0;
+  deleted_feedback bigint := 0;
+  deleted_reports bigint := 0;
+  cutoff timestamptz;
+begin
+  if retention_days < 30 then
+    raise exception 'retention_days must be at least 30';
+  end if;
+
+  cutoff := now() - make_interval(days => retention_days);
+
+  delete from public.briefing_events
+  where created_at < cutoff;
+  get diagnostics deleted_events = row_count;
+
+  delete from public.briefing_feedback
+  where created_at < cutoff;
+  get diagnostics deleted_feedback = row_count;
+
+  delete from public.article_reports
+  where status in ('resolved', 'dismissed')
+    and coalesce(resolved_at, created_at) < cutoff;
+  get diagnostics deleted_reports = row_count;
+
+  return query
+  select deleted_events, deleted_feedback, deleted_reports;
+end;
+$$;
+
+revoke all on function public.purge_old_briefing_operational_data(integer)
+from public, anon, authenticated;
+
+commit;
