@@ -2,9 +2,10 @@ name: SNAAC 모닝 브리핑
 
 on:
   schedule:
-    # UTC 23:15 = 한국시간(KST) 오전 08:15
-    # 09:00 오픈채팅 알림 전에 생성·검사·Pages 배포 시간을 확보합니다.
-    - cron: "15 23 * * *"
+    # UTC 22:20 = 한국시간(KST) 오전 07:20
+    # 오전 7시 전후 공개되는 주요 콘텐츠를 반영하면서,
+    # GitHub Actions 지연과 09:00 오픈채팅 알림 전 배포 시간을 함께 확보합니다.
+    - cron: "20 22 * * *"
   workflow_dispatch:
     inputs:
       mode:
