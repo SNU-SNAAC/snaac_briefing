@@ -53,8 +53,6 @@ GitHub의 예약 실행은 서버 상황에 따라 지연될 수 있어 오전 9
 
 최소한의 익명 이용 통계
 
-최근 반응이 충분한 기사 기반 주간 인기 아티클
-
 수동 preview와 실제 deploy 분리
 
 자동화 실패·품질 보류 시 GitHub Issue 알림
@@ -153,7 +151,6 @@ account_deletion_requests
 
 뷰
 
-weekly_article_highlights
 daily_briefing_metrics
 article_engagement_metrics
 briefing_feedback_metrics
@@ -245,6 +242,8 @@ order by briefing_date desc, clicks desc;
 → 매일 오전 9시
 
 오픈채팅봇은 고정 문구와 고정 링크를 보내고, 링크가 가리키는 GitHub Pages 콘텐츠만 매일 갱신됩니다.
+
+링크 미리보기 썸네일은 매일 생성되는 페이지의 og:image 태그를 따라가며, 그날 첫 번째 기사의 이미지로 자동 설정됩니다(이미지가 없는 회차만 SNAAC 로고로 대체).
 
 비용 구조
 

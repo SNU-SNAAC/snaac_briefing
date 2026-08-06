@@ -246,7 +246,6 @@ footer{margin-top:36px;border-top:1px solid var(--line);padding:22px 0 0;text-al
 .archive-tools{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 82%,transparent);padding:14px 0 10px}.archive-search{background:#fff}.archive-page-list{padding-top:4px}.archive-month-label{font-size:11px;letter-spacing:.12em;color:#777;font-weight:900;margin:20px 0 8px}.archive-no-result{padding:25px;border:1px dashed #bbb;background:#fff;border-radius:13px;text-align:center;color:#777;font-size:13px}
 .saved-tools{display:grid;gap:9px;margin-bottom:12px}.saved-search{width:100%;border:1px solid #c9c9c9;border-radius:11px;background:#fff;min-height:44px;padding:10px 12px}.saved-search-status{font-size:11px;color:#777;margin:0}.saved-tags,.preview-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.saved-tag,.preview-tag{display:inline-flex;border:1px solid #d0d0d0;background:#f7f7f7;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:750;color:#555}
 .tag-input{width:100%;border:1px solid #c9c9c9;border-radius:11px;background:#fff;min-height:46px;padding:11px 12px;color:#111}.tag-hint{font-size:11px;color:#777;margin:5px 0 0}
-.weekly-best{margin-top:28px;padding-top:21px;border-top:1px solid var(--line)}.weekly-best-list{display:grid;gap:8px}.weekly-best-item{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:13px;padding:11px;text-decoration:none}.weekly-rank{font:700 18px/1 GmarketSans,sans-serif}.weekly-copy{min-width:0}.weekly-title{display:block;font-size:13px;font-weight:850;line-height:1.4}.weekly-meta{display:block;font-size:10.5px;color:#777;margin-top:3px}.weekly-arrow{font-size:17px}.weekly-best-note{font-size:11px;color:#777;margin:8px 0 0}
 .status-pill{display:inline-flex;border-radius:999px;padding:3px 8px;background:#efefef;font-size:10.5px;font-weight:800;color:#555}
 @media(max-width:390px){.wrap{padding-left:14px;padding-right:14px}.topline{gap:5px}.utility-button{font-size:11.5px;padding:7px 5px}.stamp{width:66px;height:66px;font-size:9px}.stamp strong{font-size:14px}.card-actions{grid-template-columns:1fr auto auto}.source{max-width:125px}.saved-preview-trigger{grid-template-columns:82px 1fr}}
 @media(min-width:601px){.overlay{align-items:center}.panel{border-radius:22px;max-height:86vh}.floating-saved{bottom:20px}}
@@ -1079,7 +1078,6 @@ JS = r"""
     article_reported:'article_reported',
     briefing_feedback:'feedback_submitted',
     archive_open:'archive_opened',
-    weekly_best_open:'weekly_best_opened',
   };
 
   async function trackEvent(eventName, article = null, metadata = {}, mixpanelEventName = undefined) {
@@ -1374,34 +1372,7 @@ JS = r"""
       if(document.visibilityState==='visible')window.setTimeout(()=>void restoreSession(),0);
     });
 
-    void loadWeeklyBest();
     void trackEvent('page_view', null, {}, null);
-  }
-
-
-  async function loadWeeklyBest() {
-    const section = byId('weeklyBest');
-    const list = byId('weeklyBestList');
-    if (!section || !list || !supabaseClient) return;
-    try {
-      const {data,error} = await supabaseClient.from('weekly_article_highlights').select('*').order('engagement_score',{ascending:false}).limit(3);
-      if (error || !Array.isArray(data) || !data.length) return;
-      list.replaceChildren();
-      data.forEach((item,index) => {
-        const link = createElement('a','weekly-best-item');
-        link.href = item.article_url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.dataset.weeklyBestLink = item.article_url;
-        const rank = createElement('span','weekly-rank',String(index + 1).padStart(2,'0'));
-        const copy = createElement('span','weekly-copy');
-        copy.append(createElement('span','weekly-title',item.article_title || '이번 주 인기 아티클'));
-        copy.append(createElement('span','weekly-meta',[item.article_source,`${item.approximate_sessions || 0}명 반응`].filter(Boolean).join(' · ')));
-        link.append(rank,copy,createElement('span','weekly-arrow','→'));
-        list.append(link);
-      });
-      section.hidden = false;
-    } catch (error) { console.debug('weekly best skipped'); }
   }
 
   function openReport(url){const item=itemForUrl(url);if(!item)return;activeReportUrl=url;byId('reportArticleTitle').textContent=item.title;byId('reportForm').reset();byId('reportMessage').textContent='';openOverlay(reportDialog);}
@@ -1466,7 +1437,6 @@ JS = r"""
     if(event.target.closest('[data-delete-account]')){void deleteAccount();return;}
     const articleLink=event.target.closest('[data-article-link]');if(articleLink){const item=currentByUrl.get(articleLink.dataset.articleLink);void trackEvent('article_click',item,{position:articlePositionFromElement(articleLink),link_area:articleLink.classList.contains('read-link')?'button':articleLink.classList.contains('thumb')?'thumbnail':'title'});}
     const archiveLink=event.target.closest('[data-archive-link]');if(archiveLink){void trackEvent('archive_open',null,{slug:archiveLink.dataset.archiveLink});return;}
-    const weeklyLink=event.target.closest('[data-weekly-best-link]');if(weeklyLink){void trackEvent('weekly_best_open',null,{url:weeklyLink.dataset.weeklyBestLink});}
   });
 
   document.addEventListener('keydown',event=>{
@@ -1891,11 +1861,6 @@ def _scripts() -> str:
 
 
 
-def _weekly_best_html(context: str) -> str:
-    if context != "home":
-        return ""
-    return """<section class="weekly-best" id="weeklyBest" hidden aria-labelledby="weeklyBestTitle"><div class="section-head"><h2 id="weeklyBestTitle">이번 주 많이 본 아티클</h2><span class="status-pill">최근 7일</span></div><div class="weekly-best-list" id="weeklyBestList"></div><p class="weekly-best-note">최소 3개 브라우저에서 반응한 공개 집계만 표시합니다.</p></section>"""
-
 
 def _feedback_html(context: str) -> str:
     if context != "home":
@@ -1910,6 +1875,7 @@ def _page_html(picks: list[dict], now: datetime, context: str, generated_at: dat
     slug = now.strftime("%Y-%m-%d")
     total = len(picks)
     cards = "".join(_card(index, total, pick) for index, pick in enumerate(picks, 1))
+    og_image = (picks[0].get("image") if picks else "") or f"{SITE_URL}assets/{LOGO_ASSET_NAME}"
     storage_data = [
         {
             "title": pick["title"], "link": pick["link"], "source": pick["source"],
@@ -1931,11 +1897,11 @@ def _page_html(picks: list[dict], now: datetime, context: str, generated_at: dat
 <html lang="ko" data-snaac-ui="6">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2">
-<title>SNAAC 모닝 브리핑 · {html.escape(date_label)}</title><meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트와 인사이트 {total}가지"><meta property="og:title" content="SNAAC 모닝 브리핑 · {now.month}/{now.day}"><meta property="og:description" content="스타트업 업데이트와 창업가·VC 인사이트">
+<title>SNAAC 모닝 브리핑 · {html.escape(date_label)}</title><meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트와 인사이트 {total}가지"><meta property="og:title" content="SNAAC 모닝 브리핑 · {now.month}/{now.day}"><meta property="og:description" content="스타트업 업데이트와 창업가·VC 인사이트"><meta property="og:image" content="{html.escape(og_image, quote=True)}"><meta property="og:url" content="{html.escape(SITE_URL, quote=True)}">
 <link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style>
 </head><body><div class="wrap"><header class="masthead">{_header_html(context)}<div class="date-lockup"><p class="kicker">Daily startup journal</p><h1 class="date-big">{date_big}</h1><div class="date-sub">{html.escape(date_label)}</div><div class="stamp">DAILY<strong>AM 9</strong>DROP</div></div></header>{_freshness_html()}
 <section class="intro"><p>단순 투자 단신보다 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 인사이트를 골랐어요. 매일 4~5개의 콘텐츠를 소개합니다.</p><div class="editorial-rule"><span>핵심 업데이트</span><span>중복 최소화</span><span>인터뷰·영상 포함</span></div></section>
-<main class="cards">{cards}</main>{_feedback_html(context)}{_weekly_best_html(context)}{_archive_section(slug, context)}{_about_snaac_section()}<footer>매일 아침 자동 업데이트 · SNAAC Community Team<br>원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button><a class="footer-link" href="{html.escape(ABOUT_URL, quote=True)}" target="_blank" rel="noopener noreferrer">SNAAC 홈페이지</a></div></footer></div>
+<main class="cards">{cards}</main>{_feedback_html(context)}{_archive_section(slug, context)}{_about_snaac_section()}<footer>매일 아침 자동 업데이트 · SNAAC Community Team<br>원문 링크와 자체 요약만 제공하며, 모든 콘텐츠의 저작권은 각 원저작자에게 있습니다.<div class="footer-links"><button class="footer-link" type="button" data-open-privacy>개인정보 안내</button><a class="footer-link" href="{html.escape(ABOUT_URL, quote=True)}" target="_blank" rel="noopener noreferrer">SNAAC 홈페이지</a></div></footer></div>
 {_overlays_html()}<script id="briefingData" type="application/json">{_safe_json_for_script(storage_data)}</script><script id="pageConfig" type="application/json">{_safe_json_for_script(page_config)}</script><script id="authConfig" type="application/json">{_safe_json_for_script(_auth_config(context))}</script><script id="mixpanelConfig" type="application/json">{_safe_json_for_script(_mixpanel_config())}</script>{_scripts()}<script>{JS}</script></body></html>"""
 
 

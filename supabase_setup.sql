@@ -321,34 +321,9 @@ select
 from public.briefing_feedback
 group by briefing_date;
 
--- 최근 7일 동안 서로 다른 브라우저 3개 이상에서 반응한 기사만 공개합니다.
-create or replace view public.weekly_article_highlights
-with (security_invoker = false)
-as
-select
-  article_url,
-  max(article_title) as article_title,
-  max(article_source) as article_source,
-  max(briefing_date) as latest_briefing_date,
-  count(distinct session_id) as approximate_sessions,
-  count(*) filter (where event_name = 'article_click') as clicks,
-  count(*) filter (where event_name = 'article_saved') as saves,
-  (
-    count(*) filter (where event_name = 'article_click')
-    + 2 * count(*) filter (where event_name = 'article_saved')
-  )::bigint as engagement_score
-from public.briefing_events
-where created_at >= now() - interval '7 days'
-  and event_name in ('article_click', 'article_saved')
-  and article_url <> ''
-group by article_url
-having count(distinct session_id) >= 3;
-
 revoke all on public.daily_briefing_metrics from anon, authenticated;
 revoke all on public.article_engagement_metrics from anon, authenticated;
 revoke all on public.briefing_feedback_metrics from anon, authenticated;
-revoke all on public.weekly_article_highlights from anon, authenticated;
-grant select on public.weekly_article_highlights to anon, authenticated;
 
 -- 7) 운영 데이터 보관기간 정리 함수
 -- 운영자가 필요할 때만 SQL Editor에서 실행:
