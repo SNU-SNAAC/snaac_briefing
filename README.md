@@ -102,7 +102,9 @@ smoke_check.py                       배포 전 생성 결과 검사
 kakao.py                             선택형 운영자 개인 카카오 배포 확인 알림
 get_kakao_token.py                   개인 카카오 알림용 최초 토큰 발급 도구
 supabase_setup.sql                   로그인 저장함·통계·피드백·신고 DB 설정
+admin_snapshot.py                    운영 대시보드용 Supabase·Mixpanel 통계 일일 집계
 docs/                                GitHub Pages 배포 결과
+docs/admin/                          운영자 전용 통합 대시보드(로그인 필요)
 
 settings.py는 현재 실행 코드에서 사용하지 않습니다. 과거 경제 브리핑 프로젝트의 잔여 파일이므로 SNAAC 저장소에서는 삭제하는 것이 맞습니다.
 
@@ -135,6 +137,16 @@ KAKAO_REST_API_KEY
 KAKAO_REFRESH_TOKEN
 GH_PAT
 
+운영 대시보드(docs/admin/) Secrets
+
+SUPABASE_SERVICE_ROLE_KEY    필수. Supabase Dashboard > Settings > API Keys에서 복사. 절대 브라우저 코드나 커밋에 넣지 마세요.
+MIXPANEL_SERVICE_ACCOUNT_USERNAME  선택. 없으면 대시보드의 Mixpanel 카드가 "미연동"으로 표시됩니다.
+MIXPANEL_SERVICE_ACCOUNT_SECRET    선택.
+
+운영 대시보드 Variables
+
+MIXPANEL_PROJECT_ID          선택. Mixpanel 프로젝트 설정 > Project ID.
+
 Supabase 설정
 
 Supabase SQL Editor에서 저장소의 supabase_setup.sql 전체를 실행합니다.
@@ -148,6 +160,7 @@ briefing_events
 briefing_feedback
 article_reports
 account_deletion_requests
+admin_dashboard_snapshot (RLS만 켜고 정책 없음 - service_role 전용, 운영 대시보드가 씀)
 
 뷰
 
@@ -167,6 +180,12 @@ Supabase Dashboard
 → Email
 → Allow new users to sign up: ON
 → Confirm email: OFF
+
+운영 대시보드
+
+docs/admin/ 에 Supabase 로그인으로 접근하는 비공개 운영자 페이지가 있습니다. URL을 알아도 데이터는 안 보이고, 코드에 지정된 운영자 이메일로 로그인해야만 Edge Function(admin-dashboard)이 데이터를 내려줍니다.
+
+데이터는 admin-snapshot.yml 워크플로가 하루 1회(브리핑 배포 직후) Supabase 피드백·저장·신고 통계와(연동 시) Mixpanel 핵심 지표를 모아 admin_dashboard_snapshot 테이블 한 행에 저장하는 방식입니다. 실시간 조회가 아니므로 최신 반영까지 하루 정도 걸릴 수 있습니다.
 
 수동 실행
 

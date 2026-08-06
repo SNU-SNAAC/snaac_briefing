@@ -223,8 +223,18 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
+            # docs/admin(운영 대시보드)은 page.py가 만들지 않으므로,
+            # 매번 저장소에 이미 있는 버전을 보존한 뒤 나머지만 새로 생성한 내용으로 교체합니다.
+            ADMIN_BACKUP="$(mktemp -d)"
+            if [[ -d docs/admin ]]; then
+              cp -a docs/admin "$ADMIN_BACKUP/admin"
+            fi
+
             rm -rf docs
             cp -a "$GENERATED_DIR/docs" docs
+            if [[ -d "$ADMIN_BACKUP/admin" ]]; then
+              cp -a "$ADMIN_BACKUP/admin" docs/admin
+            fi
             git add docs/
 
             if git diff --cached --quiet; then
