@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SNAAC 운영 대시보드</title>
+<style>
+  :root{--bg:#f2f2f2;--surface:#fff;--ink:#111;--muted:#686868;--line:#d9d9d9;--danger:#b42318;--success:#17653c;--warning:#8a5200}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,sans-serif;line-height:1.55}
+  .wrap{width:min(100%,860px);margin:0 auto;padding:28px 18px 64px}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 24px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:15px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:12px}
+  .stat .num{font-size:24px;font-weight:800}
+  .stat .label{font-size:12px;color:var(--muted);margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase}
+  .pill{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}
+  .pill.open{background:#fdecea;color:var(--danger)}
+  .pill.checking{background:#fff3e0;color:var(--warning)}
+  .pill.resolved,.pill.dismissed{background:#e8f5e9;color:var(--success)}
+  form{display:grid;gap:10px;max-width:320px}
+  input{border:1px solid #c9c9c9;border-radius:10px;padding:11px 12px;font-size:14px}
+  button{border:none;border-radius:10px;padding:11px 12px;font-size:14px;font-weight:700;cursor:pointer;background:#171717;color:#fff}
+  button.secondary{background:#fff;color:#111;border:1px solid #c9c9c9}
+  .msg{font-size:13px;color:var(--danger);min-height:18px}
+  .muted{color:var(--muted);font-size:12.5px}
+  [hidden]{display:none!important}
+  .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-row">
+    <div>
+      <h1>SNAAC 운영 대시보드</h1>
+      <p class="sub" id="generatedAtLabel">운영자 전용 · 하루 1회 자동 집계</p>
+    </div>
+    <button class="secondary" id="signOutButton" type="button" hidden>로그아웃</button>
+  </div>
+
+  <div class="card" id="loginCard">
+    <h2>운영자 로그인</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="이메일" autocomplete="username" required>
+      <input type="password" id="loginPassword" placeholder="비밀번호" autocomplete="current-password" required>
+      <button type="submit">로그인</button>
+      <p class="msg" id="loginMessage"></p>
+    </form>
+  </div>
+
+  <div id="deniedCard" class="card" hidden>
+    <h2>접근 권한이 없습니다</h2>
+    <p class="muted">이 계정에는 운영 대시보드 접근 권한이 없어요. 운영자 계정으로 다시 로그인해주세요.</p>
+  </div>
+
+  <div id="dashboard" hidden>
+    <div class="card" id="feedbackCard">
+      <h2>브리핑 피드백 (최근 7일)</h2>
+      <div class="grid" id="feedbackStats"></div>
+    </div>
+
+    <div class="card" id="savedCard">
+      <h2>저장 기능</h2>
+      <div class="grid" id="savedStats"></div>
+    </div>
+
+    <div class="card" id="mixpanelCard">
+      <h2>Mixpanel 핵심 지표 (최근 7일)</h2>
+      <div id="mixpanelBody"></div>
+    </div>
+
+    <div class="card" id="reportsCard">
+      <h2>기사 신고</h2>
+      <div id="reportsBody"></div>
+    </div>
+
+    <div class="card" id="topArticlesCard">
+      <h2>최근 회차 기사 반응</h2>
+      <div id="topArticlesBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  'use strict';
+
+  const SUPABASE_URL = 'https://mvvmdtrgiesankvlbbnh.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Rb6eKh6L5gtB7SiFogMoHA_H-3KrkZb';
+
+  const byId = (id) => document.getElementById(id);
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const loginCard = byId('loginCard');
+  const deniedCard = byId('deniedCard');
+  const dashboard = byId('dashboard');
+  const signOutButton = byId('signOutButton');
+  const generatedAtLabel = byId('generatedAtLabel');
+
+  function fmtNum(value) {
+    if (value === null || value === undefined) return '—';
+    return Number(value).toLocaleString('ko-KR');
+  }
+
+  function fmtPercent(value) {
+    if (value === null || value === undefined) return '—';
+    return `${value}%`;
+  }
+
+  function statHtml(label, value) {
+    return `<div class="stat"><div class="num">${value}</div><div class="label">${label}</div></div>`;
+  }
+
+  function renderFeedback(feedback) {
+    byId('feedbackStats').innerHTML = [
+      statHtml('응답 수', fmtNum(feedback.responses_7d)),
+      statHtml('긍정 응답', fmtNum(feedback.helpful_7d)),
+      statHtml('긍정 비율', fmtPercent(feedback.helpful_rate_7d)),
+    ].join('');
+  }
+
+  function renderSaved(saved) {
+    byId('savedStats').innerHTML = [
+      statHtml('전체 저장 수', fmtNum(saved.total)),
+      statHtml('최근 7일 저장', fmtNum(saved.last_7d)),
+    ].join('');
+  }
+
+  function renderMixpanel(mixpanel) {
+    const body = byId('mixpanelBody');
+    if (!mixpanel || !mixpanel.configured) {
+      body.innerHTML = '<p class="muted">Mixpanel Service Account가 아직 연결되지 않았습니다. GitHub Secrets에 MIXPANEL_SERVICE_ACCOUNT_USERNAME / MIXPANEL_SERVICE_ACCOUNT_SECRET / MIXPANEL_PROJECT_ID를 추가하면 다음 스냅샷부터 표시됩니다.</p>';
+      return;
+    }
+    if (mixpanel.error) {
+      body.innerHTML = `<p class="muted">Mixpanel 조회 중 오류가 발생했습니다: ${mixpanel.error}</p>`;
+      return;
+    }
+    body.innerHTML = `<div class="grid">${[
+      statHtml('최근 7일 방문자 합', fmtNum(mixpanel.visitors_7d_total)),
+      statHtml('유의미 독자율', fmtPercent(mixpanel.meaningful_read_rate_7d)),
+      statHtml('저장 완료율', fmtPercent(mixpanel.save_completion_rate_7d)),
+    ].join('')}</div>`;
+  }
+
+  function renderReports(reports) {
+    const body = byId('reportsBody');
+    const items = (reports && reports.recent) || [];
+    const openCount = reports ? reports.open_count : 0;
+    if (!items.length) {
+      body.innerHTML = `<p class="muted">신고 내역이 없습니다.</p>`;
+      return;
+    }
+    const rows = items.map((r) => `
+      <tr>
+        <td>${new Date(r.created_at).toLocaleString('ko-KR')}</td>
+        <td>${r.article_title ? escapeHtml(r.article_title) : escapeHtml(r.article_url || '')}</td>
+        <td>${escapeHtml(r.reason || '')}</td>
+        <td>${escapeHtml(r.detail || '')}</td>
+        <td><span class="pill ${r.status}">${escapeHtml(r.status || '')}</span></td>
+      </tr>`).join('');
+    body.innerHTML = `<p class="muted">미해결 ${openCount}건 · 최근 ${items.length}건 표시</p>
+      <table><thead><tr><th>시각</th><th>기사</th><th>사유</th><th>상세</th><th>상태</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderTopArticles(items) {
+    const body = byId('topArticlesBody');
+    if (!items || !items.length) {
+      body.innerHTML = '<p class="muted">데이터가 없습니다.</p>';
+      return;
+    }
+    const rows = items.map((a) => `
+      <tr>
+        <td>${escapeHtml(a.briefing_date || '')}</td>
+        <td><a href="${escapeHtml(a.article_url || '#')}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.article_title || '')}</a></td>
+        <td>${escapeHtml(a.article_source || '')}</td>
+        <td>${fmtNum(a.clicks)}</td>
+        <td>${fmtNum(a.saves)}</td>
+        <td>${fmtNum(a.reports)}</td>
+      </tr>`).join('');
+    body.innerHTML = `<table><thead><tr><th>날짜</th><th>기사</th><th>매체</th><th>클릭</th><th>저장</th><th>신고</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  async function loadDashboard() {
+    const { data, error } = await client.functions.invoke('admin-dashboard', { method: 'POST', body: {} });
+    if (error) {
+      const status = error.context?.status;
+      if (status === 403) {
+        loginCard.hidden = true;
+        deniedCard.hidden = false;
+        dashboard.hidden = true;
+        return;
+      }
+      generatedAtLabel.textContent = `불러오기 실패: ${error.message || '알 수 없는 오류'}`;
+      return;
+    }
+
+    loginCard.hidden = true;
+    deniedCard.hidden = true;
+    dashboard.hidden = false;
+    signOutButton.hidden = false;
+
+    if (!data.payload) {
+      generatedAtLabel.textContent = data.note || '아직 생성된 스냅샷이 없습니다.';
+      return;
+    }
+
+    generatedAtLabel.textContent = `마지막 집계: ${new Date(data.generatedAt).toLocaleString('ko-KR')}`;
+    renderFeedback(data.payload.supabase.feedback);
+    renderSaved(data.payload.supabase.saved_articles);
+    renderReports(data.payload.supabase.reports);
+    renderTopArticles(data.payload.supabase.top_articles_recent);
+    renderMixpanel(data.payload.mixpanel);
+  }
+
+  async function handleSession(session) {
+    if (!session) {
+      loginCard.hidden = false;
+      deniedCard.hidden = true;
+      dashboard.hidden = true;
+      signOutButton.hidden = true;
+      return;
+    }
+    await loadDashboard();
+  }
+
+  byId('loginForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = byId('loginEmail').value.trim();
+    const password = byId('loginPassword').value;
+    const msg = byId('loginMessage');
+    msg.textContent = '';
+    const { error } = await client.auth.signInWithPassword({ email, password });
+    if (error) {
+      msg.textContent = '로그인에 실패했어요. 이메일과 비밀번호를 확인해주세요.';
+      return;
+    }
+    const { data: { session } } = await client.auth.getSession();
+    await handleSession(session);
+  });
+
+  signOutButton.addEventListener('click', async () => {
+    await client.auth.signOut();
+    await handleSession(null);
+  });
+
+  client.auth.onAuthStateChange((_event, session) => { void handleSession(session); });
+  client.auth.getSession().then(({ data: { session } }) => handleSession(session));
+})();
+</script>
+</body>
+</html>
