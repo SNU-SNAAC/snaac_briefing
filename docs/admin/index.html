@@ -137,11 +137,14 @@
   function renderMixpanel(mixpanel) {
     const body = byId('mixpanelBody');
     if (!mixpanel || !mixpanel.configured) {
-      body.innerHTML = '<p class="muted">Mixpanel Service Account가 아직 연결되지 않았습니다. GitHub Secrets에 MIXPANEL_SERVICE_ACCOUNT_USERNAME / MIXPANEL_SERVICE_ACCOUNT_SECRET / MIXPANEL_PROJECT_ID를 추가하면 다음 스냅샷부터 표시됩니다.</p>';
+      body.innerHTML = '<p class="muted">Mixpanel 연동을 쓰지 않는 상태입니다. 필요하면 Mixpanel 자체 리포트에서 직접 확인해주세요. (Query API는 Growth 이상 유료 플랜부터 지원되어, 무료 플랜에서는 이 칸에 자동으로 못 가져옵니다.)</p>';
       return;
     }
     if (mixpanel.error) {
-      body.innerHTML = `<p class="muted">Mixpanel 조회 중 오류가 발생했습니다: ${mixpanel.error}</p>`;
+      const isPaywalled = /402/.test(mixpanel.error);
+      body.innerHTML = isPaywalled
+        ? '<p class="muted">Mixpanel 무료 플랜은 Query API를 지원하지 않아 자동 조회가 안 됩니다. 필요하면 Mixpanel 자체 리포트에서 직접 확인해주세요.</p>'
+        : `<p class="muted">Mixpanel 조회 중 오류가 발생했습니다: ${escapeHtml(mixpanel.error)}</p>`;
       return;
     }
     body.innerHTML = `<div class="grid">${[

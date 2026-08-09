@@ -143,6 +143,8 @@ SUPABASE_SERVICE_ROLE_KEY    필수. Supabase Dashboard > Settings > API Keys에
 MIXPANEL_SERVICE_ACCOUNT_USERNAME  선택. 없으면 대시보드의 Mixpanel 카드가 "미연동"으로 표시됩니다.
 MIXPANEL_SERVICE_ACCOUNT_SECRET    선택.
 
+주의: Mixpanel Query API(/api/2.0/segmentation)는 Growth 이상 유료 플랜부터 지원됩니다. 무료 플랜에서는 위 시크릿을 다 넣어도 스냅샷에 402 오류가 기록되고 대시보드엔 "미연동"으로 표시됩니다. Mixpanel 수치가 필요하면 Mixpanel 자체 리포트를 직접 확인하세요.
+
 운영 대시보드 Variables
 
 MIXPANEL_PROJECT_ID          선택. Mixpanel 프로젝트 설정 > Project ID.
