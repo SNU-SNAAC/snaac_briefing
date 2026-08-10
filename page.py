@@ -1869,33 +1869,13 @@ def _feedback_html(context: str) -> str:
 <section class="feedback" aria-labelledby="feedbackTitle"><div class="feedback-copy"><h2 id="feedbackTitle">오늘 브리핑, 어땠나요?</h2><p>한 번만 눌러 알려주세요.</p></div><div class="feedback-actions"><button class="feedback-button" type="button" data-feedback="yes">👍 유용해요</button><button class="feedback-button" type="button" data-feedback="no">아쉬워요</button></div><p class="feedback-thanks" id="feedbackThanks" hidden>피드백 고마워요!</p></section>"""
 
 
-def _weekly_og_image(picks: list[dict], now: datetime) -> str:
-    """카카오 오픈채팅 공지 링크는 고정 URL이라 매일 썸네일이 바뀌면 캐시가 못 따라옵니다.
-    그래서 월요일에 그 주를 대표할 기사(품질 점수 최고점)를 한 번 고르고,
-    화~일요일은 같은 월요일 기록을 다시 읽어 같은 이미지를 그대로 씁니다."""
-    monday = now - timedelta(days=now.weekday())
-    if now.weekday() == 0:
-        source_picks = picks
-    else:
-        archive_path = DOCS_DIR / "archive" / f"{monday.strftime('%Y-%m-%d')}.json"
-        try:
-            data = json.loads(archive_path.read_text(encoding="utf-8"))
-            source_picks = data.get("picks") or []
-        except (OSError, ValueError):
-            source_picks = picks  # 이번 주 월요일 기록을 못 찾으면 오늘 기사로 대체
-    if not source_picks:
-        return ""
-    best = max(source_picks, key=lambda p: p.get("quality_score", 0) or 0)
-    return best.get("image") or next((p.get("image") for p in source_picks if p.get("image")), "")
-
-
 def _page_html(picks: list[dict], now: datetime, context: str, generated_at: datetime) -> str:
     date_big = f"{now.month}.{now.day}."
     date_label = f"{now.year}년 {now.month}월 {now.day}일 {WEEKDAYS[now.weekday()]}요일"
     slug = now.strftime("%Y-%m-%d")
     total = len(picks)
     cards = "".join(_card(index, total, pick) for index, pick in enumerate(picks, 1))
-    og_image = _weekly_og_image(picks, now) or f"{SITE_URL}assets/{LOGO_ASSET_NAME}"
+    og_image = (picks[0].get("image") if picks else "") or f"{SITE_URL}assets/{LOGO_ASSET_NAME}"
     storage_data = [
         {
             "title": pick["title"], "link": pick["link"], "source": pick["source"],
