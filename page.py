@@ -1862,6 +1862,20 @@ def _scripts() -> str:
 
 
 
+def _og_description(picks: list[dict]) -> str:
+    """카카오 오픈채팅 링크 카드 설명에 오늘 기사 제목을 한 줄씩 나열합니다."""
+    if not picks:
+        return "스타트업 업데이트와 창업가·VC 인사이트"
+    max_title_len = 42
+    lines = []
+    for index, pick in enumerate(picks, 1):
+        title = str(pick.get("title", "")).strip()
+        if len(title) > max_title_len:
+            title = title[:max_title_len].rstrip() + "…"
+        lines.append(f"{index}. {title}")
+    return "\n".join(lines)
+
+
 def _feedback_html(context: str) -> str:
     if context != "home":
         return ""
@@ -1876,6 +1890,7 @@ def _page_html(picks: list[dict], now: datetime, context: str, generated_at: dat
     total = len(picks)
     cards = "".join(_card(index, total, pick) for index, pick in enumerate(picks, 1))
     og_image = (picks[0].get("image") if picks else "") or f"{SITE_URL}assets/{LOGO_ASSET_NAME}"
+    og_description = _og_description(picks)
     storage_data = [
         {
             "title": pick["title"], "link": pick["link"], "source": pick["source"],
@@ -1897,7 +1912,7 @@ def _page_html(picks: list[dict], now: datetime, context: str, generated_at: dat
 <html lang="ko" data-snaac-ui="6">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f2f2f2">
-<title>SNAAC 모닝 브리핑 · {html.escape(date_label)}</title><meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트와 인사이트 {total}가지"><meta property="og:title" content="SNAAC 모닝 브리핑 · {now.month}/{now.day}"><meta property="og:description" content="스타트업 업데이트와 창업가·VC 인사이트"><meta property="og:image" content="{html.escape(og_image, quote=True)}"><meta property="og:url" content="{html.escape(SITE_URL, quote=True)}">
+<title>SNAAC 모닝 브리핑 · {html.escape(date_label)}</title><meta name="description" content="SNAAC이 고른 오늘의 스타트업 업데이트와 인사이트 {total}가지"><meta property="og:title" content="SNAAC 모닝 브리핑 · {now.month}/{now.day}"><meta property="og:description" content="{html.escape(og_description, quote=True)}"><meta property="og:image" content="{html.escape(og_image, quote=True)}"><meta property="og:url" content="{html.escape(SITE_URL, quote=True)}">
 <link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"><style>{CSS}</style>
 </head><body><div class="wrap"><header class="masthead">{_header_html(context)}<div class="date-lockup"><p class="kicker">Daily startup journal</p><h1 class="date-big">{date_big}</h1><div class="date-sub">{html.escape(date_label)}</div><div class="stamp">DAILY<strong>AM 9</strong>DROP</div></div></header>{_freshness_html()}
 <section class="intro"><p>단순 투자 단신보다 오늘 스타트업을 이해하는 데 도움이 되는 업데이트와 인사이트를 골랐어요. 매일 4~5개의 콘텐츠를 소개합니다.</p><div class="editorial-rule"><span>핵심 업데이트</span><span>중복 최소화</span><span>인터뷰·영상 포함</span></div></section>
